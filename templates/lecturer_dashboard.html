@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar with hamburger toggle -->
+    <aside class="sidebar" id="lecturerSidebar">
+        <button class="sidebar-toggle" id="sidebarToggleBtn" aria-label="Toggle sidebar">
+            <i class="fas fa-bars"></i>
+        </button>
+        <nav class="sidebar-nav">
+            <ul class="sidebar-menu">
+                <li><a href="#overview" class="active" data-section="overview"><i class="fas fa-tachometer-alt"></i> <span>Overview</span></a></li>
+                <li><a href="#assignments" data-section="assignments"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
+                <li><a href="#students" data-section="students"><i class="fas fa-users"></i> <span>Students</span></a></li>
+                <li><a href="#analytics" data-section="analytics"><i class="fas fa-chart-line"></i> <span>Analytics</span></a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content-area">
+        <section id="overview" class="dashboard-section">
+            <div class="dashboard-header">
+                <h1>Welcome, {{ user.name }}! 👋</h1>
+                <p>Manage assignments and grade submissions</p>
+                <div class="lecturer-badge">Lecturer</div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="quick-actions">
+                <a href="{{ url_for('create_assignment') }}" class="action-btn primary"><span>+</span> Create New Assignment</a>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card clickable" data-url="{{ url_for('lecturer_dashboard') }}">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ assignments|length }}</div>
+                        <div class="stat-label">Total Assignments</div>
+                    </div>
+                </div>
+                <div class="stat-card clickable" data-url="{{ url_for('lecturer_dashboard') }}">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ total_submissions }}</div>
+                        <div class="stat-label">Total Submissions</div>
+                    </div>
+                </div>
+                <div class="stat-card clickable" data-url="{{ url_for('lecturer_dashboard') }}">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ pending_grades }}</div>
+                        <div class="stat-label">Pending Grades</div>
+                    </div>
+                </div>
+                <div class="stat-card clickable" data-url="{{ url_for('lecturer_dashboard') }}">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ avg_grade }}%</div>
+                        <div class="stat-label">Average Grade</div>
+                    </div>
+                </div>
+                <div class="stat-card clickable" data-url="{{ url_for('admin_users') }}">
+                    <div class="stat-icon">👨‍🎓</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ total_students }}</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Your Assignments Section -->
+        <section id="assignments" class="dashboard-section">
+            <h2>📋 Your Assignments</h2>
+            {% if assignments %}
+                <div class="assignments-grid">
+                    {% for assignment in assignments %}
+                    <div class="assignment-card clickable" data-url="{{ url_for('manage_assignment', assignment_id=assignment.id) }}">
+                        <div class="assignment-header">
+                            <h3>{{ assignment.title }}</h3>
+                            <span class="deadline-badge">📅 {{ assignment.deadline.strftime('%b %d, %Y') }}</span>
+                        </div>
+                        <p class="course-code">{{ assignment.course_code }}</p>
+                        <p class="assignment-desc">
+                            {% if assignment.description %}
+                                {{ assignment.description[:100] }}{% if assignment.description|length > 100 %}...{% endif %}
+                            {% elif assignment.questions %}
+                                {{ assignment.questions|striptags|truncate(100) }}
+                            {% else %}
+                                Click to manage
+                            {% endif %}
+                        </p>
+                        <div class="assignment-stats">
+                            <span>📊 Submissions: {{ submissions|selectattr('assignment_id', 'equalto', assignment.id)|list|length }}</span>
+                        </div>
+                        <div class="assignment-footer">
+                            <span class="status-badge">Active</span>
+                            <button class="btn-manage-small" onclick="event.stopPropagation(); window.location.href='{{ url_for('manage_assignment', assignment_id=assignment.id) }}'">Manage →</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h3>No assignments yet</h3>
+                    <p>Click "Create New Assignment" to get started</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- Students Section (placeholder) -->
+        <section id="students" class="dashboard-section">
+            <h2>👨‍🎓 Students Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ total_students }}</div>
+                        <div class="stat-label">Enrolled Students</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ total_submissions }}</div>
+                        <div class="stat-label">Total Submissions</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ "%.1f"|format((total_submissions / total_students * 100) if total_students else 0) }}%</div>
+                        <div class="stat-label">Submission Rate</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analytics Section (placeholder) -->
+        <section id="analytics" class="dashboard-section">
+            <h2>📈 Performance Analytics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ avg_grade }}%</div>
+                        <div class="stat-label">Average Grade</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ submissions|selectattr('plagiarism_score', '>', 30)|list|length }}</div>
+                        <div class="stat-label">Plagiarism Alerts</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ pending_grades }}</div>
+                        <div class="stat-label">Pending Grades</div>
+                    </div>
+                </div>
+            </div>
+            <div class="plagiarism-actions" style="margin-top: 1rem;">
+                <a href="#" class="btn-primary">View Full Analytics Report →</a>
+            </div>
+        </section>
+    </main>
+</div>
+
+<style>
+/* Dashboard Layout */
+.dashboard-layout {
+    display: flex;
+    gap: 1.5rem;
+    min-height: calc(100vh - 140px);
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 260px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+    padding: 1rem 0.5rem;
+}
+
+.sidebar.collapsed .sidebar-menu a span {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-menu a i {
+    margin-right: 0;
+    font-size: 1.25rem;
+}
+
+.sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(90deg);
+}
+
+.sidebar-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    text-align: center;
+    transition: 0.2s;
+    padding: 0.5rem;
+}
+
+.sidebar-toggle:hover {
+    color: #059669;
+}
+
+.sidebar-nav {
+    width: 100%;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    color: #4b5563;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar-menu a i {
+    width: 20px;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.sidebar-menu a span {
+    transition: opacity 0.2s;
+}
+
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background: #f0fdf4;
+    color: #059669;
+}
+
+/* Main content area */
+.main-content-area {
+    flex: 1;
+    min-width: 0;
+}
+
+.dashboard-section {
+    scroll-margin-top: 80px;
+    margin-bottom: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-layout {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+        position: static;
+        padding: 1rem;
+    }
+    .sidebar.collapsed {
+        width: 100%;
+        padding: 0.5rem;
+    }
+    .sidebar.collapsed .sidebar-menu {
+        display: flex;
+        justify-content: space-around;
+    }
+    .sidebar.collapsed .sidebar-menu li {
+        margin-bottom: 0;
+    }
+    .sidebar.collapsed .sidebar-menu a span {
+        display: none;
+    }
+    .sidebar.collapsed .sidebar-menu a i {
+        margin: 0;
+    }
+    .sidebar-toggle {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Additional styles for existing components (add if missing) */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.lecturer-badge {
+    background: #059669;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.quick-actions {
+    margin-bottom: 2rem;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.action-btn.primary {
+    background: #059669;
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background: #047857;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #059669;
+}
+
+.assignments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+}
+
+.assignment-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.assignment-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: #059669;
+}
+
+.assignment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-manage-small {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+</style>
+
+<script>
+// Sidebar toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('lecturerSidebar');
+    const toggleBtn = document.getElementById('sidebarToggleBtn');
+    
+    if (sidebar && toggleBtn) {
+        // Load saved state from localStorage
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+        }
+        
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.toggle('collapsed');
+            // Save state
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        });
+    }
+    
+    // Smooth scroll for sidebar links
+    document.querySelectorAll('.sidebar-menu a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if (targetId && targetId !== '#') {
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+            // Update active class
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+            // On mobile, auto-collapse sidebar after click
+            if (window.innerWidth <= 768 && sidebar.classList.contains('collapsed') === false) {
+                sidebar.classList.add('collapsed');
+                localStorage.setItem('sidebarCollapsed', 'true');
+            }
+        });
+    });
+    
+    // Make stat cards and assignment cards clickable
+    document.querySelectorAll('.clickable').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            const url = this.dataset.url;
+            if (url) window.location.href = url;
+        });
+    });
+});
+</script>
+{% endblock %}

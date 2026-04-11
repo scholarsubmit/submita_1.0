@@ -1,0 +1,452 @@
+{% extends "base.html" %} {% block content %}
+<div class="report-container">
+  <div class="report-header">
+    <h1>Plagiarism Report</h1>
+    <p>{{ assignment.title }} - {{ assignment.course_code }}</p>
+  </div>
+
+  <div class="report-summary">
+    <div class="summary-card">
+      <div class="summary-value">{{ submissions|length }}</div>
+      <div class="summary-label">Total Submissions</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">
+        {{ submissions|selectattr('plagiarism_score', '>', 30)|list|length }}
+      </div>
+      <div class="summary-label">High Risk (>30%)</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">
+        {{ submissions|selectattr('plagiarism_score', '>',
+        15)|selectattr('plagiarism_score', '<=', 30)|list|length }}
+      </div>
+      <div class="summary-label">Medium Risk (15-30%)</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">
+        {{ submissions|selectattr('plagiarism_score', '<', 15)|list|length }}
+      </div>
+      <div class="summary-label">Low Risk (<15%)</div>
+    </div>
+  </div>
+
+  <div class="similarity-chart">
+    <h3>Similarity Distribution</h3>
+    <div class="chart-bars">
+      {% set ranges = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100] %} {% for i
+      in range(ranges|length - 1) %} {% set count =
+      submissions|selectattr('plagiarism_score', '>=',
+      ranges[i])|selectattr('plagiarism_score', '<', ranges[i+1])|list|length %}
+      {% set percentage = (count / submissions|length * 100) if submissions else
+      0 %} {% set bar_color = 'bar-danger' if ranges[i] >= 30 else
+      ('bar-warning' if ranges[i] >= 15 else 'bar-success') %}
+      <div class="chart-bar">
+        <div class="chart-bar">
+          <div class="bar-label">{{ ranges[i] }}-{{ ranges[i+1] }}%</div>
+          <div class="bar-container">
+            <div
+              class="bar-fill {{ bar_color }}"
+              style="--width: {{ percentage }}%;"
+            ></div>
+          </div>
+          <div class="bar-count">{{ count }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="submissions-list">
+      <h3>Submissions by Similarity Score</h3>
+      <table class="similarity-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Student Name</th>
+            <th>Matric Number</th>
+            <th>Similarity Score</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for submission in submissions|sort(attribute='plagiarism_score',
+          reverse=true) %}
+          <tr
+            class="{% if submission.plagiarism_score > 30 %}high-risk{% elif submission.plagiarism_score > 15 %}medium-risk{% else %}low-risk{% endif %}"
+          >
+            <td>{{ loop.index }}</td>
+            <td>{{ submission.student.name }}</td>
+            <td>{{ submission.student.matric }}</td>
+            <td>
+              <div class="similarity-score">
+                <span class="score-value"
+                  >{{ "%.1f"|format(submission.plagiarism_score) }}%</span
+                >
+                <div class="score-bar">
+                  <div class="score-bar">
+                    <div
+                      class="score-fill"
+                      style="--score-width: {{ submission.plagiarism_score }}%;"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if submission.plagiarism_score > 30 %}
+              <span class="status-high">⚠️ High Risk</span>
+              {% elif submission.plagiarism_score > 15 %}
+              <span class="status-medium">📊 Medium Risk</span>
+              {% else %}
+              <span class="status-low">✓ Low Risk</span>
+              {% endif %}
+            </td>
+            <td>
+              <a
+                href="{{ url_for('grade_submission', submission_id=submission.id) }}"
+                class="btn-review"
+                >Review</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if similar_pairs %}
+    <div class="similar-pairs">
+      <h3>⚠️ Potential Plagiarism Pairs</h3>
+      <p class="warning-note">
+        Submissions with high similarity scores that may indicate plagiarism
+      </p>
+
+      <table class="pairs-table">
+        <thead>
+          <tr>
+            <th>Student 1</th>
+            <th>Student 2</th>
+            <th>Similarity</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pair in similar_pairs %}
+          <tr>
+            <td>{{ pair.student1 }}</td>
+            <td>{{ pair.student2 }}</td>
+            <td>
+              <span class="similarity-high"
+                >{{ "%.1f"|format(pair.similarity) }}%</span
+              >
+            </td>
+            <td>
+              <button
+                onclick="investigatePair('{{ pair.student1 }}', '{{ pair.student2 }}')"
+                class="btn-investigate"
+              >
+                Investigate
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+
+    <div class="report-actions">
+      <button onclick="window.print()" class="btn-print">
+        🖨️ Print Report
+      </button>
+      <a
+        href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}"
+        class="btn-back"
+        >← Back to Management</a
+      >
+    </div>
+  </div>
+
+  <style>
+    .report-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .report-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .report-header h1 {
+      font-size: 1.75rem;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    .report-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .summary-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #059669;
+    }
+
+    .summary-label {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.25rem;
+    }
+
+    .similarity-chart {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 2rem;
+    }
+
+    .similarity-chart h3 {
+      margin-bottom: 1rem;
+    }
+
+    .chart-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .bar-label {
+      width: 60px;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .bar-container {
+      flex: 1;
+      height: 30px;
+      background: #f3f4f6;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      width: var(--width, 0%);
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .bar-fill.bar-success {
+      background: #10b981;
+    }
+
+    .bar-fill.bar-warning {
+      background: #f59e0b;
+    }
+
+    .bar-fill.bar-danger {
+      background: #dc2626;
+    }
+
+    .bar-count {
+      width: 40px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .submissions-list,
+    .similar-pairs {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 2rem;
+    }
+
+    .similarity-table,
+    .pairs-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .similarity-table th,
+    .pairs-table th {
+      text-align: left;
+      padding: 0.75rem;
+      background: #f9fafb;
+      font-weight: 600;
+      font-size: 0.813rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .similarity-table td,
+    .pairs-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .high-risk {
+      background: #fef2f2;
+    }
+
+    .medium-risk {
+      background: #fffbeb;
+    }
+
+    .low-risk {
+      background: #f0fdf4;
+    }
+
+    .similarity-score {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .score-value {
+      min-width: 45px;
+      font-weight: 600;
+    }
+
+    .score-bar {
+      flex: 1;
+      height: 6px;
+      background: #f3f4f6;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .score-fill {
+      width: var(--score-width, 0%);
+      height: 100%;
+      background: inherit;
+      transition: width 0.3s ease;
+    }
+
+    .high-risk .score-fill {
+      background: #dc2626;
+    }
+
+    .medium-risk .score-fill {
+      background: #f59e0b;
+    }
+
+    .low-risk .score-fill {
+      background: #10b981;
+    }
+
+    .status-high {
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .status-medium {
+      color: #f59e0b;
+      font-weight: 500;
+    }
+
+    .status-low {
+      color: #10b981;
+    }
+
+    .btn-review,
+    .btn-investigate {
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      text-decoration: none;
+      background: #059669;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .warning-note {
+      color: #dc2626;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .similarity-high {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn-print,
+    .btn-back {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .btn-print {
+      background: #6b7280;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-back {
+      background: #059669;
+      color: white;
+    }
+
+    @media print {
+      .report-actions,
+      .btn-review,
+      .btn-investigate {
+        display: none;
+      }
+
+      .report-container {
+        padding: 0;
+      }
+    }
+  </style>
+
+  <script>
+    function investigatePair(student1, student2) {
+      if (
+        confirm(
+          `Investigate potential plagiarism between ${student1} and ${student2}?`,
+        )
+      ) {
+        alert(
+          "Investigation feature will be available soon. Please review both submissions manually.",
+        );
+      }
+    }
+  </script>
+  {% endblock %}
+</div>

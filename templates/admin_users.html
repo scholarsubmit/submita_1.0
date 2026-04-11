@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Manage Users</h1>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">← Back to Dashboard</a>
+</div>
+
+<div class="users-table-container">
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Matric/ID</th>
+                <th>Role</th>
+                <th>Verified</th>
+                <th>Joined</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.matric }}</td>
+                <td>
+                    <span class="role-badge small {{ user.role }}">{{ user.role }}</span>
+                </td>
+                <td>
+                    {% if user.verified %}
+                    <span class="status-badge verified">✓ Verified</span>
+                    {% else %}
+                    <span class="status-badge unverified">○ Unverified</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('change_user_role', user_id=user.id) }}" style="display: inline-block;">
+                        <select name="role" onchange="this.form.submit()">
+                            <option value="student" {% if user.role == 'student' %}selected{% endif %}>Student</option>
+                            <option value="lecturer" {% if user.role == 'lecturer' %}selected{% endif %}>Lecturer</option>
+                            <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                        </select>
+                    </form>
+                    
+                    {% if user.id != current_user.id %}
+                    <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                        <button type="submit" class="btn-danger">Delete</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.users-table-container {
+    overflow-x: auto;
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--gray-light);
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.users-table th {
+    background: var(--light);
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.users-table tr:hover {
+    background: var(--light);
+}
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.verified {
+    background: #f0fdf4;
+    color: var(--success);
+}
+
+.status-badge.unverified {
+    background: #fef2f2;
+    color: var(--danger);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+select {
+    padding: 4px 8px;
+    border: 1px solid var(--gray-light);
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

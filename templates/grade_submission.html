@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="grade-container">
+    <div class="grade-header">
+        <h1>Grade Submission</h1>
+        <div class="assignment-info">
+            <strong>{{ assignment.title }}</strong> - {{ assignment.course_code }}
+        </div>
+    </div>
+
+    <div class="grade-content">
+        <div class="student-info">
+            <h3>Student Information</h3>
+            <div class="info-grid">
+                <div><strong>Name:</strong> {{ submission.student.name }}</div>
+                <div><strong>Matric Number:</strong> {{ submission.student.matric }}</div>
+                <div><strong>Email:</strong> {{ submission.student.email }}</div>
+                <div><strong>Submitted:</strong> {{ submission.submitted_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                <div><strong>Plagiarism Score:</strong> 
+                    <span class="{% if submission.plagiarism_score > 30 %}plagiarism-high{% else %}plagiarism-low{% endif %}">
+                        {{ "%.1f"|format(submission.plagiarism_score) }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="submission-content">
+            <h3>Assignment Questions</h3>
+            <div class="questions-box">
+                {{ assignment.questions|safe }}
+            </div>
+
+            {% if assignment.instructions %}
+            <div class="instructions-box">
+                <strong>Instructions:</strong>
+                <p>{{ assignment.instructions }}</p>
+            </div>
+            {% endif %}
+
+            <h3>Student's Answer</h3>
+            {% if submission.content %}
+            <div class="answer-box">
+                {{ submission.content|replace('\n', '<br>')|safe }}
+            </div>
+            {% endif %}
+
+            {% if submission.file_path %}
+            <div class="file-attachment">
+                <strong>Attached File:</strong>
+                <a href="{{ url_for('download_submission_file', submission_id=submission.id) }}" class="download-link">
+                    📎 {{ submission.original_filename }}
+                </a>
+            </div>
+            {% endif %}
+
+            {% if submission.github_url %}
+            <div class="github-link">
+                <strong>GitHub Repository:</strong>
+                <a href="{{ submission.github_url }}" target="_blank">{{ submission.github_url }}</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="POST" class="grade-form">
+            <div class="grade-input-section">
+                <label for="grade">Grade (0-100)</label>
+                <input type="number" id="grade" name="grade" step="0.5" min="0" max="100" 
+                       value="{{ submission.grade if submission.grade else '' }}" required>
+                <div class="grade-suggestions">
+                    <button type="button" onclick="setGrade(70)">Average (70%)</button>
+                    <button type="button" onclick="setGrade(85)">Good (85%)</button>
+                    <button type="button" onclick="setGrade(95)">Excellent (95%)</button>
+                    <button type="button" onclick="setGrade(50)">Poor (50%)</button>
+                </div>
+            </div>
+
+            <div class="feedback-section">
+                <label for="feedback">Feedback</label>
+                <textarea id="feedback" name="feedback" rows="8" 
+                          placeholder="Provide detailed feedback to the student...">{{ submission.feedback or '' }}</textarea>
+                <div class="feedback-templates">
+                    <button type="button" onclick="insertFeedback('excellent')">📝 Excellent Work Template</button>
+                    <button type="button" onclick="insertFeedback('good')">👍 Good Work Template</button>
+                    <button type="button" onclick="insertFeedback('average')">📊 Average Template</button>
+                    <button type="button" onclick="insertFeedback('poor')">⚠️ Needs Improvement</button>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Save Grade & Feedback</button>
+                <a href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}" class="btn-cancel">Cancel</a>
+                <button type="button" onclick="saveAndNext()" class="btn-next">Save & Next →</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.grade-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.grade-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.grade-header h1 {
+    font-size: 1.75rem;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.assignment-info {
+    color: #6b7280;
+}
+
+.grade-content {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 2rem;
+}
+
+.student-info {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.submission-content {
+    margin-bottom: 2rem;
+}
+
+.submission-content h3 {
+    margin: 1.5rem 0 1rem;
+    color: #1f2937;
+}
+
+.questions-box {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+.instructions-box {
+    background: #fef3c7;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.answer-box {
+    background: white;
+    border: 1px solid #e5e7eb;
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.file-attachment, .github-link {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background: #f0fdf4;
+    border-radius: 8px;
+}
+
+.download-link {
+    color: #059669;
+    text-decoration: none;
+    margin-left: 0.5rem;
+}
+
+.grade-form {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+}
+
+.grade-input-section {
+    margin-bottom: 1.5rem;
+}
+
+.grade-input-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.grade-input-section input {
+    width: 200px;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.grade-suggestions {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.grade-suggestions button {
+    padding: 0.25rem 0.75rem;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.feedback-section {
+    margin-bottom: 1.5rem;
+}
+
+.feedback-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-section textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.feedback-templates {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.feedback-templates button {
+    padding: 0.25rem 0.75rem;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-submit, .btn-next, .btn-cancel {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-submit {
+    background: #059669;
+    color: white;
+    border: none;
+}
+
+.btn-next {
+    background: #3b82f6;
+    color: white;
+    border: none;
+}
+
+.btn-cancel {
+    background: white;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+.plagiarism-high {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.plagiarism-low {
+    color: #059669;
+}
+</style>
+
+<script>
+function setGrade(grade) {
+    document.getElementById('grade').value = grade;
+}
+
+function insertFeedback(type) {
+    const feedback = document.getElementById('feedback');
+    const templates = {
+        excellent: `Excellent work! 🎉
+
+Strengths:
+✓ Comprehensive understanding of the topic
+✓ Well-structured and organized solution
+✓ Excellent code quality and documentation
+✓ All requirements met perfectly
+
+Areas for Improvement:
+- Continue to explore advanced concepts
+
+Keep up the great work!`,
+        
+        good: `Good work! 👍
+
+Strengths:
+✓ Good understanding of core concepts
+✓ Solution works correctly
+✓ Proper documentation included
+
+Areas for Improvement:
+- Consider optimizing your approach
+- Add more comments for complex sections
+- Test edge cases more thoroughly
+
+Well done!`,
+        
+        average: `Satisfactory work. 📊
+
+Strengths:
+✓ Basic requirements met
+✓ Understanding of fundamentals shown
+
+Areas for Improvement:
+- Review the assignment requirements carefully
+- Improve code organization and structure
+- Add more detailed documentation
+- Test your solution more thoroughly
+
+Keep practicing and you'll improve!`,
+        
+        poor: `Needs Improvement ⚠️
+
+Issues Identified:
+✗ Missing key requirements
+✗ Solution has logical errors
+✗ Poor documentation
+✗ Code organization needs work
+
+Suggestions:
+1. Review the course materials again
+2. Attend office hours for help
+3. Practice with simpler examples first
+4. Seek peer review before submission
+
+Please resubmit after addressing these issues.`
+    };
+    
+    if (templates[type]) {
+        feedback.value = templates[type];
+    }
+}
+
+function saveAndNext() {
+    const form = document.querySelector('.grade-form');
+    form.submit();
+}
+</script>
+{% endblock %}

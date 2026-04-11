@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section with Animation -->
+<section class="hero fade-in-up">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-badge">🚀 CS Department, MOUAU</div>
+            <h1 class="hero-title">Submit smarter.<br>Grade faster.</h1>
+            <p class="hero-subtitle">Submita is the all-in-one platform for assignment submission, plagiarism detection, and intelligent marking — designed for CS students and lecturers.</p>
+            <div class="hero-buttons">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-large pulse">Start submitting ↗</a>
+                <a href="#features" class="btn btn-outline btn-large">Learn more</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">99%</span>
+                    <span class="stat-label">Plagiarism accuracy</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">3x</span>
+                    <span class="stat-label">Secure submissions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section with Scroll Animation -->
+<section id="features" class="features">
+    <div class="container">
+        <h2 class="section-title fade-in">Core features</h2>
+        <p class="section-subtitle fade-in">Everything your department needs</p>
+        <div class="features-grid">
+            <div class="feature-card slide-in-left">
+                <div class="feature-icon">📝</div>
+                <h3>Assignment submission</h3>
+                <p>Upload code files, zip archives, or link GitHub repos. Deadline tracking and late submission control built in.</p>
+            </div>
+            <div class="feature-card slide-in-up">
+                <div class="feature-icon">🔍</div>
+                <h3>Plagiarism detection</h3>
+                <p>Multi-layer code similarity analysis across current and past submissions. Get a detailed similarity report instantly.</p>
+            </div>
+            <div class="feature-card slide-in-right">
+                <div class="feature-icon">🤖</div>
+                <h3>Automated marking</h3>
+                <p>Run test cases, check code quality, and generate grade summaries. Lecturers review and override with ease.</p>
+            </div>
+            <div class="feature-card slide-in-up">
+                <div class="feature-icon">💬</div>
+                <h3>Feedback dashboard</h3>
+                <p>Students get inline comments and scores. Lecturers track cohort progress at a glance.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="how-it-works">
+    <div class="container">
+        <h2 class="section-title fade-in">How it works</h2>
+        <p class="section-subtitle fade-in">From upload to grade in minutes</p>
+        <div class="steps">
+            <div class="step zoom-in">
+                <div class="step-number">1</div>
+                <h3>Student submits assignment</h3>
+                <p>Upload source files, docs before the deadline.</p>
+            </div>
+            <div class="step zoom-in" style="animation-delay: 0.2s;">
+                <div class="step-number">2</div>
+                <h3>Plagiarism check runs automatically</h3>
+                <p>Submita compares the code against all submissions and a historical database.</p>
+            </div>
+            <div class="step zoom-in" style="animation-delay: 0.4s;">
+                <div class="step-number">3</div>
+                <h3>Marker reviews and grades</h3>
+                <p>Lecturers get a pre-scored report and add inline comments.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section fade-in">
+    <div class="container">
+        <h2>Ready to transform your department?</h2>
+        <p>Join hundreds of students and lecturers already using Submita.</p>
+        <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">Get Started Now →</a>
+    </div>
+</section>
+{% endblock %}

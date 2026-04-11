@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <h1>My Profile</h1>
+            <p>View and manage your personal information</p>
+        </div>
+
+        <div class="profile-info">
+            <div class="info-group">
+                <label>Full Name</label>
+                <div class="info-value">{{ user.name }}</div>
+            </div>
+            <div class="info-group">
+                <label>Email Address</label>
+                <div class="info-value">{{ user.email }}</div>
+            </div>
+            <div class="info-group">
+                <label>Matric Number / Staff ID</label>
+                <div class="info-value">{{ user.matric }}</div>
+            </div>
+            <div class="info-group">
+                <label>Role</label>
+                <div class="info-value role-badge {{ user.role }}">{{ user.role.upper() }}</div>
+            </div>
+            <div class="info-group">
+                <label>Department</label>
+                <div class="info-value">{{ user.department or 'Computer Science' }}</div>
+            </div>
+            <div class="info-group">
+                <label>Account Created</label>
+                <div class="info-value">{{ user.created_at.strftime('%B %d, %Y at %H:%M') }}</div>
+            </div>
+            <div class="info-group">
+                <label>Last Login</label>
+                <div class="info-value">{{ user.last_login.strftime('%B %d, %Y at %H:%M') if user.last_login else 'First login' }}</div>
+            </div>
+            <div class="info-group">
+                <label>Email Verified</label>
+                <div class="info-value">
+                    {% if user.verified %}
+                    <span class="verified">✓ Yes</span>
+                    {% else %}
+                    <span class="unverified">✗ No (please check your email)</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-actions">
+            <a href="{{ url_for('dashboard') }}" class="btn-secondary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+.profile-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+.profile-header {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+.profile-avatar {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+.profile-header h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+}
+.profile-header p {
+    opacity: 0.9;
+}
+.profile-info {
+    padding: 2rem;
+}
+.info-group {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+.info-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+.info-value {
+    font-size: 1rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+.role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+}
+.role-badge.student {
+    background: #d1fae5;
+    color: #065f46;
+}
+.role-badge.lecturer {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+.role-badge.admin {
+    background: #fef3c7;
+    color: #92400e;
+}
+.verified {
+    color: #059669;
+}
+.unverified {
+    color: #dc2626;
+}
+.profile-actions {
+    padding: 1.5rem 2rem 2rem;
+    text-align: center;
+    border-top: 1px solid #e5e7eb;
+}
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+@media (max-width: 640px) {
+    .profile-container {
+        padding: 1rem;
+    }
+    .profile-info {
+        padding: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

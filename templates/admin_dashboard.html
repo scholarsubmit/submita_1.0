@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-dashboard-layout">
+    <!-- Sidebar with hamburger toggle -->
+    <div class="admin-sidebar" id="adminSidebar">
+        <button class="sidebar-toggle" id="sidebarToggleBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="sidebar-header">
+            <h3>Quick Actions</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" data-filter="all" class="active"><i class="fas fa-tachometer-alt"></i> <span>Overview</span></a></li>
+            <li><a href="#" data-filter="users"><i class="fas fa-users"></i> <span>All Users</span></a></li>
+            <li><a href="#" data-filter="students"><i class="fas fa-graduation-cap"></i> <span>Students</span></a></li>
+            <li><a href="#" data-filter="lecturers"><i class="fas fa-chalkboard-teacher"></i> <span>Lecturers</span></a></li>
+            <li><a href="#" data-filter="admins"><i class="fas fa-user-cog"></i> <span>Admins</span></a></li>
+            <li><a href="#" data-filter="submissions"><i class="fas fa-file-alt"></i> <span>Submissions</span></a></li>
+            <li><a href="#" data-filter="assignments"><i class="fas fa-tasks"></i> <span>Assignments</span></a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="admin-main-content">
+        <div class="dashboard-header">
+            <h1>Admin Dashboard</h1>
+            <p id="filter-description">System overview and management</p>
+        </div>
+
+        <!-- Stats Cards Row (all clickable, trigger filter) -->
+        <div class="stats-grid fade-in-up">
+            <div class="stat-card animate-card" data-filter="all">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_users }}</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+            </div>
+            <div class="stat-card animate-card" data-filter="students" style="animation-delay: 0.1s;">
+                <div class="stat-icon">🎓</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_students }}</div>
+                    <div class="stat-label">Students</div>
+                </div>
+            </div>
+            <div class="stat-card animate-card" data-filter="lecturers" style="animation-delay: 0.2s;">
+                <div class="stat-icon">👨‍🏫</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_lecturers }}</div>
+                    <div class="stat-label">Lecturers</div>
+                </div>
+            </div>
+            <div class="stat-card animate-card" data-filter="admins" style="animation-delay: 0.3s;">
+                <div class="stat-icon">⚙️</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_admins }}</div>
+                    <div class="stat-label">Administrators</div>
+                </div>
+            </div>
+            <div class="stat-card animate-card" data-filter="submissions" style="animation-delay: 0.4s;">
+                <div class="stat-icon">📝</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_submissions }}</div>
+                    <div class="stat-label">Submissions</div>
+                </div>
+            </div>
+            <div class="stat-card animate-card" data-filter="assignments" style="animation-delay: 0.5s;">
+                <div class="stat-icon">📚</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_assignments }}</div>
+                    <div class="stat-label">Assignments</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dynamic Content Area (filtered results) -->
+        <div class="dashboard-card fade-in-up" id="dynamicContent">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-line"></i> <span id="section-title">Overview</span></h3>
+            </div>
+            <div class="card-body" id="resultsContainer">
+                <!-- Default overview content (stats summary, recent users, activities) -->
+                <div class="overview-stats">
+                    <p>Welcome to the admin panel. Use the sidebar or click on any stat card to view filtered data.</p>
+                </div>
+                <div class="dashboard-two-columns">
+                    <div class="sub-card">
+                        <h4>Recent Users</h4>
+                        <div class="user-list" id="recentUsersList">
+                            {% for user in recent_users %}
+                            <div class="user-item">
+                                <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                                <div class="user-details">
+                                    <div class="user-name">{{ user.name }}</div>
+                                    <div class="user-meta">{{ user.email }} • {{ user.matric }}</div>
+                                </div>
+                                <div class="user-role-badge {{ user.role }}">{{ user.role }}</div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="sub-card">
+                        <h4>Recent Activities</h4>
+                        <div class="activity-list">
+                            {% for activity in recent_activities %}
+                            <div class="activity-item">
+                                <div class="activity-icon"><i class="fas fa-bell"></i></div>
+                                <div class="activity-details">
+                                    <div class="activity-action">{{ activity.action }}</div>
+                                    <div class="activity-meta">{{ activity.user.name if activity.user else 'System' }} • {{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }}</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Sidebar toggle
+const sidebar = document.getElementById('adminSidebar');
+const toggleBtn = document.getElementById('sidebarToggleBtn');
+toggleBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+// Filter function using AJAX to fetch filtered data from the server
+function loadFilteredData(filterType) {
+    fetch(`/admin/filter?type=${filterType}`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('resultsContainer');
+            const sectionTitle = document.getElementById('section-title');
+            const filterDesc = document.getElementById('filter-description');
+
+            if (filterType === 'all') {
+                sectionTitle.innerText = 'Overview';
+                filterDesc.innerText = 'System overview and management';
+                // Reload original overview content (or keep static, but we'll rebuild from passed data)
+                container.innerHTML = `
+                    <div class="overview-stats">
+                        <p>Welcome to the admin panel. Use the sidebar or click on any stat card to view filtered data.</p>
+                    </div>
+                    <div class="dashboard-two-columns">
+                        <div class="sub-card">
+                            <h4>Recent Users</h4>
+                            <div class="user-list">
+                                ${data.recent_users.map(user => `
+                                    <div class="user-item">
+                                        <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                                        <div class="user-details">
+                                            <div class="user-name">${user.name}</div>
+                                            <div class="user-meta">${user.email} • ${user.matric}</div>
+                                        </div>
+                                        <div class="user-role-badge ${user.role}">${user.role}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="sub-card">
+                            <h4>Recent Activities</h4>
+                            <div class="activity-list">
+                                ${data.recent_activities.map(act => `
+                                    <div class="activity-item">
+                                        <div class="activity-icon"><i class="fas fa-bell"></i></div>
+                                        <div class="activity-details">
+                                            <div class="activity-action">${act.action}</div>
+                                            <div class="activity-meta">${act.user_name || 'System'} • ${act.timestamp}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (filterType === 'students' || filterType === 'lecturers' || filterType === 'admins') {
+                sectionTitle.innerText = `${filterType.charAt(0).toUpperCase() + filterType.slice(1)} List`;
+                filterDesc.innerText = `Showing all ${filterType}`;
+                container.innerHTML = `
+                    <div class="users-table-container">
+                        <table class="data-table">
+                            <thead><tr><th>Name</th><th>Email</th><th>Matric</th><th>Role</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                ${data.users.map(user => `
+                                    <tr>
+                                        <td>${user.name}</td>
+                                        <td>${user.email}</td>
+                                        <td>${user.matric}</td>
+                                        <td><span class="user-role-badge ${user.role}">${user.role}</span></td>
+                                        <td>${user.created_at}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else if (filterType === 'submissions') {
+                sectionTitle.innerText = 'All Submissions';
+                filterDesc.innerText = 'Latest assignment submissions';
+                container.innerHTML = `
+                    <div class="submissions-table-container">
+                        <table class="data-table">
+                            <thead><tr><th>Student</th><th>Assignment</th><th>Submitted</th><th>Plagiarism</th><th>Grade</th></tr></thead>
+                            <tbody>
+                                ${data.submissions.map(sub => `
+                                    <tr>
+                                        <td>${sub.student_name}</td>
+                                        <td>${sub.assignment_title}</td>
+                                        <td>${sub.submitted_at}</td>
+                                        <td>${sub.plagiarism_score}%</td>
+                                        <td>${sub.grade || 'Pending'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else if (filterType === 'assignments') {
+                sectionTitle.innerText = 'All Assignments';
+                filterDesc.innerText = 'Created by lecturers';
+                container.innerHTML = `
+                    <div class="assignments-table-container">
+                        <table class="data-table">
+                            <thead><tr><th>Title</th><th>Course</th><th>Deadline</th><th>Created By</th><th>Submissions</th></tr></thead>
+                            <tbody>
+                                ${data.assignments.map(ass => `
+                                    <tr>
+                                        <td>${ass.title}</td>
+                                        <td>${ass.course_code}</td>
+                                        <td>${ass.deadline}</td>
+                                        <td>${ass.creator_name}</td>
+                                        <td>${ass.submission_count}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `<p>No data available for this filter.</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching filtered data:', error);
+            document.getElementById('resultsContainer').innerHTML = '<p>Error loading data. Please try again.</p>';
+        });
+}
+
+// Attach click handlers to stat cards and sidebar menu items
+document.querySelectorAll('.stat-card, .sidebar-menu a').forEach(el => {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+        let filter = this.getAttribute('data-filter');
+        if (!filter && this.closest('.sidebar-menu')) {
+            filter = this.getAttribute('data-filter');
+        }
+        if (filter) {
+            loadFilteredData(filter);
+            // Update active state in sidebar
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            if (this.closest('.sidebar-menu')) this.classList.add('active');
+            else {
+                // Find matching sidebar item by data-filter
+                const matchingSidebar = document.querySelector(`.sidebar-menu a[data-filter="${filter}"]`);
+                if (matchingSidebar) matchingSidebar.classList.add('active');
+            }
+        }
+    });
+});
+
+// Load default 'all' data on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadFilteredData('all');
+});
+</script>
+
+<style>
+/* Admin Dashboard Layout with Sidebar */
+.admin-dashboard-layout {
+    display: flex;
+    gap: 1.5rem;
+    min-height: calc(100vh - 140px);
+}
+
+.admin-sidebar {
+    width: 260px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: sticky;
+    top: 80px;
+    height: fit-content;
+}
+.admin-sidebar.collapsed {
+    width: 70px;
+    padding: 1rem 0.5rem;
+}
+.admin-sidebar.collapsed .sidebar-header h3,
+.admin-sidebar.collapsed .sidebar-menu a span {
+    display: none;
+}
+.admin-sidebar.collapsed .sidebar-menu a i {
+    margin-right: 0;
+    font-size: 1.25rem;
+}
+.admin-sidebar.collapsed .sidebar-toggle i {
+    transform: rotate(90deg);
+}
+.sidebar-toggle {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    text-align: center;
+}
+.sidebar-header h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+}
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+}
+.sidebar-menu li {
+    margin-bottom: 0.5rem;
+}
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    color: #4b5563;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.sidebar-menu a i {
+    width: 20px;
+}
+.sidebar-menu a:hover, .sidebar-menu a.active {
+    background: #f0fdf4;
+    color: #059669;
+}
+.admin-main-content {
+    flex: 1;
+    min-width: 0;
+}
+.dashboard-header {
+    margin-bottom: 1.5rem;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-color: #059669;
+}
+.stat-icon { font-size: 2rem; }
+.stat-value { font-size: 1.8rem; font-weight: 700; color: #059669; }
+.stat-label { font-size: 0.8rem; color: #6b7280; }
+.dashboard-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+.card-header {
+    padding: 1rem 1.5rem;
+    background: #fafafa;
+    border-bottom: 1px solid #e5e7eb;
+}
+.card-body {
+    padding: 1.5rem;
+}
+.dashboard-two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+.sub-card h4 {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+.user-item, .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+.user-role-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+}
+.user-role-badge.student { background: #d1fae5; color: #065f46; }
+.user-role-badge.lecturer { background: #e0e7ff; color: #3730a3; }
+.user-role-badge.admin { background: #fef3c7; color: #92400e; }
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.data-table th, .data-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+@media (max-width: 768px) {
+    .admin-dashboard-layout {
+        flex-direction: column;
+    }
+    .admin-sidebar {
+        width: 100%;
+        position: static;
+    }
+    .dashboard-two-columns {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

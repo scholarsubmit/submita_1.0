@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <!-- Sidebar with hamburger toggle -->
+    <div class="sidebar" id="studentSidebar">
+        <button class="sidebar-toggle" id="sidebarToggleBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <ul class="sidebar-menu">
+            <li><a href="#" data-section="overview" class="active"><i class="fas fa-tachometer-alt"></i> <span>Overview</span></a></li>
+            <li><a href="#" data-section="submissions"><i class="fas fa-tasks"></i> <span>My Submissions</span></a></li>
+            <li><a href="#" data-section="progress"><i class="fas fa-chart-line"></i> <span>Progress</span></a></li>
+            <li><a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content-area">
+        <div id="overview" class="dashboard-header">
+            <h1>Welcome, {{ user.name }}! 👋</h1>
+            <p>Track your assignments and grades</p>
+            <div class="student-badge">Student</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Stats Cards (Overview) -->
+        <div class="stats-grid">
+            <div class="stat-card clickable" data-url="{{ url_for('student_dashboard') }}">
+                <div class="stat-icon">📝</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ submissions|length }}</div>
+                    <div class="stat-label">Total Submissions</div>
+                </div>
+            </div>
+            <div class="stat-card clickable" data-url="{{ url_for('student_dashboard') }}">
+                <div class="stat-icon">📚</div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ available_assignments|length }}</div>
+                    <div class="stat-label">Pending Assignments</div>
+                </div>
+            </div>
+            <div class="stat-card clickable" data-url="{{ url_for('student_dashboard') }}">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    {% set graded = submissions|selectattr('grade', 'defined')|list %}
+                    <div class="stat-value">{{ graded|length }}</div>
+                    <div class="stat-label">Graded</div>
+                </div>
+            </div>
+            <div class="stat-card clickable" data-url="{{ url_for('student_dashboard') }}">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-info">
+                    {% set avg_grade = submissions|selectattr('grade', 'defined')|map(attribute='grade')|sum / graded|length if graded else 0 %}
+                    <div class="stat-value">{{ "%.1f"|format(avg_grade) }}%</div>
+                    <div class="stat-label">Average Grade</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Available Assignments -->
+        {% if available_assignments %}
+        <div id="submissions" class="dashboard-section">
+            <h2>📋 Available Assignments</h2>
+            <div class="assignments-grid">
+                {% for assignment in available_assignments %}
+                <div class="assignment-card clickable" data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}">
+                    <div class="assignment-header">
+                        <h3>{{ assignment.title }}</h3>
+                        <span class="deadline-badge">🕒 {{ assignment.deadline.strftime('%b %d, %H:%M') }}</span>
+                    </div>
+                    <p class="course-code">{{ assignment.course_code }}</p>
+                    <p class="assignment-desc">
+                        {% if assignment.description %}
+                            {{ assignment.description[:120] }}{% if assignment.description|length > 120 %}...{% endif %}
+                        {% elif assignment.questions %}
+                            {{ assignment.questions|striptags|truncate(100) }}
+                        {% else %}
+                            Click to view assignment details
+                        {% endif %}
+                    </p>
+                    <div class="assignment-footer">
+                        <span class="status-badge open">Open</span>
+                        <button class="btn-submit-small" onclick="event.stopPropagation(); window.location.href='{{ url_for('submit_assignment', assignment_id=assignment.id) }}'">Submit →</button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Your Submissions -->
+        {% if submissions %}
+        <div class="dashboard-section">
+            <h2>📊 Your Submissions</h2>
+            <div class="submissions-grid">
+                {% for submission in submissions %}
+                {% set assignment = submission.assignment %}
+                <div class="submission-card clickable" data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}">
+                    <div class="submission-header">
+                        <h3>{{ assignment.title }}</h3>
+                        <span class="submission-date">{{ submission.submitted_at.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <p class="course-code">{{ assignment.course_code }}</p>
+                    <div class="submission-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Plagiarism:</span>
+                            {% if submission.plagiarism_score > 30 %}
+                            <span class="plagiarism-high">⚠️ {{ "%.1f"|format(submission.plagiarism_score) }}%</span>
+                            {% else %}
+                            <span class="plagiarism-low">✓ {{ "%.1f"|format(submission.plagiarism_score) }}%</span>
+                            {% endif %}
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Grade:</span>
+                            {% if submission.grade %}
+                            <span class="grade-value">{{ "%.1f"|format(submission.grade) }}%</span>
+                            {% else %}
+                            <span class="grade-pending">Pending</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="submission-footer">
+                        {% if submission.grade %}
+                        <span class="status-graded">✓ Graded</span>
+                        {% else %}
+                        <span class="status-submitted">Submitted</span>
+                        {% endif %}
+                        {% if assignment.deadline > now and not submission.grade %}
+                        <button class="btn-resubmit-small" onclick="event.stopPropagation(); window.location.href='{{ url_for('submit_assignment', assignment_id=assignment.id) }}'">Resubmit</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Past Assignments -->
+        {% if past_assignments %}
+        <div id="progress" class="dashboard-section">
+            <h2>📅 Past Assignments</h2>
+            <div class="past-grid">
+                {% for assignment in past_assignments %}
+                <div class="past-card clickable" data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}">
+                    <div class="past-header">
+                        <h4>{{ assignment.title }}</h4>
+                        <span class="deadline-passed">Closed on {{ assignment.deadline.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <p class="course-code">{{ assignment.course_code }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Sidebar toggle with hamburger icon
+const sidebar = document.getElementById('studentSidebar');
+const toggleBtn = document.getElementById('sidebarToggleBtn');
+
+if (sidebar && toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+    });
+}
+
+// Sidebar menu navigation (scroll to sections) – only for non-profile links
+document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const sectionId = this.getAttribute('data-section');
+        if (sectionId) {
+            const target = document.getElementById(sectionId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        // Update active class
+        document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+        this.classList.add('active');
+        // On mobile, auto-collapse sidebar after click
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        }
+    });
+});
+
+// Make cards clickable
+document.querySelectorAll('.clickable').forEach(card => {
+    card.addEventListener('click', function(e) {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+        const url = this.dataset.url;
+        if (url) window.location.href = url;
+    });
+});
+</script>
+{% endblock %}

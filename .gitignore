@@ -1,0 +1,29 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Virtual environments (recommended to ignore)
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Database (optional — remove if you want to upload your database)
+# db.sqlite3
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files (optional)
+.vscode/
+.idea/
+
+# Cache
+.cache/
+.pytest_cache/
+.mypy_cache/

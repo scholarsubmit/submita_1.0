@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="submit-container">
+    <div class="submit-card">
+        <div class="assignment-header-details">
+            <h2>{{ assignment.title }}</h2>
+            <div class="assignment-meta">
+                <p><strong>📖 Course:</strong> {{ assignment.course_title }} ({{ assignment.course_code }})</p>
+                <p><strong>⏰ Deadline:</strong> {{ assignment.deadline.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Display Assignment Questions -->
+        <div class="assignment-questions">
+            <h3>📝 Assignment Questions</h3>
+            <div class="questions-content">
+                {{ assignment.questions|safe }}
+            </div>
+            
+            {% if assignment.instructions %}
+            <div class="instructions">
+                <h4>📖 Instructions</h4>
+                <p>{{ assignment.instructions }}</p>
+            </div>
+            {% endif %}
+            
+            {% if assignment.attachment_path %}
+            <div class="assignment-attachment">
+                <h4>📎 Assignment Attachment</h4>
+                <a href="{{ url_for('download_assignment_file', assignment_id=assignment.id) }}" class="download-link">
+                    📄 Download {{ assignment.attachment_filename }}
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <form method="POST" enctype="multipart/form-data" class="submission-form" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label for="content">Your Answer (Optional if uploading file)</label>
+                <textarea id="content" name="content" rows="8" 
+                          placeholder="Type your answer here..."></textarea>
+                <small>You can type your answer or upload a file, or both</small>
+            </div>
+            
+            <div class="divider">
+                <span>OR</span>
+            </div>
+            
+            <div class="form-group">
+                <label for="file">Upload Your Solution</label>
+                <div class="file-upload-area" onclick="document.getElementById('file').click()">
+                    <div class="upload-icon">📁</div>
+                    <p>Click to upload or drag and drop</p>
+                    <p class="upload-hint">Supported: PDF, DOC, DOCX, TXT, ZIP, PY, JS, JAVA, JPG, PNG</p>
+                    <input type="file" id="file" name="file" 
+                           accept=".pdf,.doc,.docx,.txt,.zip,.py,.js,.java,.cpp,.c,.jpg,.jpeg,.png,.gif" 
+                           style="display:none;">
+                </div>
+                <div id="fileInfo" style="display:none;" class="file-info">
+                    <span id="fileName"></span>
+                    <button type="button" onclick="clearFile()" class="remove-btn">Remove</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="github_url">GitHub Repository URL (Optional)</label>
+                <input type="url" id="github_url" name="github_url" 
+                       placeholder="https://github.com/username/repository">
+            </div>
+            
+            <div class="plagiarism-notice">
+                <strong>⚠️ Plagiarism Check</strong>
+                <p>All submissions are automatically checked for similarity against other submissions. Ensure your work is original.</p>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Submit Assignment →</button>
+                <a href="{{ url_for('student_dashboard') }}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.submit-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.submit-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    padding: 2rem;
+}
+
+.assignment-header-details {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.assignment-header-details h2 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.assignment-meta {
+    background: #f9fafb;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.assignment-meta p {
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+}
+
+.assignment-questions {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.assignment-questions h3 {
+    font-size: 1.125rem;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.questions-content {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.questions-content h1, .questions-content h2, .questions-content h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.questions-content ul, .questions-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.instructions {
+    background: #fef3c7;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.instructions h4 {
+    color: #92400e;
+    margin-bottom: 0.5rem;
+}
+
+.assignment-attachment {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #e0f2fe;
+    border-radius: 8px;
+}
+
+.download-link {
+    color: #0369a1;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.download-link:hover {
+    text-decoration: underline;
+}
+
+.submission-form {
+    margin-top: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+textarea, input[type="url"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: inherit;
+}
+
+textarea:focus, input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.file-upload-area {
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.file-upload-area:hover {
+    border-color: #059669;
+    background: #f0fdf4;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.file-info {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: #f0fdf4;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.divider {
+    text-align: center;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+.divider span {
+    background: white;
+    padding: 0 1rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.plagiarism-notice {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+
+.plagiarism-notice strong {
+    color: #f59e0b;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.plagiarism-notice p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-submit {
+    flex: 1;
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-submit:hover {
+    background: #047857;
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    background: white;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #f9fafb;
+}
+
+.remove-btn {
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .submit-container {
+        padding: 1rem;
+    }
+    
+    .submit-card {
+        padding: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+let selectedFile = null;
+
+document.getElementById('file')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (file.size > maxSize) {
+            alert('File size must be less than 50MB');
+            this.value = '';
+            return;
+        }
+        
+        selectedFile = file;
+        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileInfo').style.display = 'flex';
+        document.querySelector('.file-upload-area').style.display = 'none';
+    }
+});
+
+function clearFile() {
+    document.getElementById('file').value = '';
+    selectedFile = null;
+    document.getElementById('fileInfo').style.display = 'none';
+    document.querySelector('.file-upload-area').style.display = 'block';
+}
+
+function validateForm() {
+    const content = document.getElementById('content').value.trim();
+    const file = document.getElementById('file').files[0];
+    
+    if (!content && !file) {
+        alert('Please either type your answer or upload a file');
+        return false;
+    }
+    
+    return true;
+}
+
+// Drag and drop
+const dropArea = document.querySelector('.file-upload-area');
+if (dropArea) {
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.style.borderColor = '#059669';
+        dropArea.style.background = '#f0fdf4';
+    });
+    
+    dropArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropArea.style.borderColor = '#e5e7eb';
+        dropArea.style.background = 'white';
+    });
+    
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            document.getElementById('file').files = e.dataTransfer.files;
+            const event = new Event('change');
+            document.getElementById('file').dispatchEvent(event);
+        }
+        dropArea.style.borderColor = '#e5e7eb';
+        dropArea.style.background = 'white';
+    });
+}
+</script>
+{% endblock %}
