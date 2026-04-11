@@ -984,16 +984,10 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         # Create default admin if none exists
-        if not User.query.filter_by(role='admin').first():
-            # ... your admin creation code ...
-        # ... other test accounts ...
+            if not User.query.filter_by(role='admin').first():
+                # ... your admin creation code ...
+            # ... other test accounts ...
     
     # ✅ PORT BINDING FOR CLOUD DEPLOYMENT
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
-
-
-
-
-
-
