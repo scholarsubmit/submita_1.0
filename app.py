@@ -9,17 +9,39 @@ from datetime import datetime
 from difflib import SequenceMatcher
 from functools import wraps
 
-from flask import (Flask, flash, jsonify, make_response, redirect,
-                   render_template, request, send_file, session, url_for)
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
+from flask import (
+    Flask,
+    flash,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    session,
+    url_for,
+)
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
 from flask_mail import Mail, Message
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 from config import Config
-from models import (ActivityLog, Assignment, AssignmentSubmission, Submission,
-                    User, UserRole, db)
+from models import (
+    ActivityLog,
+    Assignment,
+    AssignmentSubmission,
+    Submission,
+    User,
+    UserRole,
+    db,
+)
 
 # Create Flask app FIRST
 app = Flask(
@@ -414,52 +436,42 @@ def dashboard():
         return redirect(url_for("student_dashboard"))
 
 
-@app.route("/student-dashboard")
+@app.route('/student-dashboard')
 @login_required
 def student_dashboard():
     if not current_user.is_student():
         flash("Access denied.", "danger")
-        return redirect(url_for("dashboard"))
-
+        return redirect(url_for('dashboard'))
+    
     now = datetime.utcnow()
-    submissions = (
-        Submission.query.filter_by(student_id=current_user.id)
-        .order_by(Submission.submitted_at.desc())
-        .all()
-    )
-
+    submissions = Submission.query.filter_by(student_id=current_user.id).order_by(Submission.submitted_at.desc()).all()
+    
     submitted_ids = [s.assignment_id for s in submissions]
     if submitted_ids:
-        available_assignments = (
-            AssignmentSubmission.query.filter(
-                AssignmentSubmission.deadline > now,
-                ~AssignmentSubmission.id.in_(submitted_ids),
-            )
-            .order_by(AssignmentSubmission.deadline.asc())
-            .all()
-        )
+        available_assignments = AssignmentSubmission.query.filter(
+            AssignmentSubmission.deadline > now,
+            ~AssignmentSubmission.id.in_(submitted_ids)
+        ).order_by(AssignmentSubmission.deadline.asc()).all()
     else:
-        available_assignments = (
-            AssignmentSubmission.query.filter(AssignmentSubmission.deadline > now)
-            .order_by(AssignmentSubmission.deadline.asc())
-            .all()
-        )
-
-    past_assignments = (
-        AssignmentSubmission.query.filter(AssignmentSubmission.deadline <= now)
-        .order_by(AssignmentSubmission.deadline.desc())
-        .all()
-    )
-
-    return render_template(
-        "student_dashboard.html",
-        user=current_user,
-        submissions=submissions,
-        available_assignments=available_assignments,
-        past_assignments=past_assignments,
-        now=now,
-    )
-
+        available_assignments = AssignmentSubmission.query.filter(
+            AssignmentSubmission.deadline > now
+        ).order_by(AssignmentSubmission.deadline.asc()).all()
+    
+    past_assignments = AssignmentSubmission.query.filter(
+        AssignmentSubmission.deadline <= now
+    ).order_by(AssignmentSubmission.deadline.desc()).all()
+    
+    # ✅ Calculate average grade safely
+    graded_submissions = [s for s in submissions if s.grade is not None]
+    avg_grade = sum(s.grade for s in graded_submissions) / len(graded_submissions) if graded_submissions else 0
+    
+    return render_template('student_dashboard.html', 
+                         user=current_user,
+                         submissions=submissions,
+                         available_assignments=available_assignments,
+                         past_assignments=past_assignments,
+                         now=now,
+                         avg_grade=round(avg_grade, 1))   # pass avg_grade to template
 
 @app.route("/profile")
 @login_required
