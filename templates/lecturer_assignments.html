@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .assignments-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .header-section h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    body.dark-mode .header-section h1 {
+        color: #f3f4f6;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+    }
+
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(5,150,105,0.3);
+    }
+
+    body.dark-mode .btn-create {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        text-align: center;
+    }
+
+    body.dark-mode .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    body.dark-mode .stat-number {
+        color: #10b981;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+
+    .assignments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .assignment-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    body.dark-mode .assignment-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .assignment-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        border-color: #059669;
+    }
+
+    body.dark-mode .assignment-card:hover {
+        border-color: #10b981;
+    }
+
+    .assignment-header {
+        padding: 1.25rem;
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    body.dark-mode .assignment-header {
+        background: #111827;
+        border-color: #374151;
+    }
+
+    .assignment-header h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .assignment-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        font-size: 0.7rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+    }
+
+    .assignment-body {
+        padding: 1.25rem;
+    }
+
+    .course-code {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        margin-bottom: 0.75rem;
+    }
+
+    body.dark-mode .course-code {
+        background: #1e3a5f;
+        color: #93c5fd;
+    }
+
+    .deadline {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .deadline-urgent {
+        color: #dc2626;
+    }
+
+    .stats {
+        display: flex;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    body.dark-mode .stats {
+        border-color: #374151;
+    }
+
+    .stat-item {
+        flex: 1;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    body.dark-mode .stat-value {
+        color: #10b981;
+    }
+
+    .stat-item-label {
+        font-size: 0.65rem;
+        color: #6b7280;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-view, .btn-edit, .btn-delete {
+        flex: 1;
+        padding: 0.5rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.2s;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-view {
+        background: #059669;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: #047857;
+    }
+
+    .btn-edit {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #2563eb;
+    }
+
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+    }
+
+    .btn-delete:hover {
+        background: #dc2626;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+    }
+
+    body.dark-mode .empty-state {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #059669;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .assignments-container {
+            padding: 1rem;
+        }
+        .assignments-grid {
+            grid-template-columns: 1fr;
+        }
+        .stats-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="assignments-container">
+    <a href="{{ url_for('lecturer_dashboard') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <div class="header-section">
+        <h1><i class="fas fa-tasks"></i> My Assignments</h1>
+        <a href="{{ url_for('create_assignment') }}" class="btn-create">
+            <i class="fas fa-plus"></i> Create New Assignment
+        </a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-number">{{ assignments|length }}</div>
+            <div class="stat-label">Total Assignments</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ assignments|sum(attribute='submission_count') }}</div>
+            <div class="stat-label">Total Submissions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ assignments|sum(attribute='graded_count') }}</div>
+            <div class="stat-label">Graded</div>
+        </div>
+        <div class="stat-card">
+            {# FIXED: Use a custom filter or string comparison to avoid datetime timezone issues #}
+            {% set active_count = 0 %}
+            {% for assignment in assignments %}
+                {% if assignment.deadline.strftime('%Y-%m-%d %H:%M:%S') > now.strftime('%Y-%m-%d %H:%M:%S') %}
+                    {% set active_count = active_count + 1 %}
+                {% endif %}
+            {% endfor %}
+            <div class="stat-number">{{ active_count }}</div>
+            <div class="stat-label">Active</div>
+        </div>
+    </div>
+
+    {% if assignments %}
+    <div class="assignments-grid">
+        {% for assignment in assignments %}
+        {# FIXED: Compare using string format to avoid timezone issues #}
+        {% set is_active = assignment.deadline.strftime('%Y-%m-%d %H:%M:%S') > now.strftime('%Y-%m-%d %H:%M:%S') %}
+        <div class="assignment-card">
+            <div class="assignment-header">
+                <h3>{{ assignment.title }}</h3>
+                <div class="assignment-meta">
+                    <span><i class="fas fa-calendar"></i> Created: {{ assignment.created_at.strftime('%b %d, %Y') }}</span>
+                </div>
+            </div>
+            <div class="assignment-body">
+                <span class="course-code">{{ assignment.course_code }}</span>
+                <div class="deadline {% if not is_active %}deadline-urgent{% endif %}">
+                    <i class="fas fa-clock"></i>
+                    Deadline: {{ assignment.deadline.strftime('%b %d, %Y at %H:%M') }}
+                    {% if not is_active %}
+                    <span class="status-badge status-flagged" style="margin-left: 0.5rem;">Closed</span>
+                    {% endif %}
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ assignment.submission_count }}</div>
+                        <div class="stat-item-label">Submissions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ assignment.graded_count }}</div>
+                        <div class="stat-item-label">Graded</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ "%.0f"|format((assignment.graded_count / assignment.submission_count * 100) if assignment.submission_count else 0) }}%</div>
+                        <div class="stat-item-label">Complete</div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <a href="{{ url_for('lecturer_view_assignment', assignment_id=assignment.id) }}" class="btn-view">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <a href="{{ url_for('lecturer_edit_assignment', assignment_id=assignment.id) }}" class="btn-edit">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <button class="btn-delete" onclick="deleteAssignment({{ assignment.id }}, '{{ assignment.title }}')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No assignments yet</h3>
+        <p>Click "Create New Assignment" to get started</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function deleteAssignment(assignmentId, title) {
+    if (confirm(`Are you sure you want to delete "${title}"? This will also delete all submissions. This action cannot be undone.`)) {
+        fetch(`/lecturer/assignment/${assignmentId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Failed to delete assignment');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

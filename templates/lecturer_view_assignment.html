@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .assignment-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #059669;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .assignment-header {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    body.dark-mode .assignment-header {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .assignment-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+
+    body.dark-mode .assignment-title {
+        color: #f3f4f6;
+    }
+
+    .course-info {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+
+    .course-code {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+
+    .deadline {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .deadline-urgent {
+        color: #dc2626;
+    }
+
+    .questions-box {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .questions-box h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .questions-content {
+        white-space: pre-wrap;
+        line-height: 1.6;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        text-align: center;
+    }
+
+    body.dark-mode .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-manage {
+        background: #3b82f6;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .btn-manage:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    .btn-edit {
+        background: #6b7280;
+    }
+
+    .btn-edit:hover {
+        background: #4b5563;
+    }
+
+    .submissions-section {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    body.dark-mode .submissions-section {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .section-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .submissions-table {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+        background: #f9fafb;
+        font-weight: 600;
+    }
+
+    tr:hover {
+        background: #f9fafb;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-graded {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-pending {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+
+    .btn-grade {
+        background: #059669;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+    }
+
+    .btn-grade:hover {
+        background: #047857;
+    }
+
+    .btn-view-submission {
+        background: #3b82f6;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+    }
+
+    .similarity-low {
+        color: #059669;
+    }
+
+    .similarity-mid {
+        color: #d97706;
+    }
+
+    .similarity-high {
+        color: #dc2626;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+        .assignment-container {
+            padding: 1rem;
+        }
+        th, td {
+            padding: 0.75rem;
+        }
+        .action-buttons {
+            flex-direction: column;
+        }
+        .btn-manage {
+            text-align: center;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="assignment-container">
+    <a href="{{ url_for('lecturer_assignments') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Assignments
+    </a>
+
+    <div class="assignment-header">
+        <div class="assignment-title">{{ assignment.title }}</div>
+        <div class="course-info">
+            <span class="course-code">{{ assignment.course_code }}</span>
+            <span class="course-code">{{ assignment.course_title }}</span>
+        </div>
+        <div class="deadline {% if assignment.deadline.strftime('%Y-%m-%d %H:%M:%S') < now.strftime('%Y-%m-%d %H:%M:%S') %}deadline-urgent{% endif %}">
+            <i class="fas fa-clock"></i>
+            Deadline: {{ assignment.deadline.strftime('%B %d, %Y at %H:%M') }}
+        </div>
+        
+        {% if assignment.questions %}
+        <div class="questions-box">
+            <h3><i class="fas fa-question-circle"></i> Questions</h3>
+            <div class="questions-content">
+                {{ assignment.questions|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if assignment.instructions %}
+        <div class="questions-box">
+            <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+            <div class="questions-content">
+                {{ assignment.instructions|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if assignment.attachment_path %}
+        <div class="questions-box">
+            <a href="{{ url_for('download_assignment_file', assignment_id=assignment.id) }}" class="btn-view-submission">
+                <i class="fas fa-paperclip"></i> Download Assignment File
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ submissions|length }}</div>
+            <div class="stat-label">Total Submissions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ submissions|selectattr('grade', 'defined')|list|length }}</div>
+            <div class="stat-label">Graded</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ submissions|selectattr('plagiarism_score', '>', 30)|list|length }}</div>
+            <div class="stat-label">Plagiarism Alerts</div>
+        </div>
+        <div class="stat-card">
+            {% set graded_subs = submissions|selectattr('grade', 'defined')|list %}
+            {% if graded_subs|length > 0 %}
+                {% set avg_grade = graded_subs|map(attribute='grade')|sum / graded_subs|length %}
+                <div class="stat-number">{{ "%.1f"|format(avg_grade) }}%</div>
+            {% else %}
+                <div class="stat-number">0%</div>
+            {% endif %}
+            <div class="stat-label">Average Grade</div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}" class="btn-manage">
+            <i class="fas fa-chalkboard"></i> Manage Submissions & Grade
+        </a>
+        <a href="{{ url_for('lecturer_edit_assignment', assignment_id=assignment.id) }}" class="btn-manage btn-edit">
+            <i class="fas fa-edit"></i> Edit Assignment
+        </a>
+    </div>
+
+    <div class="submissions-section">
+        <div class="section-header">
+            <h2><i class="fas fa-users"></i> Student Submissions</h2>
+        </div>
+        <div class="submissions-table">
+            {% if submissions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Matric Number</th>
+                        <th>Submitted At</th>
+                        <th>Plagiarism</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                    {% set similarity_class = 'similarity-low' %}
+                    {% if submission.plagiarism_score > 60 %}
+                        {% set similarity_class = 'similarity-high' %}
+                    {% elif submission.plagiarism_score > 30 %}
+                        {% set similarity_class = 'similarity-mid' %}
+                    {% endif %}
+                    <tr>
+                        <td>
+                            <strong>{{ submission.student.name }}</strong>
+                        </td>
+                        <td>{{ submission.student.matric }}</td>
+                        <td>{{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            <span class="{{ similarity_class }}">
+                                {{ "%.1f"|format(submission.plagiarism_score) }}%
+                            </span>
+                        </td>
+                        <td>
+                            {% if submission.grade is not none %}
+                                <strong>{{ "%.1f"|format(submission.grade) }}%</strong>
+                            {% else %}
+                                <span style="color: #6b7280;">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if submission.grade is not none %}
+                                <span class="status-badge status-graded">Graded</span>
+                            {% else %}
+                                <span class="status-badge status-pending">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if submission.file_path %}
+                            <a href="{{ url_for('download_submission_file', submission_id=submission.id) }}" class="btn-view-submission" style="background: #6b7280;">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            {% endif %}
+                            <a href="{{ url_for('grade_submission', submission_id=submission.id) }}" class="btn-grade">
+                                <i class="fas fa-star"></i> Grade
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>No submissions yet for this assignment.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

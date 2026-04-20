@@ -1,0 +1,47 @@
+CSC 101: INTRODUCTION TO COMPUTER SCIENCE
+
+Topic: Basic Concepts of Computers and Problem Solving
+
+Instructions:
+- Answer all questions clearly.
+- Attempt Question 1 (compulsory) and any other two questions.
+- Time allowed: 1 hour 30 minutes.
+- Use examples where necessary.
+
+--------------------------------------------------
+
+1. (Compulsory)
+a. Define a computer.
+b. List and explain the five basic components of a computer system.
+c. Differentiate between hardware and software with two examples each.
+
+--------------------------------------------------
+
+2.
+a. Explain the concept of an algorithm.
+b. Write an algorithm to find the sum of two numbers.
+c. State two characteristics of a good algorithm.
+
+--------------------------------------------------
+
+3.
+a. What is an operating system?
+b. List and explain three functions of an operating system.
+c. Give two examples of operating systems.
+
+--------------------------------------------------
+
+4.
+a. Define input and output devices.
+b. List three examples of input devices and three output devices.
+c. Explain the difference between primary memory and secondary memory.
+
+--------------------------------------------------
+
+5.
+a. What is programming?
+b. Mention two programming languages and state one use for each.
+c. Explain the difference between compiler and interpreter.
+
+--------------------------------------------------
+END OF PAPER

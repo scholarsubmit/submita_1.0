@@ -1,66 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Submita - CS Assignment Platform | MOUAU</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submita - CS Assignment Platform | MOUAU</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+  <style>
+    /* Toast notification styles - positioned at bottom right */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      max-width: 380px;
+    }
+    
+    .toast-notification {
+      background: white;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideInRight 0.3s ease;
+      border-left: 4px solid;
+      cursor: pointer;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+    
+    .toast-notification.success {
+      border-left-color: #059669;
+    }
+    
+    .toast-notification.danger {
+      border-left-color: #dc2626;
+    }
+    
+    .toast-notification.warning {
+      border-left-color: #f59e0b;
+    }
+    
+    .toast-notification.info {
+      border-left-color: #3b82f6;
+    }
+    
+    body.dark-mode .toast-notification {
+      background: #1f2937;
+      color: #f3f4f6;
+    }
+    
+    .toast-icon {
+      font-size: 1.2rem;
+    }
+    
+    .toast-content {
+      flex: 1;
+      font-size: 0.85rem;
+    }
+    
+    .toast-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9ca3af;
+      font-size: 1rem;
+    }
+    
+    .toast-close:hover {
+      color: #6b7280;
+    }
+  </style>
 </head>
-<body>
-    <nav class="navbar">
-        <div class="container">
-            <div class="nav-brand">
-                <a href="{{ url_for('home') }}" class="logo-link">
-                    <div class="logo-container">
-                        <div class="logo-icon-wrapper">
-                            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Submita Logo" class="logo-image">
-                        </div>
-                        <div class="logo-text">
-                            <span class="logo-name">Submita</span>
-                            <span class="logo-tagline">CS MOUAU</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="nav-links">
-                <a href="{{ url_for('home') }}">Home</a>
-                {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                    {% if current_user.role == 'lecturer' %}
-                        <a href="{{ url_for('create_assignment') }}">Create Assignment</a>
-                    {% endif %}
-                    {% if current_user.role == 'admin' %}
-                        <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
-                    {% endif %}
-                    <a href="{{ url_for('logout') }}">Logout</a>
-                {% else %}
-                    <a href="{{ url_for('login') }}">Login</a>
-                    <a href="{{ url_for('register') }}">Register</a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
 
-    <main class="main-content">
-        <div class="container">
-            {% block content %}{% endblock %}
-        </div>
-    </main>
+<body class="{% if request.endpoint == 'home' %}home-page{% endif %}">
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Submita</span>
-                </div>
-                <p>&copy; 2025/2026 Computer Science Department, Michael Okpara University of Agriculture, Umudike. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+  <!-- Professional Header -->
+  <header class="professional-header">
+    <div class="header-container">
+      <div class="header-left">
+        <a href="{{ url_for('home') }}" class="header-logo">
+          <div class="logo-icon">
+            <i class="fas fa-file-code"></i>
+          </div>
+          <div class="logo-text">
+            <span class="logo-name">Submita</span>
+            <span class="logo-badge">CS MOUAU</span>
+          </div>
+        </a>
+      </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+      <div class="header-center">
+        <nav class="header-nav">
+          <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}">Home</a>
+          <a href="#features" class="nav-item"
+            onclick="document.getElementById('features')?.scrollIntoView({behavior:'smooth'}); return false;">Features</a>
+          <a href="#how-it-works" class="nav-item"
+            onclick="document.getElementById('how-it-works')?.scrollIntoView({behavior:'smooth'}); return false;">How it
+            Works</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('dashboard') }}" class="nav-item">Dashboard</a>
+          {% if current_user.role == 'lecturer' %}
+          <a href="{{ url_for('create_assignment') }}" class="nav-item">Create</a>
+          {% endif %}
+          {% if current_user.role == 'admin' %}
+          <a href="{{ url_for('admin_dashboard') }}" class="nav-item">Admin</a>
+          {% endif %}
+          <a href="{{ url_for('logout') }}" class="nav-item">Logout</a>
+          {% endif %}
+        </nav>
+      </div>
+
+      <div class="header-right">
+        <div class="header-buttons">
+          {% if not current_user.is_authenticated %}
+          <a href="{{ url_for('login') }}" class="header-btn-outline">Sign In</a>
+          <a href="{{ url_for('register') }}" class="header-btn-primary">Get Started</a>
+          {% endif %}
+        </div>
+        <button id="darkModeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <i class="fas fa-sun theme-icon-light"></i>
+          <i class="fas fa-moon theme-icon-dark"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- REMOVED FLASH MESSAGES FROM HERE - Now using toast notifications at bottom -->
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="professional-footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <i class="fas fa-file-code"></i>
+          <span>Submita</span>
+          <p>Assignment submission & plagiarism detection platform for CS departments.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How it Works</a>
+          <a href="#">Pricing</a>
+        </div>
+        <div class="footer-links">
+          <h4>Support</h4>
+          <a href="#">Help Center</a>
+          <a href="#">Documentation</a>
+          <a href="#">Contact</a>
+        </div>
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025/2026 Submita - Computer Science Department, Michael Okpara University of Agriculture, Umudike</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container for Flash Messages (Bottom Right) -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  
+  <script>
+    // Function to show toast notifications
+    function showToast(message, category = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      
+      const toast = document.createElement('div');
+      toast.className = `toast-notification ${category}`;
+      
+      let icon = '';
+      if (category === 'success') icon = '✅';
+      else if (category === 'danger') icon = '❌';
+      else if (category === 'warning') icon = '⚠️';
+      else icon = 'ℹ️';
+      
+      toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">${message}</div>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+      `;
+      
+      toast.addEventListener('click', function(e) {
+        if (e.target !== this.querySelector('.toast-close')) {
+          this.remove();
+        }
+      });
+      
+      container.appendChild(toast);
+      
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.style.animation = 'fadeOut 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, 5000);
+    }
+    
+    // Process flash messages from server
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          showToast('{{ message|safe }}', '{{ category }}');
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </script>
 </body>
+
 </html>

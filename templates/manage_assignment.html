@@ -1,790 +1,766 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    .manage-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #059669;
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .header-section {
+        margin-bottom: 2rem;
+    }
+
+    .header-section h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    body.dark-mode .header-section h1 {
+        color: #f3f4f6;
+    }
+
+    .assignment-info {
+        background: #f0fdf4;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-top: 0.5rem;
+    }
+
+    body.dark-mode .assignment-info {
+        background: #064e3b;
+        color: #f3f4f6;
+    }
+
+    /* Stats Cards - Clickable */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 16px;
+        border: 2px solid #e5e7eb;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    body.dark-mode .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card.active {
+        border-color: #059669;
+        background: #f0fdf4;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2);
+    }
+
+    body.dark-mode .stat-card.active {
+        background: #064e3b;
+        border-color: #10b981;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    body.dark-mode .stat-number {
+        color: #10b981;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 0.25rem;
+    }
+
+    body.dark-mode .stat-label {
+        color: #9ca3af;
+    }
+
+    /* Search and Filter Bar */
+    .search-bar {
+        background: white;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    body.dark-mode .search-bar {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .search-input-wrapper {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-input-wrapper i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+    }
+
+    .search-input-wrapper input {
+        width: 100%;
+        padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    body.dark-mode .search-input-wrapper input {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+
+    .search-input-wrapper input:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-chip {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        border: 1px solid #e5e7eb;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    body.dark-mode .filter-chip {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+
+    .filter-chip:hover {
+        background: #e5e7eb;
+    }
+
+    .filter-chip.active {
+        background: #059669;
+        color: white;
+        border-color: #059669;
+    }
+
+    body.dark-mode .filter-chip.active {
+        background: #10b981;
+    }
+
+    .clear-search {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: white;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .clear-search:hover {
+        background: #f3f4f6;
+    }
+
+    /* Submissions Table */
+    .submissions-table-container {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        overflow-x: auto;
+    }
+
+    body.dark-mode .submissions-table-container {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .bulk-actions {
+        padding: 1rem;
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    body.dark-mode .bulk-actions {
+        background: #111827;
+    }
+
+    .bulk-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: white;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+
+    .bulk-btn:hover {
+        background: #e5e7eb;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th,
+    td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    body.dark-mode th,
+    body.dark-mode td {
+        border-color: #374151;
+    }
+
+    th {
+        background: #f9fafb;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+    }
+
+    body.dark-mode th {
+        background: #111827;
+    }
+
+    tr {
+        transition: background 0.2s;
+    }
+
+    tr:hover {
+        background: #f9fafb;
+    }
+
+    body.dark-mode tr:hover {
+        background: #111827;
+    }
+
+    tr.hidden-row {
+        display: none;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-graded {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-pending {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+
+    .status-flagged {
+        background: #fecaca;
+        color: #991b1b;
+    }
+
+    .similarity-low {
+        color: #059669;
+        font-weight: 600;
+    }
+
+    .similarity-mid {
+        color: #d97706;
+        font-weight: 600;
+    }
+
+    .similarity-high {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .btn-grade {
+        background: #059669;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+        display: inline-block;
+    }
+
+    .btn-grade:hover {
+        background: #047857;
+    }
+
+    .btn-view {
+        background: #3b82f6;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        margin-right: 0.5rem;
+        display: inline-block;
+    }
+
+    .btn-view:hover {
+        background: #2563eb;
+    }
+
+    .grade-input {
+        width: 80px;
+        padding: 0.35rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .quick-grade-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .btn-quick-grade {
+        background: #059669;
+        color: white;
+        padding: 0.35rem 0.75rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.7rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6b7280;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem;
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .manage-container {
+            padding: 1rem;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+        }
+
+        .stats-grid {
+            gap: 0.75rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
 <div class="manage-container">
-    <div class="manage-header">
-        <div>
-            <h1>{{ assignment.title }}</h1>
-            <p class="course-info">{{ assignment.course_title }} ({{ assignment.course_code }})</p>
-        </div>
-        <div class="header-actions">
-            <a href="{{ url_for('edit_assignment', assignment_id=assignment.id) }}" class="btn-secondary">✏️ Edit</a>
-            <button onclick="voidAssignment()" class="btn-danger">🗑️ Void Assignment</button>
+    <a href="{{ url_for('lecturer_view_assignment', assignment_id=assignment.id) }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Assignment
+    </a>
+
+    <div class="header-section">
+        <h1><i class="fas fa-chalkboard"></i> Manage Submissions</h1>
+        <div class="assignment-info">
+            <strong>{{ assignment.title }}</strong> ({{ assignment.course_code }})
+            <br>
+            <small>Deadline: {{ assignment.deadline.strftime('%B %d, %Y at %H:%M') }}</small>
         </div>
     </div>
 
-    <div class="stats-overview">
-        <div class="stat-box">
-            <div class="stat-value">{{ total_students }}</div>
-            <div class="stat-label">Total Students</div>
+    <!-- Statistics Cards - Clickable Filters -->
+    <div class="stats-grid">
+        <div class="stat-card" data-filter="all" id="stat-all">
+            <div class="stat-number">{{ submissions|length }}</div>
+            <div class="stat-label">All Submissions</div>
         </div>
-        <div class="stat-box">
-            <div class="stat-value">{{ submitted_count }}</div>
-            <div class="stat-label">Submissions</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-value">{{ pending_count }}</div>
+        <div class="stat-card" data-filter="pending" id="stat-pending">
+            <div class="stat-number">{{ pending_count }}</div>
             <div class="stat-label">Pending</div>
         </div>
-        <div class="stat-box">
-            <div class="stat-value">{{ graded_count }}</div>
+        <div class="stat-card" data-filter="graded" id="stat-graded">
+            <div class="stat-number">{{ graded_count }}</div>
             <div class="stat-label">Graded</div>
         </div>
-        <div class="stat-box">
-            <div class="stat-value">{{ avg_grade }}%</div>
-            <div class="stat-label">Average Grade</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-value">{{ plagiarism_alerts|length }}</div>
-            <div class="stat-label">Plagiarism Alerts</div>
+        <div class="stat-card" data-filter="flagged" id="stat-flagged">
+            <div class="stat-number">{{ plagiarism_alerts|length }}</div>
+            <div class="stat-label">Flagged</div>
         </div>
     </div>
 
-    <div class="action-toolbar">
-        <div class="toolbar-left">
-            <button onclick="selectAll()" class="btn-sm">✓ Select All</button>
-            <button onclick="clearSelection()" class="btn-sm">✗ Clear</button>
-            <button onclick="bulkGrade()" class="btn-sm btn-primary">📊 Bulk Grade</button>
-            <button onclick="exportCSV()" class="btn-sm">📄 Export CSV</button>
-            <button onclick="exportExcel()" class="btn-sm">📊 Export Excel</button>
+    <!-- Search and Filter Bar -->
+    <div class="search-bar">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by student name or matric number...">
         </div>
-        <div class="toolbar-right">
-            <input type="text" id="searchInput" placeholder="Search students..." class="search-input" onkeyup="filterTable()">
-            <select id="filterStatus" onchange="filterTable()" class="filter-select">
-                <option value="all">All Submissions</option>
-                <option value="submitted">Submitted</option>
-                <option value="pending">Pending</option>
-                <option value="graded">Graded</option>
-                <option value="ungraded">Ungraded</option>
-                <option value="plagiarism">Plagiarism > 30%</option>
-            </select>
+        <div class="filter-buttons">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip" data-filter="pending">Pending</button>
+            <button class="filter-chip" data-filter="graded">Graded</button>
+            <button class="filter-chip" data-filter="flagged">Flagged</button>
         </div>
+        <button class="clear-search" id="clearSearchBtn">
+            <i class="fas fa-times"></i> Clear
+        </button>
     </div>
 
-    <form id="bulkGradeForm" method="POST" action="{{ url_for('bulk_grade', assignment_id=assignment.id) }}">
-        <div class="submissions-table-container">
-            <table class="data-table">
+    <!-- Submissions Table -->
+    <div class="submissions-table-container">
+        <div class="bulk-actions">
+            <button class="bulk-btn" onclick="exportToCSV()">
+                <i class="fas fa-download"></i> Export to CSV
+            </button>
+            <button class="bulk-btn" onclick="selectAll()">
+                <i class="fas fa-check-square"></i> Select All
+            </button>
+        </div>
+        <div class="submissions-table">
+            {% if submissions %}
+            <table id="submissionsTable">
                 <thead>
                     <tr>
-                        <th width="30"><input type="checkbox" id="selectAllCheckbox" onclick="toggleAllCheckboxes()"></th>
-                        <th>S/N</th>
-                        <th>Matric Number</th>
+                        <th style="width: 30px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                        <th style="width: 50px;">#</th>
                         <th>Student Name</th>
-                        <th>Email</th>
-                        <th>Submission Date</th>
+                        <th>Matric Number</th>
+                        <th>Submitted At</th>
                         <th>Plagiarism</th>
                         <th>Grade</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th style="width: 120px;">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="submissionsTable">
-                    {% for student in students %}
-                    {% set submission = submissions|selectattr('student_id', 'equalto', student.id)|first %}
-                    <tr class="{% if not submission %}pending-row{% elif submission.grade %}graded-row{% else %}submitted-row{% endif %}"
-                        data-status="{% if not submission %}pending{% elif submission.grade %}graded{% else %}submitted{% endif %}"
-                        data-plagiarism="{{ submission.plagiarism_score if submission else 0 }}">
-                        <td>
-                            {% if submission %}
-                            <input type="checkbox" name="selected_submissions" value="{{ submission.id }}" class="submission-checkbox">
-                            <input type="hidden" name="submission_ids[]" value="{{ submission.id }}">
-                            {% endif %}
-                        </td>
+                <tbody id="submissionsTableBody">
+                    {% for submission in submissions %}
+                    {% set similarity_class = 'similarity-low' %}
+                    {% if submission.plagiarism_score > 60 %}
+                    {% set similarity_class = 'similarity-high' %}
+                    {% elif submission.plagiarism_score > 30 %}
+                    {% set similarity_class = 'similarity-mid' %}
+                    {% endif %}
+                    {% set status = 'graded' if submission.grade is not none else ('flagged' if
+                    submission.plagiarism_score > 30 else 'pending') %}
+                    <tr data-status="{{ status }}" data-name="{{ submission.student.name }}"
+                        data-matric="{{ submission.student.matric }}">
+                        <td><input type="checkbox" class="submission-checkbox" value="{{ submission.id }}"></td>
                         <td>{{ loop.index }}</td>
-                        <td>{{ student.matric }}</td>
-                        <td>{{ student.name }}</td>
-                        <td>{{ student.email }}</td>
+                        <td><strong>{{ submission.student.name }}</strong></td>
+                        <td>{{ submission.student.matric }}</td>
+                        <td>{{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="{{ similarity_class }}">{{ "%.1f"|format(submission.plagiarism_score) }}%</td>
                         <td>
-                            {% if submission %}
-                            {{ submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% if submission.grade is not none %}
+                            <strong style="color: #059669;">{{ "%.1f"|format(submission.grade) }}%</strong>
                             {% else %}
-                            <span class="status-badge not-submitted">Not Submitted</span>
+                            <span style="color: #9ca3af;">—</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if submission %}
-                                {% if submission.plagiarism_score > 30 %}
-                                <span class="plagiarism-high">⚠️ {{ "%.1f"|format(submission.plagiarism_score) }}%</span>
-                                {% else %}
-                                <span class="plagiarism-low">✓ {{ "%.1f"|format(submission.plagiarism_score) }}%</span>
-                                {% endif %}
+                            {% if submission.grade is not none %}
+                            <span class="status-badge status-graded">Graded</span>
+                            {% elif submission.plagiarism_score > 30 %}
+                            <span class="status-badge status-flagged">Flagged</span>
                             {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-                        <td class="grade-cell">
-                            {% if submission %}
-                                {% if submission.grade %}
-                                <input type="number" name="grades[]" value="{{ submission.grade }}" class="grade-input" step="0.5" min="0" max="100" style="width: 70px;">
-                                {% else %}
-                                <input type="number" name="grades[]" placeholder="Grade" class="grade-input" step="0.5" min="0" max="100" style="width: 70px;">
-                                {% endif %}
-                            {% else %}
-                            <span class="text-muted">—</span>
+                            <span class="status-badge status-pending">Pending</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if submission %}
-                                {% if submission.grade %}
-                                <span class="status-badge graded">✓ Graded</span>
-                                {% else %}
-                                <span class="status-badge pending">⏳ Pending</span>
-                                {% endif %}
-                            {% else %}
-                            <span class="status-badge missing">❌ Missing</span>
+                            {% if submission.file_path %}
+                            <a href="{{ url_for('download_submission_file', submission_id=submission.id) }}"
+                                class="btn-view" title="Download File">
+                                <i class="fas fa-download"></i>
+                            </a>
                             {% endif %}
-                        </td>
-                        <td>
-                            {% if submission %}
-                            <div class="action-buttons">
-                                <a href="{{ url_for('grade_submission', submission_id=submission.id) }}" class="action-icon" title="Grade">📝</a>
-                                <a href="{{ url_for('download_submission_file', submission_id=submission.id) }}" class="action-icon" title="Download">📥</a>
-                                <button onclick="viewSubmission('{{ submission.id }}')" class="action-icon" title="View">👁️</button>
-                                <button onclick="resubmitReminder('{{ submission.id }}')" class="action-icon" title="Send Reminder">📧</button>
-                            </div>
-                            {% else %}
-                            <button type="button" onclick="sendReminder('{{ student.id }}', '{{ assignment.id }}')" class="btn-reminder">📧 Remind</button>
-                            {% endif %}
+                            <!-- ADD PLAGIARISM REPORT BUTTON HERE -->
+                            <a href="{{ url_for('plagiarism_report', submission_id=submission.id) }}" class="btn-view"
+                                title="View Plagiarism Report" style="background: #8b5cf6;">
+                                <i class="fas fa-shield-alt"></i>
+                            </a>
+                            <a href="{{ url_for('grade_submission', submission_id=submission.id) }}" class="btn-grade">
+                                <i class="fas fa-star"></i> Grade
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-        
-        <div class="bulk-actions" id="bulkActions" style="display: none;">
-            <div class="bulk-bar">
-                <span id="selectedCount">0</span> submissions selected
-                <div class="bulk-grade-input">
-                    <label>Set Grade: </label>
-                    <input type="number" id="bulkGradeValue" step="0.5" min="0" max="100" placeholder="Grade">
-                    <button type="button" onclick="applyBulkGrade()" class="btn-primary">Apply to Selected</button>
-                </div>
-                <button type="submit" class="btn-success">Save All Grades</button>
-                <button type="button" onclick="clearBulkSelection()" class="btn-secondary">Cancel</button>
+            <div id="noResultsMsg" class="no-results" style="display: none;">
+                <i class="fas fa-search" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                <p>No submissions match your search criteria.</p>
             </div>
-        </div>
-    </form>
-
-    <!-- Plagiarism Alerts Section -->
-    {% if plagiarism_alerts %}
-    <div class="plagiarism-section">
-        <h3>⚠️ Plagiarism Alerts</h3>
-        <div class="alerts-list">
-            {% for alert in plagiarism_alerts %}
-            <div class="alert-item">
-                <div class="alert-info">
-                    <strong>{{ alert.student.name }}</strong> ({{ alert.student.matric }})
-                    <span class="plagiarism-score">Similarity: {{ "%.1f"|format(alert.plagiarism_score) }}%</span>
-                </div>
-                <div class="alert-actions">
-                    <a href="{{ url_for('grade_submission', submission_id=alert.id) }}" class="btn-sm">Review</a>
-                    <button onclick="markAsReviewed('{{ alert.id }}')" class="btn-sm">Mark Reviewed</button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        <div class="plagiarism-actions">
-            <a href="{{ url_for('plagiarism_report', assignment_id=assignment.id) }}" class="btn-primary">View Full Plagiarism Report</a>
-            <form method="POST" action="{{ url_for('check_plagiarism', assignment_id=assignment.id) }}" style="display: inline;">
-                <button type="submit" class="btn-secondary">Re-run Plagiarism Check</button>
-            </form>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Assignment Details Section -->
-    <div class="assignment-details">
-        <h3>📋 Assignment Details</h3>
-        <div class="details-grid">
-            <div class="detail-item">
-                <strong>Deadline:</strong> {{ assignment.deadline.strftime('%Y-%m-%d %H:%M') }}
-            </div>
-            <div class="detail-item">
-                <strong>Status:</strong>
-                {% if assignment.deadline > now %}
-                <span class="status-active">Active</span>
-                {% else %}
-                <span class="status-closed">Closed</span>
-                {% endif %}
-            </div>
-            {% if assignment.attachment_path %}
-            <div class="detail-item">
-                <strong>Attachment:</strong>
-                <a href="{{ url_for('download_assignment_file', assignment_id=assignment.id) }}">📎 {{ assignment.attachment_filename }}</a>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>No submissions yet for this assignment.</p>
             </div>
             {% endif %}
         </div>
-        
-        <div class="questions-preview">
-            <strong>Questions:</strong>
-            <div class="questions-content">{{ assignment.questions|safe }}</div>
-        </div>
-        
-        {% if assignment.instructions %}
-        <div class="instructions-preview">
-            <strong>Instructions:</strong>
-            <p>{{ assignment.instructions }}</p>
-        </div>
-        {% endif %}
     </div>
 </div>
 
-<style>
-.manage-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 1rem;
-}
-
-.manage-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 2px solid #e5e7eb;
-}
-
-.manage-header h1 {
-    font-size: 1.75rem;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-}
-
-.course-info {
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-
-.header-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.stats-overview {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.stat-box {
-    background: white;
-    padding: 1rem;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    text-align: center;
-    transition: all 0.2s;
-}
-
-.stat-box:hover {
-    border-color: #059669;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #059669;
-}
-
-.stat-label {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-top: 0.25rem;
-}
-
-.action-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.toolbar-left, .toolbar-right {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.search-input, .filter-select {
-    padding: 0.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.875rem;
-}
-
-.search-input {
-    width: 250px;
-}
-
-.submissions-table-container {
-    overflow-x: auto;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.data-table th {
-    padding: 1rem;
-    background: #f9fafb;
-    font-weight: 600;
-    font-size: 0.813rem;
-    color: #374151;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.data-table td {
-    padding: 0.75rem 1rem;
-    font-size: 0.813rem;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.data-table tr:hover {
-    background: #f9fafb;
-}
-
-.pending-row {
-    background: #fffbeb;
-}
-
-.graded-row {
-    background: #f0fdf4;
-}
-
-.submitted-row {
-    background: white;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    font-weight: 500;
-}
-
-.status-badge.graded {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.status-badge.pending {
-    background: #fef3c7;
-    color: #d97706;
-}
-
-.status-badge.not-submitted {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.status-badge.missing {
-    background: #fef2f2;
-    color: #991b1b;
-}
-
-.plagiarism-high {
-    color: #dc2626;
-    font-weight: 500;
-}
-
-.plagiarism-low {
-    color: #059669;
-}
-
-.grade-input {
-    padding: 0.25rem 0.5rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    font-size: 0.813rem;
-    width: 70px;
-}
-
-.grade-input:focus {
-    outline: none;
-    border-color: #059669;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.action-icon {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 0.25rem;
-    transition: transform 0.2s;
-}
-
-.action-icon:hover {
-    transform: scale(1.1);
-}
-
-.btn-reminder {
-    background: #e0e7ff;
-    color: #3730a3;
-    border: none;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.7rem;
-}
-
-.bulk-actions {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 8px;
-}
-
-.bulk-bar {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.bulk-grade-input {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.plagiarism-section {
-    margin-top: 2rem;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 1.5rem;
-}
-
-.plagiarism-section h3 {
-    margin-bottom: 1rem;
-    color: #dc2626;
-}
-
-.alerts-list {
-    margin-bottom: 1rem;
-}
-
-.alert-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem;
-    background: #fef2f2;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
-}
-
-.alert-info strong {
-    color: #991b1b;
-}
-
-.plagiarism-score {
-    margin-left: 1rem;
-    color: #dc2626;
-    font-weight: 500;
-}
-
-.alert-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.plagiarism-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.assignment-details {
-    margin-top: 2rem;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    padding: 1.5rem;
-}
-
-.assignment-details h3 {
-    margin-bottom: 1rem;
-}
-
-.details-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.questions-preview, .instructions-preview {
-    margin-top: 1rem;
-}
-
-.questions-content {
-    background: #f9fafb;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-top: 0.5rem;
-    line-height: 1.6;
-}
-
-.btn-sm {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.75rem;
-    border-radius: 6px;
-    border: 1px solid #e5e7eb;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.btn-sm:hover {
-    background: #f3f4f6;
-}
-
-.btn-primary {
-    background: #059669;
-    color: white;
-    border: none;
-}
-
-.btn-primary:hover {
-    background: #047857;
-}
-
-.btn-secondary {
-    background: #6b7280;
-    color: white;
-    border: none;
-}
-
-.btn-danger {
-    background: #dc2626;
-    color: white;
-    border: none;
-}
-
-.btn-success {
-    background: #10b981;
-    color: white;
-    border: none;
-}
-
-.text-muted {
-    color: #9ca3af;
-}
-
-@media (max-width: 768px) {
-    .action-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .stats-overview {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .bulk-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-}
-</style>
-
 <script>
-let selectedSubmissions = new Set();
+    // Get all submissions rows
+    const rows = document.querySelectorAll('#submissionsTableBody tr');
+    const noResultsMsg = document.getElementById('noResultsMsg');
+    const submissionsTable = document.getElementById('submissionsTable');
 
-function toggleAllCheckboxes() {
-    const selectAll = document.getElementById('selectAllCheckbox');
-    const checkboxes = document.querySelectorAll('.submission-checkbox');
-    checkboxes.forEach(cb => {
-        cb.checked = selectAll.checked;
-        if (selectAll.checked) {
-            selectedSubmissions.add(cb.value);
+    let currentFilter = 'all';
+    let currentSearch = '';
+
+    // Function to update stats card active state
+    function updateActiveStatCard(filter) {
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach(card => {
+            if (card.dataset.filter === filter) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+        });
+    }
+
+    // Function to update filter chips active state
+    function updateActiveFilterChip(filter) {
+        const filterChips = document.querySelectorAll('.filter-chip');
+        filterChips.forEach(chip => {
+            if (chip.dataset.filter === filter) {
+                chip.classList.add('active');
+            } else {
+                chip.classList.remove('active');
+            }
+        });
+    }
+
+    // Main filter function
+    function filterTable() {
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowStatus = row.dataset.status;
+            const rowName = row.dataset.name.toLowerCase();
+            const rowMatric = row.dataset.matric.toLowerCase();
+            const searchTerm = currentSearch.toLowerCase();
+
+            // Status filter
+            let statusMatch = false;
+            if (currentFilter === 'all') statusMatch = true;
+            else if (currentFilter === 'pending' && rowStatus === 'pending') statusMatch = true;
+            else if (currentFilter === 'graded' && rowStatus === 'graded') statusMatch = true;
+            else if (currentFilter === 'flagged' && rowStatus === 'flagged') statusMatch = true;
+
+            // Search filter
+            let searchMatch = false;
+            if (currentSearch === '') {
+                searchMatch = true;
+            } else {
+                searchMatch = rowName.includes(searchTerm) || rowMatric.includes(searchTerm);
+            }
+
+            if (statusMatch && searchMatch) {
+                row.classList.remove('hidden-row');
+                visibleCount++;
+            } else {
+                row.classList.add('hidden-row');
+            }
+        });
+
+        // Show/hide no results message
+        if (visibleCount === 0 && rows.length > 0) {
+            if (noResultsMsg) noResultsMsg.style.display = 'block';
+            if (submissionsTable) submissionsTable.style.display = 'none';
         } else {
-            selectedSubmissions.delete(cb.value);
+            if (noResultsMsg) noResultsMsg.style.display = 'none';
+            if (submissionsTable) submissionsTable.style.display = 'table';
         }
-    });
-    updateBulkActions();
-}
-
-function updateBulkActions() {
-    const checkboxes = document.querySelectorAll('.submission-checkbox:checked');
-    const bulkActions = document.getElementById('bulkActions');
-    const selectedCount = document.getElementById('selectedCount');
-    
-    if (checkboxes.length > 0) {
-        bulkActions.style.display = 'block';
-        selectedCount.textContent = checkboxes.length;
-    } else {
-        bulkActions.style.display = 'none';
     }
-}
 
-function selectAll() {
-    document.querySelectorAll('.submission-checkbox').forEach(cb => {
-        cb.checked = true;
-        selectedSubmissions.add(cb.value);
-    });
-    updateBulkActions();
-}
-
-function clearSelection() {
-    document.querySelectorAll('.submission-checkbox').forEach(cb => {
-        cb.checked = false;
-        selectedSubmissions.clear();
-    });
-    updateBulkActions();
-}
-
-function clearBulkSelection() {
-    clearSelection();
-    document.getElementById('bulkActions').style.display = 'none';
-}
-
-function applyBulkGrade() {
-    const grade = document.getElementById('bulkGradeValue').value;
-    if (!grade) {
-        alert('Please enter a grade value');
-        return;
+    // Search input handler
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function (e) {
+            currentSearch = e.target.value;
+            filterTable();
+        });
     }
-    
-    document.querySelectorAll('.submission-checkbox:checked').forEach(cb => {
-        const row = cb.closest('tr');
-        const gradeInput = row.querySelector('.grade-input');
-        if (gradeInput) {
-            gradeInput.value = grade;
-        }
-    });
-}
 
-function bulkGrade() {
-    document.querySelectorAll('.submission-checkbox').forEach(cb => {
-        cb.checked = true;
-        selectedSubmissions.add(cb.value);
-    });
-    updateBulkActions();
-    document.getElementById('bulkGradeValue').focus();
-}
+    // Clear search button
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    if (clearSearchBtn) {
+        clearSearchBtn.addEventListener('click', function () {
+            if (searchInput) {
+                searchInput.value = '';
+                currentSearch = '';
+                filterTable();
+            }
+        });
+    }
 
-function filterTable() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const statusFilter = document.getElementById('filterStatus').value;
-    const rows = document.querySelectorAll('#submissionsTable tr');
-    
-    rows.forEach(row => {
-        const name = row.cells[3]?.textContent.toLowerCase() || '';
-        const matric = row.cells[2]?.textContent.toLowerCase() || '';
-        const status = row.dataset.status;
-        const plagiarism = parseFloat(row.dataset.plagiarism);
-        
-        let matchesSearch = name.includes(searchTerm) || matric.includes(searchTerm);
-        let matchesStatus = true;
-        
-        if (statusFilter === 'submitted') matchesStatus = status === 'submitted';
-        else if (statusFilter === 'pending') matchesStatus = status === 'pending';
-        else if (statusFilter === 'graded') matchesStatus = status === 'graded';
-        else if (statusFilter === 'ungraded') matchesStatus = status === 'submitted';
-        else if (statusFilter === 'plagiarism') matchesStatus = plagiarism > 30;
-        
-        if (matchesSearch && matchesStatus) {
-            row.style.display = '';
+    // Filter chip click handlers
+    const filterChips = document.querySelectorAll('.filter-chip');
+    filterChips.forEach(chip => {
+        chip.addEventListener('click', function () {
+            currentFilter = this.dataset.filter;
+            updateActiveFilterChip(currentFilter);
+            updateActiveStatCard(currentFilter);
+            filterTable();
+        });
+    });
+
+    // Stat card click handlers (make cards clickable)
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        card.addEventListener('click', function () {
+            const filterValue = this.dataset.filter;
+            currentFilter = filterValue;
+            updateActiveFilterChip(currentFilter);
+            updateActiveStatCard(currentFilter);
+            filterTable();
+
+            // Scroll to table
+            document.querySelector('.submissions-table-container').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+    });
+
+    // Select All functionality
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const submissionCheckboxes = document.querySelectorAll('.submission-checkbox');
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            // Only select visible rows
+            const visibleRows = document.querySelectorAll('#submissionsTableBody tr:not(.hidden-row)');
+            visibleRows.forEach(row => {
+                const checkbox = row.querySelector('.submission-checkbox');
+                if (checkbox) checkbox.checked = selectAllCheckbox.checked;
+            });
+        });
+    }
+
+    // Export to CSV function
+    window.exportToCSV = function () {
+        const visibleRows = document.querySelectorAll('#submissionsTableBody tr:not(.hidden-row)');
+        const csvData = [];
+
+        // Headers
+        csvData.push(['Student Name', 'Matric Number', 'Submitted At', 'Plagiarism Score', 'Grade', 'Status']);
+
+        // Data
+        visibleRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 8) {
+                csvData.push([
+                    cells[2]?.innerText.replace(/\n/g, ' ').trim() || '',
+                    cells[3]?.innerText.trim() || '',
+                    cells[4]?.innerText.trim() || '',
+                    cells[5]?.innerText.trim() || '',
+                    cells[6]?.innerText.trim() || '',
+                    cells[7]?.innerText.trim() || ''
+                ]);
+            }
+        });
+
+        if (csvData.length > 1) {
+            const csvContent = csvData.map(row => row.join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `submissions_${new Date().toISOString().slice(0, 19)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
         } else {
-            row.style.display = 'none';
+            alert('No data to export');
         }
-    });
-}
+    };
 
-function exportCSV() {
-    window.location.href = "{{ url_for('export_submissions_csv', assignment_id=assignment.id) }}";
-}
+    // Select All visible rows
+    window.selectAll = function () {
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = true;
+            const visibleRows = document.querySelectorAll('#submissionsTableBody tr:not(.hidden-row)');
+            visibleRows.forEach(row => {
+                const checkbox = row.querySelector('.submission-checkbox');
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+    };
 
-function exportExcel() {
-    window.location.href = "{{ url_for('export_submissions_excel', assignment_id=assignment.id) }}";
-}
-
-function viewSubmission(submissionId) {
-    window.open(`/grade/${submissionId}`, '_blank');
-}
-
-function sendReminder(studentId, assignmentId) {
-    if (confirm('Send reminder email to this student?')) {
-        fetch('/api/send-reminder', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({student_id: studentId, assignment_id: assignmentId})
-        }).then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  alert('Reminder sent successfully!');
-              } else {
-                  alert('Failed to send reminder');
-              }
-          });
-    }
-}
-
-function resubmitReminder(submissionId) {
-    if (confirm('Send resubmission reminder to this student?')) {
-        fetch('/api/resubmit-reminder', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({submission_id: submissionId})
-        }).then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  alert('Resubmission reminder sent!');
-              } else {
-                  alert('Failed to send reminder');
-              }
-          });
-    }
-}
-
-function voidAssignment() {
-    if (confirm('Are you sure you want to void this assignment? This action cannot be undone.')) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "{{ url_for('void_assignment', assignment_id=assignment.id) }}";
-        document.body.appendChild(form);
-        form.submit();
-    }
-}
-
-function markAsReviewed(submissionId) {
-    fetch('/api/mark-plagiarism-reviewed', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({submission_id: submissionId})
-    }).then(response => response.json())
-      .then(data => {
-          if (data.success) {
-              location.reload();
-          }
-      });
-}
-
-// Update selected count when checkboxes change
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.submission-checkbox').forEach(cb => {
-        cb.addEventListener('change', updateBulkActions);
-    });
-});
+    // Initial filter to show all
+    filterTable();
 </script>
 {% endblock %}

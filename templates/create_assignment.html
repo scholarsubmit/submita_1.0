@@ -1,616 +1,502 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="create-assignment-container">
-    <div class="create-assignment-card">
+<style>
+    .create-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    .create-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    body.dark-mode .create-card {
+        background: #1f2937;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #059669, #047857);
+        padding: 1.5rem 2rem;
+        color: white;
+    }
+
+    body.dark-mode .card-header {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .card-header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .card-header p {
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+
+    .form-container {
+        padding: 2rem;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    body.dark-mode .form-section {
+        border-color: #374151;
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    body.dark-mode .form-section-title {
+        color: #f3f4f6;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+
+    body.dark-mode .form-group label {
+        color: #d1d5db;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+
+    body.dark-mode .form-group input,
+    body.dark-mode .form-group textarea,
+    body.dark-mode .form-group select {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+    }
+
+    body.dark-mode .form-group input:focus,
+    body.dark-mode .form-group textarea:focus,
+    body.dark-mode .form-group select:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 120px;
+        font-family: inherit;
+    }
+
+    /* Rich Text Editor */
+    .editor-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px 12px 0 0;
+        margin-bottom: 0;
+    }
+
+    body.dark-mode .editor-toolbar {
+        background: #111827;
+        border-color: #374151;
+    }
+
+    .editor-toolbar button {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    body.dark-mode .editor-toolbar button {
+        background: #1f2937;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+
+    .editor-toolbar button:hover {
+        background: #f0fdf4;
+        border-color: #059669;
+    }
+
+    body.dark-mode .editor-toolbar button:hover {
+        background: #374151;
+        border-color: #10b981;
+    }
+
+    .rich-editor {
+        border: 1px solid #e5e7eb;
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        padding: 1rem;
+        min-height: 200px;
+        background: white;
+        line-height: 1.6;
+        font-size: 0.85rem;
+    }
+
+    body.dark-mode .rich-editor {
+        background: #1f2937;
+        border-color: #374151;
+        color: #f3f4f6;
+    }
+
+    .rich-editor:focus {
+        outline: none;
+    }
+
+    /* File Upload */
+    .file-upload-area {
+        border: 2px dashed #e5e7eb;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    body.dark-mode .file-upload-area {
+        border-color: #374151;
+    }
+
+    .file-upload-area:hover {
+        border-color: #059669;
+        background: #f0fdf4;
+    }
+
+    body.dark-mode .file-upload-area:hover {
+        border-color: #10b981;
+        background: #374151;
+    }
+
+    .upload-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-hint {
+        font-size: 0.7rem;
+        color: #6b7280;
+        margin-top: 0.5rem;
+    }
+
+    .current-file {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        background: #f0fdf4;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    body.dark-mode .current-file {
+        background: #374151;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1rem;
+    }
+
+    .btn-submit {
+        flex: 1;
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        border: none;
+        padding: 0.875rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(5,150,105,0.3);
+    }
+
+    body.dark-mode .btn-submit {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    .btn-cancel {
+        flex: 0 0 auto;
+        background: white;
+        color: #6b7280;
+        border: 1px solid #e5e7eb;
+        padding: 0.875rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: #f9fafb;
+    }
+
+    body.dark-mode .btn-cancel {
+        background: #1f2937;
+        border-color: #374151;
+        color: #9ca3af;
+    }
+
+    body.dark-mode .btn-cancel:hover {
+        background: #374151;
+    }
+
+    /* Info Cards */
+    .info-cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .info-card {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    body.dark-mode .info-card {
+        background: #374151;
+    }
+
+    .info-icon {
+        font-size: 1.5rem;
+    }
+
+    .info-text h4 {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+
+    .info-text p {
+        font-size: 0.7rem;
+        color: #6b7280;
+    }
+
+    @media (max-width: 768px) {
+        .create-container {
+            padding: 1rem;
+        }
+        .form-container {
+            padding: 1.5rem;
+        }
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+        .info-cards {
+            grid-template-columns: 1fr;
+        }
+        .form-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="create-container">
+    <div class="create-card">
         <div class="card-header">
-            <div class="header-icon">📝</div>
-            <h1>Create New Assignment</h1>
+            <h1><i class="fas fa-plus-circle"></i> Create New Assignment</h1>
             <p>Create and publish assignments for your students</p>
         </div>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <form method="POST" action="{{ url_for('create_assignment') }}" class="assignment-form" enctype="multipart/form-data">
-            <!-- Course Information -->
-            <div class="form-section">
-                <h3 class="section-title">📚 Course Information</h3>
-                <div class="form-row">
+
+        <div class="form-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="margin-bottom: 1.5rem;">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data" id="assignmentForm">
+                <!-- Course Information -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-graduation-cap"></i> Course Information
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Course Title *</label>
+                            <input type="text" name="course_title" placeholder="e.g., Data Structures and Algorithms" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Course Code *</label>
+                            <input type="text" name="course_code" placeholder="e.g., CSC301" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment Information -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-tasks"></i> Assignment Information
+                    </div>
                     <div class="form-group">
-                        <label for="course_title">
-                            <span class="label-icon">📖</span>
-                            Course Title *
-                        </label>
-                        <input type="text" id="course_title" name="course_title" 
-                               placeholder="e.g., Introduction to Python Programming" 
-                               required>
+                        <label>Assignment Title *</label>
+                        <input type="text" name="title" placeholder="e.g., Binary Search Tree Implementation" required>
                     </div>
-                    
                     <div class="form-group">
-                        <label for="course_code">
-                            <span class="label-icon">🆔</span>
-                            Course Code *
-                        </label>
-                        <input type="text" id="course_code" name="course_code" 
-                               placeholder="e.g., CSC301" required>
+                        <label>Deadline *</label>
+                        <input type="datetime-local" name="deadline" id="deadline" required>
+                        <small style="font-size: 0.7rem; color: #6b7280;">Students cannot submit after this time</small>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Assignment Information -->
-            <div class="form-section">
-                <h3 class="section-title">📋 Assignment Information</h3>
-                <div class="form-group">
-                    <label for="title">
-                        <span class="label-icon">📌</span>
-                        Assignment Title *
-                    </label>
-                    <input type="text" id="title" name="title" 
-                           placeholder="e.g., Python Programming Assignment 1" 
-                           required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="deadline">
-                        <span class="label-icon">⏰</span>
-                        Submission Deadline *
-                    </label>
-                    <input type="datetime-local" id="deadline" name="deadline" required>
-                    <small>Students cannot submit after this time</small>
-                </div>
-            </div>
-            
-            <!-- Assignment Questions -->
-            <div class="form-section">
-                <h3 class="section-title">❓ Assignment Questions</h3>
-                <div class="form-group">
-                    <label for="questions">
-                        <span class="label-icon">📝</span>
-                        Questions *
-                    </label>
-                    <div class="editor-toolbar">
-                        <button type="button" onclick="formatText('bold', 'questionsEditor')" title="Bold">
-                            <strong>B</strong>
-                        </button>
-                        <button type="button" onclick="formatText('italic', 'questionsEditor')" title="Italic">
-                            <em>I</em>
-                        </button>
-                        <button type="button" onclick="formatText('underline', 'questionsEditor')" title="Underline">
-                            <u>U</u>
-                        </button>
-                        <button type="button" onclick="formatText('insertOrderedList', 'questionsEditor')" title="Numbered List">
-                            📋 1.
-                        </button>
-                        <button type="button" onclick="formatText('insertUnorderedList', 'questionsEditor')" title="Bullet List">
-                            • List
-                        </button>
+
+                <!-- Assignment Questions -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-question-circle"></i> Assignment Questions
                     </div>
-                    <div id="questionsEditor" class="rich-editor" contenteditable="true" 
-                         placeholder="Type your assignment questions here..."></div>
-                    <textarea id="questions" name="questions" style="display:none;"></textarea>
-                    <div class="char-counter" id="questionsCounter">0 / 10000 characters</div>
-                    <small>Maximum 10,000 characters. Use the toolbar for formatting.</small>
-                </div>
-            </div>
-            
-            <!-- Optional Instructions -->
-            <div class="form-section">
-                <h3 class="section-title">📖 Instructions (Optional)</h3>
-                <div class="form-group">
-                    <label for="instructions">
-                        <span class="label-icon">ℹ️</span>
-                        Additional Instructions
-                    </label>
-                    <textarea id="instructions" name="instructions" rows="4" 
-                              placeholder="Provide any additional instructions or guidelines for students..."></textarea>
-                </div>
-            </div>
-            
-            <!-- File Attachment -->
-            <div class="form-section">
-                <h3 class="section-title">📎 Attachment (Optional)</h3>
-                <div class="form-group">
-                    <label for="attachment">
-                        <span class="label-icon">📁</span>
-                        Upload Assignment Document
-                    </label>
-                    <div class="file-upload-area" onclick="document.getElementById('attachment').click()">
-                        <div class="upload-icon">📄</div>
-                        <p>Click to upload or drag and drop</p>
-                        <p class="upload-hint">Supported formats: PDF, DOC, DOCX, TXT, XLS, XLSX, PPT, PPTX, JPG, PNG, GIF</p>
-                        <input type="file" id="attachment" name="attachment" 
-                               accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif" 
-                               style="display:none;">
-                    </div>
-                    <div id="attachmentInfo" style="display:none;" class="attachment-info">
-                        <span id="attachmentName"></span>
-                        <button type="button" onclick="clearAttachment()" class="remove-btn">Remove</button>
+                    <div class="form-group">
+                        <label>Questions / Description *</label>
+                        <div class="editor-toolbar">
+                            <button type="button" onclick="formatText('bold')"><strong>B</strong></button>
+                            <button type="button" onclick="formatText('italic')"><em>I</em></button>
+                            <button type="button" onclick="formatText('underline')"><u>U</u></button>
+                            <button type="button" onclick="formatText('insertOrderedList')">1.</button>
+                            <button type="button" onclick="formatText('insertUnorderedList')">•</button>
+                        </div>
+                        <div id="questionsEditor" class="rich-editor" contenteditable="true" 
+                             placeholder="Describe the assignment requirements, questions, and expectations..."></div>
+                        <textarea name="questions" style="display:none;"></textarea>
                     </div>
                 </div>
-            </div>
-            
-            <div class="form-options">
-                <div class="option-card">
-                    <div class="option-icon">🔍</div>
-                    <div class="option-content">
-                        <h4>Plagiarism Check</h4>
-                        <p>Submissions will be automatically checked for similarity</p>
+
+                <!-- Instructions -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-info-circle"></i> Instructions (Optional)
+                    </div>
+                    <div class="form-group">
+                        <textarea name="instructions" rows="4" 
+                                  placeholder="Provide additional instructions or guidelines for students..."></textarea>
                     </div>
                 </div>
-                <div class="option-card">
-                    <div class="option-icon">🤖</div>
-                    <div class="option-content">
-                        <h4>Auto-Grading Ready</h4>
-                        <p>Test cases can be added after creation</p>
+
+                <!-- Attachment -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-paperclip"></i> Attachment (Optional)
+                    </div>
+                    <div class="form-group">
+                        <div class="file-upload-area" onclick="document.getElementById('attachment').click()">
+                            <div class="upload-icon">📎</div>
+                            <div>Click to upload or drag and drop</div>
+                            <div class="upload-hint">Supported: PDF, DOC, DOCX, TXT, ZIP, JPG, PNG (Max 20MB)</div>
+                            <input type="file" id="attachment" name="attachment" style="display:none;" 
+                                   accept=".pdf,.doc,.docx,.txt,.zip,.jpg,.jpeg,.png,.gif">
+                        </div>
+                        <div id="attachmentInfo" style="display:none;" class="current-file">
+                            <i class="fas fa-file"></i>
+                            <span id="attachmentName"></span>
+                            <button type="button" onclick="clearAttachment()" style="margin-left: auto; background: none; border: none; cursor: pointer; color: #dc2626;">✖</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="form-actions">
-                <button type="submit" class="btn-submit" onclick="submitForm()">
-                    <span>Create Assignment</span>
-                    <span class="btn-icon">→</span>
-                </button>
-                <a href="{{ url_for('lecturer_dashboard') }}" class="btn-cancel">
-                    Cancel
-                </a>
-            </div>
-        </form>
+
+                <!-- Info Cards -->
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="info-icon">🔍</div>
+                        <div class="info-text">
+                            <h4>Plagiarism Detection</h4>
+                            <p>Submissions will be automatically checked for similarity</p>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon">🤖</div>
+                        <div class="info-text">
+                            <h4>Auto-Grading Ready</h4>
+                            <p>Test cases can be added after creation</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit" onclick="prepareSubmit()">
+                        <i class="fas fa-check"></i> Create Assignment
+                    </button>
+                    <a href="{{ url_for('lecturer_dashboard') }}" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<style>
-.create-assignment-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 2rem 0;
-}
-
-.create-assignment-card {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-}
-
-.card-header {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    color: white;
-    padding: 2rem;
-    text-align: center;
-}
-
-.header-icon {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-}
-
-.card-header h1 {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-}
-
-.card-header p {
-    opacity: 0.9;
-    font-size: 0.875rem;
-}
-
-.assignment-form {
-    padding: 2rem;
-}
-
-.form-section {
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.section-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.form-group {
-    margin-bottom: 1rem;
-}
-
-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.label-icon {
-    font-size: 1rem;
-}
-
-input, textarea {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    font-family: inherit;
-}
-
-input:focus, textarea:focus {
-    outline: none;
-    border-color: #059669;
-    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-}
-
-/* Rich Text Editor Styles */
-.editor-toolbar {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px 8px 0 0;
-    padding: 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-}
-
-.editor-toolbar button {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    padding: 0.4rem 0.75rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-}
-
-.editor-toolbar button:hover {
-    background: #f0fdf4;
-    border-color: #059669;
-}
-
-.rich-editor {
-    border: 1px solid #e5e7eb;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    padding: 1rem;
-    min-height: 200px;
-    background: white;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    overflow-y: auto;
-}
-
-.rich-editor:focus {
-    outline: none;
-    border-color: #059669;
-}
-
-.rich-editor[placeholder]:empty:before {
-    content: attr(placeholder);
-    color: #9ca3af;
-}
-
-.char-counter {
-    text-align: right;
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-top: 0.25rem;
-}
-
-.char-counter.warning {
-    color: #f59e0b;
-}
-
-.char-counter.danger {
-    color: #ef4444;
-}
-
-/* File Upload */
-.file-upload-area {
-    border: 2px dashed #e5e7eb;
-    border-radius: 8px;
-    padding: 2rem;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.file-upload-area:hover {
-    border-color: #059669;
-    background: #f0fdf4;
-}
-
-.upload-icon {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-}
-
-.upload-hint {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-top: 0.5rem;
-}
-
-.attachment-info {
-    margin-top: 0.5rem;
-    padding: 0.5rem;
-    background: #f0fdf4;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.remove-btn {
-    background: #fee2e2;
-    color: #dc2626;
-    border: none;
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.75rem;
-}
-
-.form-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin: 1.5rem 0;
-    padding: 1rem;
-    background: #f9fafb;
-    border-radius: 12px;
-}
-
-.option-card {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem;
-    background: white;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-}
-
-.option-icon {
-    font-size: 1.5rem;
-}
-
-.option-content h4 {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-}
-
-.option-content p {
-    font-size: 0.7rem;
-    color: #6b7280;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
-}
-
-.btn-submit {
-    flex: 1;
-    background: #059669;
-    color: white;
-    border: none;
-    padding: 0.875rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
-}
-
-.btn-submit:hover {
-    background: #047857;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
-}
-
-.btn-icon {
-    transition: transform 0.2s;
-}
-
-.btn-submit:hover .btn-icon {
-    transform: translateX(4px);
-}
-
-.btn-cancel {
-    background: white;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
-    padding: 0.875rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s;
-}
-
-.btn-cancel:hover {
-    background: #f9fafb;
-    border-color: #d1d5db;
-    color: #374151;
-}
-
-small {
-    display: block;
-    margin-top: 0.25rem;
-    color: #6b7280;
-    font-size: 0.75rem;
-}
-
-.alert {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-}
-
-.alert-success {
-    background: #f0fdf4;
-    border: 1px solid #86efac;
-    color: #065f46;
-}
-
-.alert-danger {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #991b1b;
-}
-
-@media (max-width: 768px) {
-    .create-assignment-container {
-        padding: 1rem;
-    }
-    
-    .assignment-form {
-        padding: 1.5rem;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-    
-    .form-options {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-actions {
-        flex-direction: column;
-    }
-}
-</style>
-
 <script>
-let currentEditor = null;
-
-function formatText(command, editorId) {
-    const editor = document.getElementById(editorId);
-    editor.focus();
-    document.execCommand(command, false, null);
-}
-
-// Character counter for questions
-function updateCharCounter() {
-    const editor = document.getElementById('questionsEditor');
-    const text = editor.innerText || '';
-    const count = text.length;
-    const counter = document.getElementById('questionsCounter');
-    
-    counter.textContent = `${count} / 10000 characters`;
-    
-    if (count > 9000) {
-        counter.classList.add('warning');
-    } else {
-        counter.classList.remove('warning');
-    }
-    
-    if (count > 10000) {
-        counter.classList.add('danger');
-        return false;
-    }
-    return true;
-}
-
-// File upload handling
-let selectedFile = null;
-
-document.getElementById('attachment')?.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const maxSize = 50 * 1024 * 1024; // 50MB
-        if (file.size > maxSize) {
-            alert('File size must be less than 50MB');
-            this.value = '';
-            return;
-        }
-        
-        selectedFile = file;
-        document.getElementById('attachmentName').textContent = file.name;
-        document.getElementById('attachmentInfo').style.display = 'flex';
-        document.querySelector('.file-upload-area').style.display = 'none';
-    }
-});
-
-function clearAttachment() {
-    document.getElementById('attachment').value = '';
-    selectedFile = null;
-    document.getElementById('attachmentInfo').style.display = 'none';
-    document.querySelector('.file-upload-area').style.display = 'block';
-}
-
-// Drag and drop
-const dropArea = document.querySelector('.file-upload-area');
-if (dropArea) {
-    dropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropArea.style.borderColor = '#059669';
-        dropArea.style.background = '#f0fdf4';
-    });
-    
-    dropArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        dropArea.style.borderColor = '#e5e7eb';
-        dropArea.style.background = 'white';
-    });
-    
-    dropArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const file = e.dataTransfer.files[0];
-        if (file) {
-            document.getElementById('attachment').files = e.dataTransfer.files;
-            const event = new Event('change');
-            document.getElementById('attachment').dispatchEvent(event);
-        }
-        dropArea.style.borderColor = '#e5e7eb';
-        dropArea.style.background = 'white';
-    });
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    const questionsEditor = document.getElementById('questionsEditor');
-    if (questionsEditor) {
-        questionsEditor.addEventListener('input', updateCharCounter);
-        questionsEditor.addEventListener('keyup', updateCharCounter);
-    }
-    
-    // Set deadline minimum
+    // Set minimum date for deadline picker
     const deadlineInput = document.getElementById('deadline');
     if (deadlineInput) {
         const now = new Date();
@@ -619,45 +505,76 @@ document.addEventListener('DOMContentLoaded', function() {
         const day = String(now.getDate()).padStart(2, '0');
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
-        
         deadlineInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
         
+        // Set default deadline to 7 days from now
         const defaultDate = new Date();
         defaultDate.setDate(defaultDate.getDate() + 7);
         const defaultYear = defaultDate.getFullYear();
         const defaultMonth = String(defaultDate.getMonth() + 1).padStart(2, '0');
         const defaultDay = String(defaultDate.getDate()).padStart(2, '0');
-        
         deadlineInput.value = `${defaultYear}-${defaultMonth}-${defaultDay}T23:59`;
+    }
+
+    // Rich text formatting
+    function formatText(command) {
+        document.execCommand(command, false, null);
+        document.getElementById('questionsEditor').focus();
+    }
+
+    // File upload handling
+    let selectedFile = null;
+    
+    document.getElementById('attachment').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const maxSize = 20 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('File size must be less than 20MB');
+                this.value = '';
+                return;
+            }
+            selectedFile = file;
+            document.getElementById('attachmentName').textContent = file.name;
+            document.getElementById('attachmentInfo').style.display = 'flex';
+            document.querySelector('.file-upload-area').style.display = 'none';
+        }
+    });
+
+    function clearAttachment() {
+        document.getElementById('attachment').value = '';
+        selectedFile = null;
+        document.getElementById('attachmentInfo').style.display = 'none';
+        document.querySelector('.file-upload-area').style.display = 'block';
+    }
+
+    // Prepare form for submission
+    function prepareSubmit() {
+        const editor = document.getElementById('questionsEditor');
+        const textarea = document.querySelector('textarea[name="questions"]');
+        textarea.value = editor.innerHTML;
+        
+        // Validate required fields
+        const title = document.querySelector('input[name="title"]').value;
+        const courseTitle = document.querySelector('input[name="course_title"]').value;
+        const courseCode = document.querySelector('input[name="course_code"]').value;
+        
+        if (!title || !courseTitle || !courseCode) {
+            alert('Please fill in all required fields');
+            return false;
+        }
+        
+        if (!editor.innerText.trim()) {
+            alert('Please enter assignment questions');
+            return false;
+        }
+        
+        return true;
     }
     
     // Auto-capitalize course code
-    const courseCode = document.getElementById('course_code');
-    if (courseCode) {
-        courseCode.addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
-        });
-    }
-});
-
-function submitForm() {
-    const questionsEditor = document.getElementById('questionsEditor');
-    const questions = document.getElementById('questions');
-    questions.value = questionsEditor.innerHTML;
-    
-    // Validate questions not empty
-    if (!questionsEditor.innerText.trim()) {
-        alert('Please enter assignment questions');
-        return false;
-    }
-    
-    // Check character limit
-    if (questionsEditor.innerText.length > 10000) {
-        alert('Questions exceed 10,000 character limit');
-        return false;
-    }
-    
-    return true;
-}
+    document.querySelector('input[name="course_code"]')?.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
 </script>
 {% endblock %}

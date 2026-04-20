@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Grade – {{ sub.student_name }} – Submita{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="{{ url_for('lecturer_dashboard') }}">Dashboard</a> / Grade submission</div>
+<div class="page-title">{{ sub.student_name }}</div>
+<div class="page-sub">{{ sub.student_id }} &nbsp;·&nbsp; {{ sub.assignment_id }} &nbsp;·&nbsp; Submitted {{ sub.submitted_at[:10] }}</div>
+
+<div style="display:grid;grid-template-columns:1fr;gap:16px;">
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Submitted files</div>
+      <a href="{{ url_for('plagiarism_report', sub_id=sub.id) }}" class="btn btn-sm btn-danger">View plagiarism report</a>
+    </div>
+    <div class="card-body">
+      {% if sub.files %}
+        {% for f in sub.files %}
+        <div style="display:flex;align-items:center;gap:10px;background:#F5FAF0;border:0.5px solid #C0DD97;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+          <div style="flex:1;font-size:13px;font-weight:500;color:#27500A;">{{ f.split('_', 2)[-1] }}</div>
+          <span style="font-size:12px;color:#639922;">Code file</span>
+        </div>
+        {% endfor %}
+      {% endif %}
+      {% if sub.github_url %}
+        <div style="font-size:13px;color:#3B6D11;margin-top:8px;">GitHub: <a href="{{ sub.github_url }}" target="_blank">{{ sub.github_url }}</a></div>
+      {% endif %}
+      {% if sub.notes %}
+        <div style="margin-top:12px;padding:10px 12px;background:#F5FAF0;border-radius:8px;font-size:13px;color:#555;border:0.5px solid #C0DD97;">
+          <strong style="color:#3B6D11;">Student note:</strong> {{ sub.notes }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">Plagiarism summary</div>
+      {% set sim = sub.max_similarity %}
+      <span class="badge {% if sim >= 60 %}badge-high{% elif sim >= 30 %}badge-mid{% else %}badge-low{% endif %}">
+        {{ sim }}% similarity
+      </span>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px;">
+        <span>Overall similarity score</span>
+        <span style="font-weight:500;color:{% if sim >= 60 %}#A32D2D{% elif sim >= 30 %}#BA7517{% else %}#3B6D11{% endif %};">{{ sim }}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:{{ sim }}%;background:{% if sim >= 60 %}#E24B4A{% elif sim >= 30 %}#EF9F27{% else %}#3B6D11{% endif %};"></div>
+      </div>
+      {% if sim >= 60 %}
+        <div style="margin-top:10px;font-size:12px;color:#791F1F;background:#FCEBEB;padding:8px 12px;border-radius:8px;">High similarity detected — review recommended before grading.</div>
+      {% elif sim >= 30 %}
+        <div style="margin-top:10px;font-size:12px;color:#633806;background:#FAEEDA;padding:8px 12px;border-radius:8px;">Moderate similarity — check flagged sections.</div>
+      {% else %}
+        <div style="margin-top:10px;font-size:12px;color:#173404;background:#EAF3DE;padding:8px 12px;border-radius:8px;">Low similarity — no concerns flagged.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Grade &amp; feedback</div></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('grade_submission', sub_id=sub.id) }}">
+        <div class="form-group">
+          <label>Score <span style="font-size:12px;color:#888;font-weight:400;">(out of 100)</span></label>
+          <input type="number" name="score" min="0" max="100" step="0.5"
+            value="{{ grade.score if grade else '' }}"
+            placeholder="Enter score 0–100" style="max-width:160px;">
+        </div>
+        <div class="form-group">
+          <label>Feedback to student</label>
+          <textarea name="feedback" placeholder="Write feedback visible to the student…" style="min-height:100px;">{{ grade.feedback if grade else '' }}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="submit" name="action" value="release" class="btn btn-primary">Save &amp; release grade</button>
+          <button type="submit" name="action" value="draft" class="btn btn-secondary">Save draft</button>
+          <a href="{{ url_for('flag_submission', sub_id=sub.id) }}" class="btn btn-danger"
+             onclick="return confirm('Toggle flag status for this submission?')"
+             style="text-decoration:none;">
+            {% if sub.flagged %}Unflag{% else %}Flag{% endif %} submission
+          </a>
+        </div>
+      </form>
+      {% if grade %}
+        <hr>
+        <div style="font-size:12px;color:#888;">
+          Last graded by {{ grade.graded_by }} on {{ grade.graded_at[:10] }} &nbsp;·&nbsp;
+          {% if grade.released %}<span style="color:#3B6D11;">Released to student</span>{% else %}<span style="color:#888;">Draft</span>{% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:8px;">
+  <a href="{{ url_for('lecturer_dashboard') }}" class="btn btn-secondary">&larr; Back to dashboard</a>
+</div>
+{% endblock %}

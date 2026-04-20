@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="verify-container">
+    <div class="verify-card">
+        <div class="verify-icon">📧</div>
+        <h1>Email Verification Required</h1>
+        <p>Before submitting <strong>{{ assignment.title }}</strong>, we need to verify your email address.</p>
+        
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <p>A verification code will be sent to <strong>{{ current_user.email }}</strong>. 
+            This code expires in 10 minutes.</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" class="verify-form">
+            <button type="submit" class="btn-send-code">
+                <i class="fas fa-paper-plane"></i> Send Verification Code
+            </button>
+        </form>
+        
+        <div class="verify-footer">
+            <a href="{{ url_for('student_dashboard') }}" class="btn-back">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.verify-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+.verify-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.verify-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+.verify-card h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+}
+.verify-card p {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+.info-box {
+    background: #eff6ff;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: start;
+    text-align: left;
+}
+.info-box i {
+    color: #3b82f6;
+    font-size: 1.25rem;
+}
+.info-box p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+.btn-send-code {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+}
+.btn-send-code:hover {
+    background: #047857;
+    transform: translateY(-2px);
+}
+.btn-back {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+.btn-back:hover {
+    color: #059669;
+}
+</style>
+{% endblock %}

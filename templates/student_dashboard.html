@@ -1,263 +1,1077 @@
-{% extends "base.html" %} {% block content %}
-<div class="dashboard-layout">
-  <!-- Sidebar with hamburger toggle -->
-  <div class="sidebar" id="studentSidebar">
-    <button class="sidebar-toggle" id="sidebarToggleBtn">
-      <i class="fas fa-bars"></i>
-    </button>
-    <ul class="sidebar-menu">
-      <li>
-        <a href="#" data-section="overview" class="active"
-          ><i class="fas fa-tachometer-alt"></i> <span>Overview</span></a
-        >
-      </li>
-      <li>
-        <a href="#" data-section="submissions"
-          ><i class="fas fa-tasks"></i> <span>My Submissions</span></a
-        >
-      </li>
-      <li>
-        <a href="#" data-section="progress"
-          ><i class="fas fa-chart-line"></i> <span>Progress</span></a
-        >
-      </li>
-      <li>
-        <a href="{{ url_for('profile') }}"
-          ><i class="fas fa-user"></i> <span>Profile</span></a
-        >
-      </li>
-    </ul>
-  </div>
+{% extends "base.html" %}
 
-  <!-- Main Content Area -->
-  <div class="main-content-area">
-    <div id="overview" class="dashboard-header">
-      <h1>Welcome, {{ user.name }}! 👋</h1>
-      <p>Track your assignments and grades</p>
-      <div class="student-badge">Student</div>
+{% block content %}
+<style>
+    /* ==================== PULL-OUT FEATURES BUTTON ==================== */
+    .features-panel-btn {
+        position: fixed;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #059669, #047857);
+        border: none;
+        border-radius: 30px 0 0 30px;
+        padding: 12px 10px 12px 16px;
+        cursor: pointer;
+        z-index: 1000;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -2px 4px 15px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: white;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    body.dark-mode .features-panel-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        box-shadow: -2px 4px 15px rgba(0,0,0,0.3);
+    }
+    
+    .features-panel-btn:hover {
+        transform: translateY(-50%) translateX(-5px);
+        padding-right: 15px;
+        box-shadow: -4px 6px 20px rgba(5,150,105,0.4);
+    }
+    
+    .features-panel-btn .btn-icon {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .features-panel-btn:hover .btn-icon {
+        transform: scale(1.1);
+    }
+    
+    .features-panel-btn .btn-text {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        letter-spacing: 2px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+        .features-panel-btn {
+            padding: 10px 8px 10px 12px;
+        }
+        .features-panel-btn .btn-text {
+            font-size: 0.6rem;
+        }
+    }
+    
+    /* Features Panel */
+    .features-panel {
+        position: fixed;
+        right: -320px;
+        top: 0;
+        width: 320px;
+        height: 100vh;
+        background: white;
+        box-shadow: -5px 0 30px rgba(0,0,0,0.15);
+        z-index: 1001;
+        transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    @media (max-width: 480px) {
+        .features-panel {
+            width: 280px;
+        }
+    }
+    
+    body.dark-mode .features-panel {
+        background: #1f2937;
+        box-shadow: -5px 0 30px rgba(0,0,0,0.3);
+    }
+    
+    .features-panel.open {
+        right: 0;
+    }
+    
+    .panel-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        display: none;
+        backdrop-filter: blur(4px);
+        transition: opacity 0.3s ease;
+    }
+    
+    .panel-overlay.active {
+        display: block;
+    }
+    
+    .panel-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    body.dark-mode .panel-header {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .panel-header h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .close-panel {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.2s;
+    }
+    
+    .close-panel:hover {
+        background: rgba(255,255,255,0.3);
+        transform: rotate(90deg);
+    }
+    
+    .panel-content {
+        flex: 1;
+        padding: 1rem;
+    }
+    
+    .feature-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .feature-section-title {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6b7280;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    body.dark-mode .feature-section-title {
+        color: #9ca3af;
+        border-color: #374151;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 12px;
+        transition: all 0.2s;
+        cursor: pointer;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-item:hover {
+        background: #f0fdf4;
+        transform: translateX(5px);
+    }
+    
+    body.dark-mode .feature-item:hover {
+        background: #374151;
+    }
+    
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+        background: #f0fdf4;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    body.dark-mode .feature-icon {
+        background: #374151;
+    }
+    
+    .feature-info h4 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.2rem;
+    }
+    
+    body.dark-mode .feature-info h4 {
+        color: #f3f4f6;
+    }
+    
+    .feature-info p {
+        font-size: 0.7rem;
+        color: #6b7280;
+    }
+    
+    body.dark-mode .feature-info p {
+        color: #9ca3af;
+    }
+    
+    .panel-footer {
+        padding: 1rem;
+        border-top: 1px solid #e5e7eb;
+        text-align: center;
+    }
+    
+    body.dark-mode .panel-footer {
+        border-color: #374151;
+    }
+    
+    .quick-link {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: #f3f4f6;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        color: #059669;
+        margin: 0 0.25rem;
+        transition: all 0.2s;
+    }
+    
+    body.dark-mode .quick-link {
+        background: #374151;
+        color: #10b981;
+    }
+    
+    .quick-link:hover {
+        background: #059669;
+        color: white;
+    }
+    
+    body.dark-mode .quick-link:hover {
+        background: #10b981;
+        color: white;
+    }
+    
+    .helper-card {
+        background: #fef3c7;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    body.dark-mode .helper-card {
+        background: #78350f;
+    }
+    
+    .helper-card h4 {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .helper-card p {
+        font-size: 0.7rem;
+        color: #92400e;
+    }
+    
+    body.dark-mode .helper-card p {
+        color: #fbbf24;
+    }
+    
+    /* Dashboard Container */
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+    
+    /* Welcome Section */
+    .welcome-section {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    body.dark-mode .welcome-section {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+    }
+    
+    .welcome-text h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    body.dark-mode .welcome-text h1 {
+        color: #f3f4f6;
+    }
+    
+    .welcome-text p {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+    
+    body.dark-mode .welcome-text p {
+        color: #9ca3af;
+    }
+    
+    .student-badge-large {
+        background: #059669;
+        color: white;
+        padding: 0.5rem 1.2rem;
+        border-radius: 40px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    /* Stats Grid */
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .stats-overview {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .stats-overview {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.2rem;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+    
+    body.dark-mode .stat-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        border-color: #059669;
+    }
+    
+    body.dark-mode .stat-card:hover {
+        border-color: #10b981;
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #059669;
+    }
+    
+    body.dark-mode .stat-value {
+        color: #10b981;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+    
+    /* Assignments Grid */
+    .assignments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .assignment-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    body.dark-mode .assignment-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .assignment-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        border-color: #059669;
+    }
+    
+    body.dark-mode .assignment-card:hover {
+        border-color: #10b981;
+    }
+    
+    .assignment-header {
+        padding: 1rem 1.2rem;
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    body.dark-mode .assignment-header {
+        background: #111827;
+        border-color: #374151;
+    }
+    
+    .assignment-header h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .assignment-body {
+        padding: 1rem 1.2rem;
+    }
+    
+    .course-code {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #059669;
+        margin-bottom: 0.5rem;
+    }
+    
+    body.dark-mode .course-code {
+        color: #10b981;
+    }
+    
+    .assignment-description {
+        font-size: 0.8rem;
+        color: #6b7280;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+    }
+    
+    body.dark-mode .assignment-description {
+        color: #9ca3af;
+    }
+    
+    .assignment-footer {
+        padding: 0.8rem 1.2rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    body.dark-mode .assignment-footer {
+        border-color: #374151;
+    }
+    
+    .deadline-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    body.dark-mode .deadline-badge {
+        background: #78350f;
+        color: #fbbf24;
+    }
+    
+    .status-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+    }
+    
+    .status-open {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    body.dark-mode .status-open {
+        background: #064e3b;
+        color: #6ee7b7;
+    }
+    
+    .btn-submit-small {
+        background: #059669;
+        color: white;
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: 8px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-submit-small:hover {
+        background: #047857;
+        transform: translateY(-1px);
+    }
+    
+    body.dark-mode .btn-submit-small {
+        background: #10b981;
+    }
+    
+    /* Submissions Grid */
+    .submissions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .submission-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    body.dark-mode .submission-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .submission-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        border-color: #059669;
+    }
+    
+    body.dark-mode .submission-card:hover {
+        border-color: #10b981;
+    }
+    
+    .submission-header {
+        padding: 1rem 1.2rem;
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    body.dark-mode .submission-header {
+        background: #111827;
+        border-color: #374151;
+    }
+    
+    .submission-header h4 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .submission-date {
+        font-size: 0.7rem;
+        color: #6b7280;
+    }
+    
+    .submission-body {
+        padding: 1rem 1.2rem;
+    }
+    
+    .submission-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .meta-item {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        color: #6b7280;
+        padding: 0.3rem 0;
+    }
+    
+    .plagiarism-high {
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .plagiarism-low {
+        color: #059669;
+        font-weight: 600;
+    }
+    
+    body.dark-mode .plagiarism-low {
+        color: #10b981;
+    }
+    
+    .grade-value {
+        color: #059669;
+        font-weight: 600;
+    }
+    
+    body.dark-mode .grade-value {
+        color: #10b981;
+    }
+    
+    .grade-pending {
+        color: #f59e0b;
+        font-weight: 500;
+    }
+    
+    .submission-footer {
+        padding: 0.8rem 1.2rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    body.dark-mode .submission-footer {
+        border-color: #374151;
+    }
+    
+    .status-graded {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+    }
+    
+    body.dark-mode .status-graded {
+        background: #064e3b;
+        color: #6ee7b7;
+    }
+    
+    .status-submitted {
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+    }
+    
+    body.dark-mode .status-submitted {
+        background: #1e3a5f;
+        color: #93c5fd;
+    }
+    
+    /* Past Assignments */
+    .past-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1rem;
+    }
+    
+    .past-card {
+        background: #f9fafb;
+        border-radius: 16px;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    body.dark-mode .past-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .past-card:hover {
+        background: white;
+        border-color: #059669;
+        transform: translateX(5px);
+    }
+    
+    body.dark-mode .past-card:hover {
+        background: #374151;
+        border-color: #10b981;
+    }
+    
+    .past-card h4 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+    
+    .deadline-passed {
+        font-size: 0.65rem;
+        color: #dc2626;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+    }
+    
+    body.dark-mode .empty-state {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+        .stats-overview {
+            grid-template-columns: 1fr;
+        }
+        .assignments-grid,
+        .submissions-grid,
+        .past-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Pull-out Features Button -->
+<button class="features-panel-btn" id="featuresPanelBtn">
+    <span class="btn-icon">✨</span>
+    <span class="btn-text">FEATURES</span>
+</button>
+
+<!-- Panel Overlay -->
+<div class="panel-overlay" id="panelOverlay"></div>
+
+<!-- Features Panel -->
+<div class="features-panel" id="featuresPanel">
+    <div class="panel-header">
+        <h3><i class="fas fa-star"></i> Quick Actions</h3>
+        <button class="close-panel" id="closePanelBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="panel-content">
+        <div class="helper-card">
+            <h4><i class="fas fa-lightbulb"></i> Did you know?</h4>
+            <p>You can resubmit assignments before the deadline if you need to make improvements!</p>
+        </div>
+        <div class="feature-section">
+            <div class="feature-section-title">Quick Navigation</div>
+            <div class="feature-item" onclick="window.location.href='{{ url_for('profile') }}'">
+                <div class="feature-icon"><i class="fas fa-user"></i></div>
+                <div class="feature-info"><h4>My Profile</h4><p>View your personal information</p></div>
+            </div>
+            <div class="feature-item" onclick="window.location.href='{{ url_for('student_dashboard') }}'">
+                <div class="feature-icon"><i class="fas fa-tachometer-alt"></i></div>
+                <div class="feature-info"><h4>Dashboard</h4><p>Overview of your assignments</p></div>
+            </div>
+        </div>
+        <div class="feature-section">
+            <div class="feature-section-title">Assignment Help</div>
+            <div class="feature-item" id="viewGuideBtn">
+                <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+                <div class="feature-info"><h4>Submission Guide</h4><p>Learn how to submit assignments correctly</p></div>
+            </div>
+            <div class="feature-item" id="plagiarismGuideBtn">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="feature-info"><h4>Plagiarism Policy</h4><p>Understanding academic integrity</p></div>
+            </div>
+        </div>
+        <div class="feature-section">
+            <div class="feature-section-title">Support</div>
+            <div class="feature-item" id="contactSupportBtn">
+                <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                <div class="feature-info"><h4>Contact Support</h4><p>scholarsubmit1@gmail.com</p></div>
+            </div>
+            <div class="feature-item" id="faqBtn">
+                <div class="feature-icon"><i class="fas fa-question-circle"></i></div>
+                <div class="feature-info"><h4>FAQs</h4><p>Frequently asked questions</p></div>
+            </div>
+        </div>
+        <div class="feature-section">
+            <div class="feature-section-title">Quick Tips</div>
+            <div class="feature-item" id="deadlineTipBtn">
+                <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                <div class="feature-info"><h4>Deadline Reminders</h4><p>Check deadlines to avoid late submissions</p></div>
+            </div>
+            <div class="feature-item" id="gradeTipBtn">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="feature-info"><h4>Grade Tracking</h4><p>Monitor your academic progress</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer">
+        <a href="#" class="quick-link" id="feedbackLink">Send Feedback</a>
+        <a href="#" class="quick-link" id="reportLink">Report Issue</a>
+    </div>
+</div>
+
+<!-- Main Dashboard Content -->
+<div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="welcome-text">
+            <h1>Welcome back, {{ user.name }}! 👋</h1>
+            <p>Track your assignments, submissions, and grades all in one place</p>
+        </div>
+        <div class="student-badge-large">
+            <i class="fas fa-graduation-cap"></i> Student
+        </div>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %} {% for category, message in messages %}
-    <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %} {% endif %} {% endwith %}
 
-    <!-- Stats Cards (Overview) -->
-    <div class="stats-grid">
-      <div
-        class="stat-card clickable"
-        data-url="{{ url_for('student_dashboard') }}"
-      >
-        <div class="stat-icon">⭐</div>
-        <div class="stat-info">
-          <div class="stat-value">{{ avg_grade }}%</div>
-          <div class="stat-label">Average Grade</div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-value">{{ submissions|length }}</div>
+            <div class="stat-label">Total Submissions</div>
         </div>
-      </div>
-      <div
-        class="stat-card clickable"
-        data-url="{{ url_for('student_dashboard') }}"
-      >
-        <div class="stat-icon">📚</div>
-        <div class="stat-info">
-          <div class="stat-value">{{ available_assignments|length }}</div>
-          <div class="stat-label">Pending Assignments</div>
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-value">{{ available_assignments|length }}</div>
+            <div class="stat-label">Pending Assignments</div>
         </div>
-      </div>
-      <div
-        class="stat-card clickable"
-        data-url="{{ url_for('student_dashboard') }}"
-      >
-        <div class="stat-icon">✅</div>
-        <div class="stat-info">
-          {% set graded = submissions|selectattr('grade', 'defined')|list %}
-          <div class="stat-value">{{ graded|length }}</div>
-          <div class="stat-label">Graded</div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value">{{ submissions|selectattr('grade', 'defined')|list|length }}</div>
+            <div class="stat-label">Graded</div>
         </div>
-      </div>
-      <div
-        class="stat-card clickable"
-        data-url="{{ url_for('student_dashboard') }}"
-      >
-        <div class="stat-icon">⭐</div>
-        <div class="stat-info">
-          {% set avg_grade = submissions|selectattr('grade',
-          'defined')|map(attribute='grade')|sum / graded|length if graded else 0
-          %}
-          <div class="stat-value">{{ "%.1f"|format(avg_grade) }}%</div>
-          <div class="stat-label">Average Grade</div>
+        <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-value">{{ avg_grade }}%</div>
+            <div class="stat-label">Average Grade</div>
         </div>
-      </div>
     </div>
 
-    <!-- Available Assignments -->
+    <!-- Available Assignments Section -->
     {% if available_assignments %}
-    <div id="submissions" class="dashboard-section">
-      <h2>📋 Available Assignments</h2>
-      <div class="assignments-grid">
+    <div class="section-header">
+        <h2 class="section-title">📋 Available Assignments</h2>
+    </div>
+    <div class="assignments-grid">
         {% for assignment in available_assignments %}
-        <div
-          class="assignment-card clickable"
-          data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}"
-        >
-          <div class="assignment-header">
-            <h3>{{ assignment.title }}</h3>
-            <span class="deadline-badge"
-              >🕒 {{ assignment.deadline.strftime('%b %d, %H:%M') }}</span
-            >
-          </div>
-          <p class="course-code">{{ assignment.course_code }}</p>
-          <p class="assignment-desc">
-            {% if assignment.description %} {{ assignment.description[:120] }}{%
-            if assignment.description|length > 120 %}...{% endif %} {% elif
-            assignment.questions %} {{
-            assignment.questions|striptags|truncate(100) }} {% else %} Click to
-            view assignment details {% endif %}
-          </p>
-          <div class="assignment-footer">
-            <span class="status-badge open">Open</span>
-            <button
-              class="btn-submit-small"
-              onclick="event.stopPropagation(); window.location.href='{{ url_for('submit_assignment', assignment_id=assignment.id) }}'"
-            >
-              Submit →
-            </button>
-          </div>
+        <div class="assignment-card" data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}">
+            <div class="assignment-header">
+                <h3>{{ assignment.title }}</h3>
+                <span class="deadline-badge">📅 {{ assignment.deadline.strftime('%b %d, %Y') }}</span>
+            </div>
+            <div class="assignment-body">
+                <div class="course-code">{{ assignment.course_code }}</div>
+                <div class="assignment-description">
+                    {{ assignment.questions|striptags|truncate(100) if assignment.questions else 'Click to view assignment details' }}
+                </div>
+            </div>
+            <div class="assignment-footer">
+                <span class="status-badge status-open">Open</span>
+                <button class="btn-submit-small" onclick="event.stopPropagation(); window.location.href='{{ url_for('submit_assignment', assignment_id=assignment.id) }}'">Submit →</button>
+            </div>
         </div>
         {% endfor %}
-      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No Available Assignments</h3>
+        <p>Check back later for new assignments from your lecturers</p>
     </div>
     {% endif %}
 
-    <!-- Your Submissions -->
+    <!-- Recent Submissions Section -->
     {% if submissions %}
-    <div class="dashboard-section">
-      <h2>📊 Your Submissions</h2>
-      <div class="submissions-grid">
-        {% for submission in submissions %} {% set assignment =
-        submission.assignment %}
-        <div
-          class="submission-card clickable"
-          data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}"
-        >
-          <div class="submission-header">
-            <h3>{{ assignment.title }}</h3>
-            <span class="submission-date"
-              >{{ submission.submitted_at.strftime('%b %d, %Y') }}</span
-            >
-          </div>
-          <p class="course-code">{{ assignment.course_code }}</p>
-          <div class="submission-stats">
-            <div class="stat-item">
-              <span class="stat-label">Plagiarism:</span>
-              {% if submission.plagiarism_score > 30 %}
-              <span class="plagiarism-high"
-                >⚠️ {{ "%.1f"|format(submission.plagiarism_score) }}%</span
-              >
-              {% else %}
-              <span class="plagiarism-low"
-                >✓ {{ "%.1f"|format(submission.plagiarism_score) }}%</span
-              >
-              {% endif %}
+    <div class="section-header">
+        <h2 class="section-title">📊 Recent Submissions</h2>
+    </div>
+    <div class="submissions-grid">
+        {% for submission in submissions[:6] %}
+        {% set assignment = submission.assignment %}
+        <div class="submission-card" data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}">
+            <div class="submission-header">
+                <h4>{{ assignment.title }}</h4>
+                <span class="submission-date">{{ submission.submitted_at.strftime('%b %d, %Y') }}</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">Grade:</span>
-              {% if submission.grade %}
-              <span class="grade-value"
-                >{{ "%.1f"|format(submission.grade) }}%</span
-              >
-              {% else %}
-              <span class="grade-pending">Pending</span>
-              {% endif %}
+            <div class="submission-body">
+                <div class="course-code">{{ assignment.course_code }}</div>
+                <div class="submission-meta">
+                    <div class="meta-item">
+                        <span>Plagiarism</span>
+                        {% if submission.plagiarism_score > 30 %}
+                        <span class="plagiarism-high">⚠️ {{ "%.1f"|format(submission.plagiarism_score) }}%</span>
+                        {% else %}
+                        <span class="plagiarism-low">✓ {{ "%.1f"|format(submission.plagiarism_score) }}%</span>
+                        {% endif %}
+                    </div>
+                    <div class="meta-item">
+                        <span>Grade</span>
+                        {% if submission.grade %}
+                        <span class="grade-value">{{ "%.1f"|format(submission.grade) }}%</span>
+                        {% else %}
+                        <span class="grade-pending">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="submission-footer">
-            {% if submission.grade %}
-            <span class="status-graded">✓ Graded</span>
-            {% else %}
-            <span class="status-submitted">Submitted</span>
-            {% endif %} {% if assignment.deadline > now and not submission.grade
-            %}
-            <button
-              class="btn-resubmit-small"
-              onclick="event.stopPropagation(); window.location.href='{{ url_for('submit_assignment', assignment_id=assignment.id) }}'"
-            >
-              Resubmit
-            </button>
-            {% endif %}
-          </div>
+            <div class="submission-footer">
+                {% if submission.grade %}
+                <span class="status-graded">✓ Graded</span>
+                {% else %}
+                <span class="status-submitted">Submitted</span>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
-      </div>
     </div>
+    {% if submissions|length > 6 %}
+    <div style="text-align: center; margin-top: 1rem;">
+        <a href="#" class="btn-outline" style="padding: 0.5rem 1.5rem;">View All Submissions →</a>
+    </div>
+    {% endif %}
     {% endif %}
 
-    <!-- Past Assignments -->
+    <!-- Past Assignments Section -->
     {% if past_assignments %}
-    <div id="progress" class="dashboard-section">
-      <h2>📅 Past Assignments</h2>
-      <div class="past-grid">
-        {% for assignment in past_assignments %}
-        <div
-          class="past-card clickable"
-          data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}"
-        >
-          <div class="past-header">
-            <h4>{{ assignment.title }}</h4>
-            <span class="deadline-passed"
-              >Closed on {{ assignment.deadline.strftime('%b %d, %Y') }}</span
-            >
-          </div>
-          <p class="course-code">{{ assignment.course_code }}</p>
+    <div class="section-header">
+        <h2 class="section-title">📅 Past Assignments</h2>
+    </div>
+    <div class="past-grid">
+        {% for assignment in past_assignments[:4] %}
+        <div class="past-card" data-url="{{ url_for('view_assignment', assignment_id=assignment.id) }}">
+            <div>
+                <h4>{{ assignment.title }}</h4>
+                <div class="course-code" style="margin-bottom: 0;">{{ assignment.course_code }}</div>
+            </div>
+            <div class="deadline-passed">
+                Closed on {{ assignment.deadline.strftime('%b %d, %Y') }}
+            </div>
         </div>
         {% endfor %}
-      </div>
     </div>
     {% endif %}
-  </div>
 </div>
 
 <script>
-  // Sidebar toggle with hamburger icon
-  const sidebar = document.getElementById("studentSidebar");
-  const toggleBtn = document.getElementById("sidebarToggleBtn");
-
-  if (sidebar && toggleBtn) {
-    toggleBtn.addEventListener("click", function () {
-      sidebar.classList.toggle("collapsed");
-    });
-  }
-
-  // Sidebar menu navigation (scroll to sections) – only for non-profile links
-  document.querySelectorAll(".sidebar-menu a[data-section]").forEach((link) => {
-    link.addEventListener("click", function (e) {
-      e.preventDefault();
-      const sectionId = this.getAttribute("data-section");
-      if (sectionId) {
-        const target = document.getElementById(sectionId);
-        if (target) {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Features Panel Functionality
+    const panelBtn = document.getElementById('featuresPanelBtn');
+    const featuresPanel = document.getElementById('featuresPanel');
+    const panelOverlay = document.getElementById('panelOverlay');
+    const closePanelBtn = document.getElementById('closePanelBtn');
+    
+    function openPanel() {
+        featuresPanel.classList.add('open');
+        panelOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closePanel() {
+        featuresPanel.classList.remove('open');
+        panelOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    if (panelBtn) {
+        panelBtn.addEventListener('click', openPanel);
+    }
+    
+    if (closePanelBtn) {
+        closePanelBtn.addEventListener('click', closePanel);
+    }
+    
+    if (panelOverlay) {
+        panelOverlay.addEventListener('click', closePanel);
+    }
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && featuresPanel.classList.contains('open')) {
+            closePanel();
         }
-      }
-      // Update active class
-      document
-        .querySelectorAll(".sidebar-menu a")
-        .forEach((a) => a.classList.remove("active"));
-      this.classList.add("active");
-      // On mobile, auto-collapse sidebar after click
-      if (window.innerWidth <= 768) {
-        sidebar.classList.add("collapsed");
-      }
     });
-  });
-
-  // Make cards clickable
-  document.querySelectorAll(".clickable").forEach((card) => {
-    card.addEventListener("click", function (e) {
-      if (e.target.tagName === "BUTTON" || e.target.closest("button")) return;
-      const url = this.dataset.url;
-      if (url) window.location.href = url;
+    
+    // Feature actions
+    document.getElementById('viewGuideBtn')?.addEventListener('click', function() {
+        alert('📚 Submission Guide:\n\n1. Read instructions carefully\n2. Prepare your solution\n3. Upload files or link GitHub\n4. Verify and submit\n5. Check for plagiarism report');
+        closePanel();
     });
-  });
+    
+    document.getElementById('plagiarismGuideBtn')?.addEventListener('click', function() {
+        alert('🛡️ Plagiarism Policy:\n\n• All submissions are checked for similarity\n• Similarity above 30% will be flagged\n• Always cite sources\n• Maintain academic honesty');
+        closePanel();
+    });
+    
+    document.getElementById('contactSupportBtn')?.addEventListener('click', function() {
+        alert('📧 Contact Support: scholarsubmit1@gmail.com\n\nWe aim to respond within 24 hours.');
+        closePanel();
+    });
+    
+    document.getElementById('faqBtn')?.addEventListener('click', function() {
+        window.location.href = '#faq';
+        closePanel();
+    });
+    
+    document.getElementById('deadlineTipBtn')?.addEventListener('click', function() {
+        alert('⏰ Deadline Tips:\n\n• Submit at least 1 hour before deadline\n• Set reminders\n• Late submissions may incur penalties');
+        closePanel();
+    });
+    
+    document.getElementById('gradeTipBtn')?.addEventListener('click', function() {
+        alert('📊 Grade Tips:\n\n• Review feedback\n• Check your average grade\n• Contact lecturer if you have questions');
+        closePanel();
+    });
+    
+    document.getElementById('feedbackLink')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('💬 Send feedback to: scholarsubmit1@gmail.com');
+        closePanel();
+    });
+    
+    document.getElementById('reportLink')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('🐛 Report issues to: scholarsubmit1@gmail.com');
+        closePanel();
+    });
+    
+    // Make cards clickable
+    document.querySelectorAll('.assignment-card, .submission-card, .past-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            const url = this.getAttribute('data-url');
+            if (url) window.location.href = url;
+        });
+    });
 </script>
 {% endblock %}

@@ -1,335 +1,435 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="register-page">
-    <div class="register-box">
-        <div class="register-header">
-            <div class="logo-icon-wrapper">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Submita Logo" class="register-logo-image">
-            </div>
+<style>
+    .auth-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+    
+    .auth-card {
+        max-width: 520px;
+        width: 100%;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    body.dark-mode .auth-card {
+        background: #1f2937;
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .auth-header {
+        padding: 2rem 2rem 1rem;
+        text-align: center;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    body.dark-mode .auth-header {
+        border-color: #374151;
+    }
+    
+    .auth-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+    
+    body.dark-mode .auth-header h1 {
+        color: #f3f4f6;
+    }
+    
+    .auth-header p {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    body.dark-mode .auth-header p {
+        color: #9ca3af;
+    }
+    
+    .auth-body {
+        padding: 2rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+    
+    body.dark-mode .form-group label {
+        color: #d1d5db;
+    }
+    
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        color: #9ca3af;
+        font-size: 1rem;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.5rem;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+    
+    body.dark-mode .form-group input {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+    
+    body.dark-mode .form-group input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+    
+    .password-wrapper {
+        position: relative;
+    }
+    
+    .password-wrapper input {
+        padding-right: 2.5rem;
+    }
+    
+    .toggle-password {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        font-size: 1rem;
+    }
+    
+    .toggle-password:hover {
+        color: #059669;
+    }
+    
+    body.dark-mode .toggle-password:hover {
+        color: #10b981;
+    }
+    
+    .password-strength {
+        margin-top: 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .password-match {
+        margin-top: 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .info-note {
+        background: #f0fdf4;
+        border-left: 4px solid #059669;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        font-size: 0.75rem;
+        color: #065f46;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    body.dark-mode .info-note {
+        background: #064e3b;
+        color: #d1fae5;
+    }
+    
+    .info-note i {
+        font-size: 1rem;
+    }
+    
+    .auth-btn {
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 0.5rem;
+    }
+    
+    .auth-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+    }
+    
+    body.dark-mode .auth-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    
+    body.dark-mode .auth-footer {
+        border-color: #374151;
+        color: #9ca3af;
+    }
+    
+    .auth-footer a {
+        color: #059669;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    body.dark-mode .auth-footer a {
+        color: #10b981;
+    }
+    
+    @media (max-width: 640px) {
+        .auth-card {
+            margin: 0 1rem;
+        }
+        .auth-header {
+            padding: 1.5rem;
+        }
+        .auth-body {
+            padding: 1.5rem;
+        }
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
             <h1>Create Account</h1>
-            <p>Join Submita platform</p>
+            <p>Join Submita - Submit smarter, grade faster</p>
         </div>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="info-note">
-            <i class="fas fa-info-circle"></i>
-            <span>Use @mouau.edu.ng email to register as lecturer</span>
-        </div>
-        
-        <form method="POST" action="{{ url_for('register') }}" class="register-form">
-            <div class="form-field">
-                <label>Full Name</label>
-                <input type="text" name="name" placeholder="Enter your full name" required>
+        <div class="auth-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="margin-bottom: 1.5rem;">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="info-note">
+                <i class="fas fa-info-circle"></i>
+                <span>Use @mouau.edu.ng email to be automatically registered as a lecturer</span>
             </div>
             
-            <div class="form-field">
-                <label>Email Address</label>
-                <input type="email" name="email" placeholder="you@example.com" required>
-            </div>
-            
-            <div class="form-field">
-                <label>Matric Number / Staff ID</label>
-                <input type="text" name="matric" placeholder="e.g., STU001" required>
-            </div>
-            
-            <div class="form-field">
-                <label>Password</label>
-                <div class="password-wrapper">
-                    <input type="password" name="password" id="regPassword" placeholder="Minimum 6 characters" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword('regPassword')">
-                        <i class="fas fa-eye"></i>
-                    </button>
+            <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" name="name" placeholder="Enter your full name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" name="email" placeholder="you@example.com" required>
+                        </div>
+                    </div>
                 </div>
-                <div class="password-strength" id="passwordStrength"></div>
-            </div>
-            
-            <div class="form-field">
-                <label>Confirm Password</label>
-                <div class="password-wrapper">
-                    <input type="password" name="confirm_password" id="confirmPassword" placeholder="Confirm your password" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Matric Number / Staff ID</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-id-card input-icon"></i>
+                            <input type="text" name="matric" placeholder="e.g., STU001 or LEC001" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Confirm Matric Number</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-id-card input-icon"></i>
+                            <input type="text" name="confirm_matric" placeholder="Confirm your Matric number" required>
+                        </div>
+                    </div>
                 </div>
-                <div class="password-match" id="passwordMatch"></div>
-            </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="password-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="password" id="password" placeholder="Minimum 6 characters" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <div class="password-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="confirm_password" id="confirmPassword" placeholder="Confirm your password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-match" id="passwordMatch"></div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="auth-btn">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
             
-            <button type="submit" class="register-button">Register</button>
-            
-            <div class="register-footer">
+            <div class="auth-footer">
                 Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
-<style>
-/* Ensure the register page container centers and restricts width */
-.register-page {
-    min-height: calc(100vh - 140px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f5f7fa;
-    padding: 2rem;
-    margin: -2rem 0;
-}
-
-.register-box {
-    background: white;
-    width: 100%;
-    max-width: 450px;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin: 0 auto;
-}
-
-/* Responsive: on smaller screens, reduce padding and width */
-@media (max-width: 640px) {
-    .register-page {
-        padding: 1rem;
-    }
-    .register-box {
-        max-width: 100%;
-        padding: 1.5rem;
-    }
-}
-
-.register-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.register-header .logo-icon-wrapper {
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 1rem;
-    background: transparent;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.register-logo-image {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-}
-
-.register-header h1 {
-    font-size: 1.5rem;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-    font-weight: 700;
-}
-
-.register-header p {
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-
-.info-note {
-    background: #f0fdf4;
-    border-left: 3px solid #059669;
-    padding: 0.75rem;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    color: #065f46;
-    margin-bottom: 1.5rem;
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.register-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.form-field label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-.form-field input {
-    padding: 0.75rem 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-    outline: none;
-    width: 100%;
-}
-
-.form-field input:focus {
-    border-color: #059669;
-    box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
-}
-
-.password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.password-wrapper input {
-    flex: 1;
-    padding-right: 2.5rem;
-}
-
-.toggle-password {
-    position: absolute;
-    right: 0.75rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #6b7280;
-    font-size: 1rem;
-}
-
-.toggle-password:hover {
-    color: #059669;
-}
-
-.password-strength, .password-match {
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
-}
-
-.register-button {
-    background: #059669;
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-top: 0.5rem;
-}
-
-.register-button:hover {
-    background: #047857;
-}
-
-.register-footer {
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 0.813rem;
-    color: #6b7280;
-}
-
-.register-footer a {
-    color: #059669;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.register-footer a:hover {
-    text-decoration: underline;
-}
-
-.alert {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
-}
-
-.alert-success { background: #f0fdf4; border: 1px solid #86efac; color: #065f46; }
-.alert-danger { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
-.alert-warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
-</style>
-
 <script>
-function togglePassword(fieldId) {
-    const field = document.getElementById(fieldId);
-    const icon = field.parentElement.querySelector('.toggle-password i');
-    if (field.type === 'password') {
-        field.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        field.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
-}
-
-// Password strength checker
-const passwordInput = document.getElementById('regPassword');
-const confirmInput = document.getElementById('confirmPassword');
-const strengthDiv = document.getElementById('passwordStrength');
-const matchDiv = document.getElementById('passwordMatch');
-
-if (passwordInput) {
-    passwordInput.addEventListener('input', function() {
-        const password = this.value;
-        let strength = '';
-        let color = '';
-        if (password.length === 0) {
-            strength = '';
-        } else if (password.length < 6) {
-            strength = '❌ Too short (min 6 characters)';
-            color = '#ef4444';
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = field.parentElement.querySelector('.toggle-password i');
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
         } else {
-            const hasUpper = /[A-Z]/.test(password);
-            const hasLower = /[a-z]/.test(password);
-            const hasNumber = /\d/.test(password);
-            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-            const strengthCount = [hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length;
-            if (strengthCount >= 3) {
-                strength = '✅ Strong password';
-                color = '#10b981';
-            } else if (strengthCount >= 2) {
-                strength = '⚠️ Medium password';
-                color = '#f59e0b';
-            } else {
-                strength = '❌ Weak password';
-                color = '#ef4444';
-            }
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
         }
-        strengthDiv.innerHTML = `<span style="color: ${color}">${strength}</span>`;
-        checkPasswordMatch();
-    });
-}
-
-if (confirmInput) {
-    confirmInput.addEventListener('input', checkPasswordMatch);
-}
-
-function checkPasswordMatch() {
-    const password = passwordInput ? passwordInput.value : '';
-    const confirm = confirmInput ? confirmInput.value : '';
-    if (confirm.length === 0) {
-        matchDiv.innerHTML = '';
-    } else if (password === confirm) {
-        matchDiv.innerHTML = '<span style="color: #10b981">✓ Passwords match</span>';
-    } else {
-        matchDiv.innerHTML = '<span style="color: #ef4444">✗ Passwords do not match</span>';
     }
-}
+    
+    // Password strength checker
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirmPassword');
+    const strengthDiv = document.getElementById('passwordStrength');
+    const matchDiv = document.getElementById('passwordMatch');
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = '';
+            let color = '';
+            
+            if (password.length === 0) {
+                strength = '';
+            } else if (password.length < 6) {
+                strength = '❌ Too short (min 6 characters)';
+                color = '#ef4444';
+            } else {
+                const hasUpper = /[A-Z]/.test(password);
+                const hasLower = /[a-z]/.test(password);
+                const hasNumber = /\d/.test(password);
+                const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+                const strengthCount = [hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length;
+                
+                if (strengthCount >= 3) {
+                    strength = '✅ Strong password';
+                    color = '#10b981';
+                } else if (strengthCount >= 2) {
+                    strength = '⚠️ Medium password';
+                    color = '#f59e0b';
+                } else {
+                    strength = '❌ Weak password';
+                    color = '#ef4444';
+                }
+            }
+            strengthDiv.innerHTML = `<span style="color: ${color}">${strength}</span>`;
+            checkPasswordMatch();
+        });
+    }
+    
+    if (confirmInput) {
+        confirmInput.addEventListener('input', checkPasswordMatch);
+    }
+    
+    function checkPasswordMatch() {
+        const password = passwordInput ? passwordInput.value : '';
+        const confirm = confirmInput ? confirmInput.value : '';
+        
+        if (confirm.length === 0) {
+            matchDiv.innerHTML = '';
+        } else if (password === confirm) {
+            matchDiv.innerHTML = '<span style="color: #10b981">✓ Passwords match</span>';
+        } else {
+            matchDiv.innerHTML = '<span style="color: #ef4444">✗ Passwords do not match</span>';
+        }
+    }
+    
+    // Matric number confirmation validation
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            const matric = document.querySelector('input[name="matric"]').value;
+            const confirmMatric = document.querySelector('input[name="confirm_matric"]').value;
+            
+            if (matric !== confirmMatric) {
+                e.preventDefault();
+                alert('Matric numbers do not match. Please re-enter.');
+            }
+        });
+    }
 </script>
 {% endblock %}

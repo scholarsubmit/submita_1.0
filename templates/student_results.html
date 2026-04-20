@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}My Results – Submita{% endblock %}
+{% block content %}
+<div class="page-title">My results</div>
+<div class="page-sub">{{ session.name }}</div>
+
+{% if not submissions %}
+  <div class="alert alert-info">No submissions yet. <a href="{{ url_for('student_dashboard') }}">Go submit an assignment.</a></div>
+{% else %}
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Assignment</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th>Score</th>
+          <th>Feedback</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sid, sub in submissions.items() %}
+        <tr>
+          <td>
+            <div style="font-weight:500;">{{ sub.assignment_id }}</div>
+            <div style="font-size:12px;color:#888;">{{ sub.course_id }}</div>
+          </td>
+          <td style="font-size:12px;color:#888;">{{ sub.submitted_at[:10] }}</td>
+          <td>
+            {% if sub.status == 'graded' %}
+              <span class="badge badge-graded">Graded</span>
+            {% elif sub.flagged %}
+              <span class="badge badge-flagged">Under review</span>
+            {% else %}
+              <span class="badge badge-pending">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if sub.grade and sub.grade.released %}
+              <strong style="color:#3B6D11;">{{ sub.grade.score | int }} / 100</strong>
+            {% else %}
+              <span style="color:#aaa;">—</span>
+            {% endif %}
+          </td>
+          <td style="max-width:220px;">
+            {% if sub.grade and sub.grade.released and sub.grade.feedback %}
+              <span style="font-size:12px;color:#555;">{{ sub.grade.feedback[:80] }}{% if sub.grade.feedback|length > 80 %}…{% endif %}</span>
+            {% else %}
+              <span style="color:#aaa;font-size:12px;">Not yet released</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

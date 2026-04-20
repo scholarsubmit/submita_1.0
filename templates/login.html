@@ -1,181 +1,555 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="login-wrapper">
-    <div class="login-card">
-        <div class="login-brand">
-            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Submita" class="login-logo">
+<style>
+    .auth-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+    
+    .auth-card {
+        max-width: 480px;
+        width: 100%;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    body.dark-mode .auth-card {
+        background: #1f2937;
+        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .auth-header {
+        padding: 2rem 2rem 1rem;
+        text-align: center;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    body.dark-mode .auth-header {
+        border-color: #374151;
+    }
+    
+    .auth-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+    
+    body.dark-mode .auth-header h1 {
+        color: #f3f4f6;
+    }
+    
+    .auth-header p {
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    body.dark-mode .auth-header p {
+        color: #9ca3af;
+    }
+    
+    .auth-body {
+        padding: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #374151;
+    }
+    
+    body.dark-mode .form-group label {
+        color: #d1d5db;
+    }
+    
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        color: #9ca3af;
+        font-size: 1rem;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.5rem;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+    }
+    
+    body.dark-mode .form-group input {
+        background: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #059669;
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+    
+    body.dark-mode .form-group input:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+    
+    .password-wrapper {
+        position: relative;
+    }
+    
+    .password-wrapper input {
+        padding-right: 2.5rem;
+    }
+    
+    .toggle-password {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        font-size: 1rem;
+    }
+    
+    .toggle-password:hover {
+        color: #059669;
+    }
+    
+    body.dark-mode .toggle-password:hover {
+        color: #10b981;
+    }
+    
+    .forgot-link {
+        text-align: right;
+        margin-top: 0.5rem;
+    }
+    
+    .forgot-link a {
+        font-size: 0.75rem;
+        color: #059669;
+        text-decoration: none;
+    }
+    
+    .forgot-link a:hover {
+        text-decoration: underline;
+    }
+    
+    body.dark-mode .forgot-link a {
+        color: #10b981;
+    }
+    
+    .auth-btn {
+        width: 100%;
+        padding: 0.875rem;
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 0.5rem;
+    }
+    
+    .auth-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+    }
+    
+    body.dark-mode .auth-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+    
+    body.dark-mode .auth-footer {
+        border-color: #374151;
+        color: #9ca3af;
+    }
+    
+    .auth-footer a {
+        color: #059669;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    body.dark-mode .auth-footer a {
+        color: #10b981;
+    }
+    
+    /* Demo Accounts Section */
+    .demo-section {
+        margin-top: 1.5rem;
+    }
+    
+    .demo-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .demo-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .demo-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    body.dark-mode .demo-card {
+        background: #374151;
+        border-color: #4b5563;
+    }
+    
+    .demo-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #059669;
+        background: #f0fdf4;
+    }
+    
+    body.dark-mode .demo-card:hover {
+        border-color: #10b981;
+        background: #1f2937;
+    }
+    
+    .demo-role {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .demo-role.student {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .demo-role.lecturer {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+    
+    .demo-role.admin {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    body.dark-mode .demo-role.student {
+        background: #064e3b;
+        color: #6ee7b7;
+    }
+    
+    body.dark-mode .demo-role.lecturer {
+        background: #1e3a5f;
+        color: #93c5fd;
+    }
+    
+    body.dark-mode .demo-role.admin {
+        background: #78350f;
+        color: #fbbf24;
+    }
+    
+    .demo-id {
+        font-family: monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+    
+    body.dark-mode .demo-id {
+        color: #f3f4f6;
+    }
+    
+    .demo-password {
+        font-size: 0.6rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    body.dark-mode .demo-password {
+        color: #9ca3af;
+    }
+    
+    .demo-password i {
+        font-size: 0.5rem;
+    }
+    
+    .demo-hint {
+        text-align: center;
+        font-size: 0.65rem;
+        color: #9ca3af;
+        margin-top: 0.5rem;
+    }
+    
+    @media (max-width: 480px) {
+        .demo-grid {
+            grid-template-columns: 1fr;
+        }
+        .auth-card {
+            margin: 0 1rem;
+        }
+        .auth-header {
+            padding: 1.5rem;
+        }
+        .auth-body {
+            padding: 1.5rem;
+        }
+    }
+    
+    /* Loading spinner */
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.6s linear infinite;
+        margin-left: 8px;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
             <h1>Welcome Back</h1>
-            <p>Sign in to continue</p>
+            <p>Sign in to continue to your account</p>
         </div>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <form method="POST" action="{{ url_for('login') }}" class="login-form">
-            <div class="input-group">
-                <i class="fas fa-id-card"></i>
-                <input type="text" name="matric" placeholder="Matric Number / Staff ID" required>
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" name="password" id="password" placeholder="Password" required>
-                <button type="button" class="toggle-password" onclick="togglePassword()">
-                    <i class="fas fa-eye"></i>
+        <div class="auth-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}" style="margin-bottom: 1.5rem;">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('login') }}" id="loginForm">
+                <div class="form-group">
+                    <label>Matric Number / Staff ID</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-id-card input-icon"></i>
+                        <input type="text" name="matric" id="matric" placeholder="e.g., STU001 or LEC001" required autofocus>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="password-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="forgot-link">
+                    <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="auth-btn" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
                 </button>
+            </form>
+            
+            <!-- Demo Accounts Section - Click to Auto Login -->
+            <div class="demo-section">
+                <div class="demo-title">✨ Quick Demo Access</div>
+                <div class="demo-grid">
+                    <!-- Student 1 -->
+                    <div class="demo-card" onclick="autoLogin('STU001', 'Student123!')">
+                        <span class="demo-role student">🎓 Student</span>
+                        <div class="demo-id">STU001</div>
+                        <div class="demo-password">
+                            <i class="fas fa-lock"></i> Click to login
+                        </div>
+                    </div>
+                    
+                    <!-- Student 2 -->
+                    <div class="demo-card" onclick="autoLogin('STU002', 'Student456!')">
+                        <span class="demo-role student">🎓 Student</span>
+                        <div class="demo-id">STU002</div>
+                        <div class="demo-password">
+                            <i class="fas fa-lock"></i> Click to login
+                        </div>
+                    </div>
+                    
+                    <!-- Lecturer 1 -->
+                    <div class="demo-card" onclick="autoLogin('LEC001', 'Lecturer123!')">
+                        <span class="demo-role lecturer">👨‍🏫 Lecturer</span>
+                        <div class="demo-id">LEC001</div>
+                        <div class="demo-password">
+                            <i class="fas fa-lock"></i> Click to login
+                        </div>
+                    </div>
+                    
+                    <!-- Lecturer 2 -->
+                    <div class="demo-card" onclick="autoLogin('LEC002', 'Lecturer456!')">
+                        <span class="demo-role lecturer">👩‍🏫 Lecturer</span>
+                        <div class="demo-id">LEC002</div>
+                        <div class="demo-password">
+                            <i class="fas fa-lock"></i> Click to login
+                        </div>
+                    </div>
+                    
+                    <!-- Admin -->
+                    <div class="demo-card" onclick="autoLogin('ADMIN001', 'Admin123!')">
+                        <span class="demo-role admin">👑 Administrator</span>
+                        <div class="demo-id">ADMIN001</div>
+                        <div class="demo-password">
+                            <i class="fas fa-lock"></i> Click to login
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-hint">
+                    <i class="fas fa-mouse-pointer"></i> Click any demo card to login instantly
+                </div>
             </div>
-            <button type="submit" class="login-btn">Sign In</button>
-        </form>
-        
-        <div class="login-footer">
-            <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
-            <span class="separator">•</span>
-            <a href="{{ url_for('register') }}">Create account</a>
-        </div>
-        
-        <div class="demo-credentials">
-            <p class="demo-title">Demo Access</p>
-            <div class="demo-codes">
-                <span>Student: STU001</span>
-                <span>Lecturer: LEC001</span>
-                <span>Admin: ADMIN001</span>
+            
+            <div class="auth-footer">
+                Don't have an account? <a href="{{ url_for('register') }}">Create an account</a>
             </div>
-            <p class="demo-hint">Contact admin for password</p>
         </div>
     </div>
 </div>
 
-<style>
-.login-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 140px);
-    background: linear-gradient(135deg, #f5f7fa 0%, #e5e9f0 100%);
-    padding: 2rem;
-}
-.login-card {
-    background: white;
-    border-radius: 24px;
-    padding: 2rem;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-}
-.login-brand {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-.login-logo {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    margin-bottom: 1rem;
-}
-.login-brand h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1f2937;
-}
-.login-brand p {
-    color: #6b7280;
-    font-size: 0.875rem;
-}
-.input-group {
-    position: relative;
-    margin-bottom: 1rem;
-}
-.input-group i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9ca3af;
-}
-.input-group input {
-    width: 100%;
-    padding: 12px 12px 12px 40px;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    transition: 0.2s;
-}
-.input-group input:focus {
-    outline: none;
-    border-color: #059669;
-    box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
-}
-.toggle-password {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #9ca3af;
-}
-.login-btn {
-    width: 100%;
-    background: #059669;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.login-btn:hover {
-    background: #047857;
-}
-.login-footer {
-    text-align: center;
-    margin-top: 1rem;
-    font-size: 0.813rem;
-}
-.login-footer a {
-    color: #059669;
-    text-decoration: none;
-}
-.demo-credentials {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e5e7eb;
-    text-align: center;
-    font-size: 0.75rem;
-}
-.demo-codes {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin: 0.5rem 0;
-    background: #f3f4f6;
-    padding: 0.5rem;
-    border-radius: 12px;
-}
-</style>
 <script>
-function togglePassword() {
-    const field = document.getElementById('password');
-    const icon = document.querySelector('.toggle-password i');
-    if (field.type === 'password') {
-        field.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        field.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
+    function togglePasswordVisibility() {
+        const passwordField = document.getElementById('password');
+        const icon = document.querySelector('.toggle-password i');
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
     }
-}
+    
+    async function autoLogin(matric, password) {
+        // Show loading state on the clicked card
+        const cards = document.querySelectorAll('.demo-card');
+        let clickedCard = null;
+        
+        for (let card of cards) {
+            if (card.textContent.includes(matric)) {
+                clickedCard = card;
+                break;
+            }
+        }
+        
+        if (clickedCard) {
+            const originalHTML = clickedCard.innerHTML;
+            clickedCard.innerHTML = '<div class="loading-spinner"></div> Logging in...';
+            clickedCard.style.opacity = '0.7';
+            clickedCard.style.pointerEvents = 'none';
+            
+            // Fill the form
+            document.getElementById('matric').value = matric;
+            document.getElementById('password').value = password;
+            
+            // Submit the form
+            const form = document.getElementById('loginForm');
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    // If no redirect in JSON, submit normally
+                    form.submit();
+                }
+            } catch (error) {
+                // Fallback to normal form submission
+                form.submit();
+            }
+        } else {
+            // Just fill and submit normally
+            document.getElementById('matric').value = matric;
+            document.getElementById('password').value = password;
+            document.getElementById('loginForm').submit();
+        }
+    }
+    
+    // Also allow Enter key to submit
+    document.getElementById('loginForm').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.submit();
+        }
+    });
 </script>
 {% endblock %}

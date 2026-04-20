@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="verify-container">
+    <div class="verify-card">
+        <div class="verify-icon">🔐</div>
+        <h1>Enter Verification Code</h1>
+        <p>We sent a 6-digit code to <strong>{{ current_user.email }}</strong></p>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" class="code-form">
+            <div class="code-input-wrapper">
+                <input type="text" name="verification_code" maxlength="6" 
+                       placeholder="000000" class="code-input" autofocus required>
+            </div>
+            <button type="submit" class="btn-verify">Verify & Continue</button>
+        </form>
+        
+        <div class="verify-footer">
+            <p>Didn't receive the code? 
+                <a href="{{ url_for('request_verification_code', assignment_id=assignment.id) }}">Resend Code</a>
+            </p>
+            <a href="{{ url_for('student_dashboard') }}" class="btn-back">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.verify-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+.verify-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.verify-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+.verify-card h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+}
+.verify-card p {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+}
+.code-input-wrapper {
+    margin-bottom: 1rem;
+}
+.code-input {
+    width: 200px;
+    padding: 0.75rem;
+    font-size: 1.25rem;
+    text-align: center;
+    letter-spacing: 4px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-family: monospace;
+}
+.code-input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+}
+.btn-verify {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+}
+.btn-verify:hover {
+    background: #047857;
+    transform: translateY(-2px);
+}
+.verify-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+.verify-footer p {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+.verify-footer a {
+    color: #059669;
+    text-decoration: none;
+}
+.verify-footer a:hover {
+    text-decoration: underline;
+}
+.btn-back {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+</style>
+
+<script>
+// Auto-submit when 6 digits are entered
+document.querySelector('.code-input')?.addEventListener('input', function(e) {
+    if (this.value.length === 6 && /^\d+$/.test(this.value)) {
+        this.form.submit();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .warning-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 1rem;
+    }
+    .warning-card {
+        background: white;
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    body.dark-mode .warning-card {
+        background: #1f2937;
+    }
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        background: #fee2e2;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    .warning-icon i {
+        font-size: 2.5rem;
+        color: #dc2626;
+    }
+    .plagiarism-score {
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 1rem 0;
+    }
+    .plagiarism-high { color: #dc2626; }
+    .plagiarism-mid { color: #f59e0b; }
+    .plagiarism-low { color: #059669; }
+    .similarity-list {
+        text-align: left;
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: #f9fafb;
+        border-radius: 16px;
+    }
+    body.dark-mode .similarity-list {
+        background: #111827;
+    }
+    .similarity-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    .btn-submit {
+        background: #059669;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+    }
+    .btn-rewrite {
+        background: #f59e0b;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+    }
+    .btn-draft {
+        background: #6b7280;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        flex: 1;
+    }
+    @media (max-width: 768px) {
+        .btn-group {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="warning-container">
+    <div class="warning-card">
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h2>Plagiarism Detected!</h2>
+        <p>Our system has detected potential similarity with existing submissions.</p>
+        
+        <div class="plagiarism-score {% if plagiarism_score > 60 %}plagiarism-high{% elif plagiarism_score > 30 %}plagiarism-mid{% else %}plagiarism-low{% endif %}">
+            {{ "%.1f"|format(plagiarism_score) }}% Similarity
+        </div>
+        
+        {% if plagiarism_results %}
+        <div class="similarity-list">
+            <strong><i class="fas fa-chart-line"></i> Top Matches:</strong>
+            {% for result in plagiarism_results[:5] %}
+            <div class="similarity-item">
+                <span>{{ result.student_name }} ({{ result.student_id }})</span>
+                <span style="color: {% if result.similarity > 60 %}#dc2626{% elif result.similarity > 30 %}#f59e0b{% else %}#059669{% endif %};">
+                    {{ result.similarity }}%
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <p style="margin: 1rem 0; color: #6b7280;">
+            <i class="fas fa-info-circle"></i> 
+            {% if plagiarism_score > 60 %}
+                <strong>High similarity detected!</strong> Please rewrite your work to avoid academic penalties.
+            {% elif plagiarism_score > 30 %}
+                <strong>Moderate similarity detected.</strong> Consider revising your submission.
+            {% else %}
+                <strong>Low similarity detected.</strong> Still acceptable, but review recommended.
+            {% endif %}
+        </p>
+        
+        <form method="POST" action="{{ url_for('submit_assignment', assignment_id=assignment.id) }}">
+            <input type="hidden" name="content" value="{{ content }}">
+            <input type="hidden" name="github_url" value="{{ github_url }}">
+            {% if filename %}
+            <input type="hidden" name="file_exists" value="true">
+            {% endif %}
+            <input type="hidden" name="ignore_plagiarism" value="true">
+            
+            <div class="btn-group">
+                <button type="submit" name="action" value="submit" class="btn-submit">
+                    <i class="fas fa-check-circle"></i> Yes, Submit Anyway
+                </button>
+                <button type="button" class="btn-rewrite" onclick="window.history.back()">
+                    <i class="fas fa-edit"></i> No, I'll Rewrite It
+                </button>
+                <button type="submit" name="action" value="draft" class="btn-draft">
+                    <i class="fas fa-save"></i> Save as Draft
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
