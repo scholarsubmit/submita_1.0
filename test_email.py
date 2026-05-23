@@ -1,13 +1,15 @@
 # FILE: test_email.py
+import os
+
 import requests
 import json
 
 print("🔄 STEP 1: Script has started executing...")
 
 # --- PASTE YOUR BREVO DETAILS HERE FOR THIS DIRECT ISOLATED TEST ---
-BREVO_API_KEY="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"
-MAIL_USERNAME="onboarding@brevo.com"
-SENDER_EMAIL = "scholarsubmit1@gmail.com"
+BREVO_API_KEY=os.environ.get('BREVO_API_KEY')
+MAIL_USERNAME=os.environ.get('MAIL_USERNAME')
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL')
 RECIPIENT_EMAIL = "ogwogp@gmail.com"  # Test sending anywhere globally!
 
 print(f"🔄 STEP 2: Target Recipient set to: {RECIPIENT_EMAIL}")
