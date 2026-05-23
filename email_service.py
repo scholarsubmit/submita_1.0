@@ -1,9 +1,13 @@
 # FILE: email_service.py
 # LOCATION: /email_service.py
-# FIXES: Use Brevo Python SDK for transactional emails
+# FIXES: Support both SMTP and Brevo HTTP modes via USE_SMTP flag
 
 import threading
 import os
+import smtplib
+import requests
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from flask import url_for, current_app
 from datetime import datetime
 from dotenv import load_dotenv
@@ -11,53 +15,54 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Brevo SDK
-try:
-    import sib_api_v3_sdk
-    from sib_api_v3_sdk.rest import ApiException
-    BREVO_SDK_AVAILABLE = True
-except ImportError:
-    BREVO_SDK_AVAILABLE = False
-    print("⚠️ sib-api-v3-sdk not installed. Run: pip install sib-api-v3-sdk")
-
 
 class EmailService:
-    """Handles all email operations using Brevo SDK"""
+    """Handles all email operations - supports SMTP and Brevo HTTP modes"""
     
-    # Brevo Configuration
-    API_KEY = os.environ.get('BREVO_API_KEY', '')
-    SENDER_EMAIL = os.environ.get('MAIL_USERNAME', '')
+    # Mode selection (set USE_SMTP=true in .env to use SMTP, otherwise Brevo HTTP)
+    USE_SMTP = os.environ.get('USE_SMTP', 'false').lower() == 'true'
+    
+    # SMTP Configuration (original)
+    SMTP_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    SMTP_PORT = int(os.environ.get('MAIL_PORT', 587))
+    SMTP_USERNAME = os.environ.get('MAIL_USERNAME', 'scholarsubmit1@gmail.com').strip()
+    SMTP_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+    
+    # Brevo HTTP Configuration
+    BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '').strip()
+    BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+    
+    # Common configuration
+    SENDER_EMAIL = os.environ.get('MAIL_USERNAME', '').strip()
     SENDER_NAME = os.environ.get('MAIL_SENDER_NAME', 'Submita')
     
     @classmethod
-    def _get_api_instance(cls):
-        """Get configured Brevo API instance"""
-        if not cls.API_KEY:
-            return None
-        
-        # Configure API key authorization
-        configuration = sib_api_v3_sdk.Configuration()
-        configuration.api_key['api-key'] = cls.API_KEY
-        
-        # Create API instance
-        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
-            sib_api_v3_sdk.ApiClient(configuration)
-        )
-        return api_instance
+    def is_configured(cls):
+        """Check if email service is properly configured based on selected mode"""
+        if cls.USE_SMTP:
+            return bool(cls.SMTP_USERNAME and cls.SMTP_PASSWORD)
+        else:
+            return bool(cls.BREVO_API_KEY and cls.SENDER_EMAIL)
+    
+    @classmethod
+    def get_mode(cls):
+        """Return current email mode as string"""
+        return "SMTP" if cls.USE_SMTP else "Brevo HTTP"
     
     @staticmethod
     def send_email_async(recipient, subject, html_content, text_content=None):
-        """Send email asynchronously using Brevo SDK"""
-        if not EmailService.API_KEY:
-            print(f"❌ Email aborted - BREVO_API_KEY missing")
-            return False
+        """Send email asynchronously using selected method"""
         
-        if not EmailService.SENDER_EMAIL:
-            print(f"❌ Email aborted - MAIL_USERNAME missing")
-            return False
-        
-        if not BREVO_SDK_AVAILABLE:
-            print(f"❌ Email aborted - Brevo SDK not installed")
+        # Check configuration
+        if not EmailService.is_configured():
+            print(f"❌ Email not sent - Missing configuration for {EmailService.get_mode()} mode")
+            print(f"   USE_SMTP: {EmailService.USE_SMTP}")
+            if EmailService.USE_SMTP:
+                print(f"   SMTP_USERNAME: {'✅' if EmailService.SMTP_USERNAME else '❌'}")
+                print(f"   SMTP_PASSWORD: {'✅' if EmailService.SMTP_PASSWORD else '❌'}")
+            else:
+                print(f"   BREVO_API_KEY: {'✅' if EmailService.BREVO_API_KEY else '❌'}")
+                print(f"   MAIL_USERNAME: {'✅' if EmailService.SENDER_EMAIL else '❌'}")
             return False
         
         try:
@@ -66,7 +71,7 @@ class EmailService:
             app_context = None
         
         thread = threading.Thread(
-            target=EmailService._send_email_sdk,
+            target=EmailService._send_email,
             args=(recipient, subject, html_content, text_content, app_context)
         )
         thread.daemon = True
@@ -74,36 +79,14 @@ class EmailService:
         return True
     
     @staticmethod
-    def _send_email_sdk(recipient, subject, html_content, text_content, app_context=None):
-        """Send email using Brevo SDK"""
+    def _send_email(recipient, subject, html_content, text_content, app_context=None):
+        """Send email using selected method"""
         
         def execute_send():
-            try:
-                api_instance = EmailService._get_api_instance()
-                if not api_instance:
-                    print("❌ Failed to initialize Brevo API")
-                    return
-                
-                # Create email object
-                send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
-                    to=[{"email": recipient, "name": recipient.split('@')[0]}],
-                    sender={"name": EmailService.SENDER_NAME, "email": EmailService.SENDER_EMAIL},
-                    subject=subject,
-                    html_content=html_content
-                )
-                
-                # Add plain text if provided
-                if text_content:
-                    send_smtp_email.text_content = text_content
-                
-                # Send email
-                api_response = api_instance.send_transac_email(send_smtp_email)
-                print(f"✅ Email sent to {recipient}! Message ID: {api_response.message_id}")
-                
-            except ApiException as e:
-                print(f"❌ Brevo API Exception: {e}")
-            except Exception as e:
-                print(f"❌ Email error for {recipient}: {str(e)}")
+            if EmailService.USE_SMTP:
+                EmailService._send_smtp(recipient, subject, html_content, text_content)
+            else:
+                EmailService._send_brevo(recipient, subject, html_content, text_content)
         
         if app_context:
             with app_context.app_context():
@@ -111,12 +94,87 @@ class EmailService:
         else:
             execute_send()
     
+    @staticmethod
+    def _send_smtp(recipient, subject, html_content, text_content):
+        """Send email using traditional SMTP"""
+        try:
+            if not EmailService.SMTP_PASSWORD:
+                print(f"Cannot send email: SMTP password not configured")
+                return
+            
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = f"{EmailService.SENDER_NAME} <{EmailService.SMTP_USERNAME}>"
+            msg['To'] = recipient
+            
+            if text_content:
+                part_text = MIMEText(text_content, 'plain')
+                msg.attach(part_text)
+            
+            part_html = MIMEText(html_content, 'html')
+            msg.attach(part_html)
+            
+            with smtplib.SMTP(EmailService.SMTP_SERVER, EmailService.SMTP_PORT) as server:
+                server.starttls()
+                server.login(EmailService.SMTP_USERNAME, EmailService.SMTP_PASSWORD)
+                server.send_message(msg)
+                print(f"✅ SMTP email sent to {recipient}")
+                
+        except Exception as e:
+            print(f"❌ SMTP email failed for {recipient}: {e}")
+    
+    @staticmethod
+    def _send_brevo(recipient, subject, html_content, text_content):
+        """Send email using Brevo HTTP API"""
+        try:
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "api-key": EmailService.BREVO_API_KEY
+            }
+            
+            payload = {
+                "sender": {
+                    "name": EmailService.SENDER_NAME,
+                    "email": EmailService.SENDER_EMAIL
+                },
+                "to": [{"email": recipient}],
+                "subject": subject,
+                "htmlContent": html_content
+            }
+            
+            if text_content:
+                payload["textContent"] = text_content
+            
+            response = requests.post(
+                EmailService.BREVO_API_URL, 
+                json=payload, 
+                headers=headers, 
+                timeout=30
+            )
+            
+            if response.status_code in [200, 201, 202]:
+                data = response.json()
+                print(f"✅ Brevo email sent to {recipient}! Message ID: {data.get('messageId', 'unknown')}")
+            else:
+                print(f"❌ Brevo failed for {recipient}: {response.status_code}")
+                print(f"   Response: {response.text}")
+                
+        except requests.exceptions.Timeout:
+            print(f"❌ Brevo timeout for {recipient}")
+        except Exception as e:
+            print(f"❌ Brevo error for {recipient}: {str(e)}")
+    
     # ==================== EMAIL TEMPLATES ====================
     
     @staticmethod
     def send_verification_email(user_name, user_email, student_id, verification_code):
         """Send account verification email"""
-        verification_link = url_for('verify', _external=True)
+        try:
+            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+            verification_link = f"{base_url}/verify"
+        except:
+            verification_link = url_for('verify', _external=True)
         
         html_content = f"""
         <!DOCTYPE html>
@@ -165,7 +223,6 @@ class EmailService:
                 </div>
                 <div class="footer">
                     <p>&copy; 2026 Submita. All rights reserved.</p>
-                    <p>Your trusted assignment management platform</p>
                 </div>
             </div>
         </body>
@@ -187,12 +244,16 @@ class EmailService:
         © 2026 Submita
         """
         
-        EmailService.send_email_async(user_email, "Verify Your Submita Account", html_content, text_content)
+        return EmailService.send_email_async(user_email, "Verify Your Submita Account", html_content, text_content)
     
     @staticmethod
     def send_lecturer_verification_email(lecturer_data, verification_code, expires_at):
         """Send lecturer verification code email"""
-        registration_link = url_for('register', _external=True)
+        try:
+            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+            registration_link = f"{base_url}/register"
+        except:
+            registration_link = url_for('register', _external=True)
         
         if len(verification_code) > 6:
             formatted_code = ' '.join([verification_code[i:i+3] for i in range(0, len(verification_code), 3)])
@@ -203,18 +264,14 @@ class EmailService:
         <!DOCTYPE html>
         <html>
         <head>
-            <meta charset="UTF-8">
             <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                body {{ font-family: Arial, sans-serif; }}
                 .container {{ max-width: 550px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }}
-                .header h1 {{ color: #fff; margin: 0; font-size: 22px; }}
-                .content {{ padding: 30px; background: #fff; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
+                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 25px; text-align: center; color: white; }}
                 .code-box {{ background: #f0fdf4; border: 3px solid #059669; border-radius: 12px; padding: 25px; text-align: center; margin: 20px 0; }}
-                .code {{ font-size: 36px; font-weight: bold; color: #047857; font-family: 'Courier New', monospace; letter-spacing: 5px; }}
-                .warning {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px; }}
-                .button {{ display: inline-block; background: #059669; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 8px; }}
-                .footer {{ margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }}
+                .code {{ font-size: 36px; font-weight: bold; color: #047857; font-family: monospace; }}
+                .warning {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }}
+                .button {{ background: #059669; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; }}
             </style>
         </head>
         <body>
@@ -227,24 +284,20 @@ class EmailService:
                     <p>You have been invited to join Submita as a lecturer.</p>
                     
                     <div class="code-box">
-                        <p style="margin-bottom: 10px;">Your Secure Verification Code</p>
+                        <p><strong>Your Verification Code:</strong></p>
                         <div class="code">{formatted_code}</div>
-                        <p style="margin-top: 15px; font-size: 12px;">🔑 {len(verification_code)}-character code</p>
+                        <p>🔑 {len(verification_code)}-character code</p>
                     </div>
                     
                     <div class="warning">
                         <strong>⚠️ Security Notice:</strong>
-                        <p>• This code can only be used <strong>once</strong></p>
+                        <p>• This code expires on <strong>{expires_at.strftime('%Y-%m-%d at %H:%M')}</strong></p>
+                        <p>• This code can only be used once</p>
                         <p>• Never share this code with anyone</p>
-                        <p>• Code expires on <strong>{expires_at.strftime('%Y-%m-%d at %H:%M')}</strong></p>
                     </div>
                     
                     <div style="text-align: center;">
                         <a href="{registration_link}" class="button">Complete Registration →</a>
-                    </div>
-                    
-                    <div class="footer">
-                        <p>© 2026 Submita - Secure Assignment Platform</p>
                     </div>
                 </div>
             </div>
@@ -252,12 +305,16 @@ class EmailService:
         </html>
         """
         
-        EmailService.send_email_async(lecturer_data['email'], "🔐 Submita Lecturer Verification Code", html_content)
+        return EmailService.send_email_async(lecturer_data['email'], "🔐 Submita Lecturer Verification Code", html_content)
     
     @staticmethod
     def send_password_reset_email(user_email, reset_token):
         """Send password reset email"""
-        reset_link = url_for('reset_password', token=reset_token, _external=True)
+        try:
+            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+            reset_link = f"{base_url}/reset-password?token={reset_token}"
+        except:
+            reset_link = url_for('reset_password', token=reset_token, _external=True)
         
         html_content = f"""
         <!DOCTYPE html>
@@ -266,8 +323,7 @@ class EmailService:
             <style>
                 body {{ font-family: Arial, sans-serif; }}
                 .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: #059669; padding: 20px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
-                .content {{ padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
+                .header {{ background: #059669; padding: 20px; text-align: center; color: white; }}
                 .button {{ background: #059669; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; }}
             </style>
         </head>
@@ -277,8 +333,8 @@ class EmailService:
                     <h2>Password Reset Request</h2>
                 </div>
                 <div class="content">
-                    <p>You requested to reset your password. Click the button below:</p>
-                    <div style="text-align: center; margin: 30px 0;">
+                    <p>Click the button below to reset your password:</p>
+                    <div style="text-align: center;">
                         <a href="{reset_link}" class="button">Reset Password</a>
                     </div>
                     <p>This link expires in 1 hour.</p>
@@ -288,12 +344,16 @@ class EmailService:
         </html>
         """
         
-        EmailService.send_email_async(user_email, "Reset Your Submita Password", html_content)
+        return EmailService.send_email_async(user_email, "Reset Your Submita Password", html_content)
     
     @staticmethod
     def send_grade_notification(student_email, student_name, assignment_title, grade, feedback=None):
         """Send grade notification email"""
-        dashboard_link = url_for('student_dashboard', _external=True)
+        try:
+            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+            dashboard_link = f"{base_url}/student-dashboard"
+        except:
+            dashboard_link = url_for('student_dashboard', _external=True)
         
         html_content = f"""
         <!DOCTYPE html>
@@ -302,9 +362,8 @@ class EmailService:
             <style>
                 body {{ font-family: Arial, sans-serif; }}
                 .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 20px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
-                .content {{ padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
-                .grade {{ font-size: 36px; font-weight: bold; color: #059669; text-align: center; margin: 20px 0; }}
+                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 20px; text-align: center; color: white; }}
+                .grade {{ font-size: 48px; font-weight: bold; color: #059669; text-align: center; margin: 20px 0; }}
             </style>
         </head>
         <body>
@@ -317,13 +376,26 @@ class EmailService:
                     <p>Your assignment "<strong>{assignment_title}</strong>" has been graded.</p>
                     <div class="grade">{grade}%</div>
                     {f'<p><strong>Feedback:</strong><br>{feedback}</p>' if feedback else ''}
-                    <div style="text-align: center; margin-top: 20px;">
-                        <a href="{dashboard_link}" style="color: #059669;">View on Dashboard →</a>
-                    </div>
+                    <p><a href="{dashboard_link}">View on Dashboard →</a></p>
                 </div>
             </div>
         </body>
         </html>
         """
         
-        EmailService.send_email_async(student_email, f"Grade Posted: {assignment_title}", html_content)
+        return EmailService.send_email_async(student_email, f"Grade Posted: {assignment_title}", html_content)
+
+
+# Test function
+if __name__ == '__main__':
+    print("=" * 60)
+    print("📧 EMAIL SERVICE TEST")
+    print("=" * 60)
+    print(f"Mode: {EmailService.get_mode()}")
+    print(f"Configured: {EmailService.is_configured()}")
+    print(f"Sender Email: {EmailService.SENDER_EMAIL if EmailService.SENDER_EMAIL else '❌'}")
+    
+    if EmailService.USE_SMTP:
+        print(f"SMTP Server: {EmailService.SMTP_SERVER}:{EmailService.SMTP_PORT}")
+    else:
+        print(f"Brevo API: {'✅' if EmailService.BREVO_API_KEY else '❌'}")
