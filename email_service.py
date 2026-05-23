@@ -1,26 +1,30 @@
 # FILE: email_service.py
+# LOCATION: /email_service.py
+# PIPELINE: Pure HTTP API requests (No SMTP, bypasses all cloud firewalls)
+
 import threading
 import os
-import resend  # Import the Resend SDK
+import requests  # Using standard HTTP requests
 from flask import url_for, current_app
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize the Resend client with your environment variable
-resend.api_key = os.environ.get('RESEND_API_KEY')
-
 class EmailService:
-    """Handles all email operations asynchronously using Resend"""
+    """Handles all email operations asynchronously using pure HTTP REST APIs"""
     
-    # Change this to your Resend verified domain or 'onboarding@resend.dev' for testing
-    SENDER_EMAIL = "onboarding@resend.dev" 
-
+    BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+    API_KEY = os.environ.get('BREVO_API_KEY', '')
+    
+    # You can change this to your custom domain email later. 
+    # For now, Brevo allows you to use your registration email to test globally.
+    SENDER_EMAIL = os.environ.get('MAIL_USERNAME', 'your-registered-brevo-email@gmail.com')
+    
     @staticmethod
     def send_email_async(recipient, subject, html_content, text_content=None):
-        """Send email in a background thread safely maintaining Flask state"""
-        if not resend.api_key:
-            print(f"❌ Email not sent - RESEND_API_KEY missing from environment variables.")
+        """Send email via background thread to prevent blocking the Flask UI"""
+        if not EmailService.API_KEY:
+            print(f"❌ Email aborted - BREVO_API_KEY missing from environment.")
             return False
             
         try:
@@ -38,27 +42,38 @@ class EmailService:
     
     @staticmethod
     def _send_email(recipient, subject, html_content, text_content, app_context=None):
-        """Actual email dispatch using Resend's API wrapper"""
+        """Executes the outbound transactional HTTP POST payload securely over Port 443"""
         
         def execute_send():
+            # Build headers required by Brevo's REST architecture
+            headers = {
+                "accept": "application/json",
+                "content-type": "application/json",
+                "api-key": EmailService.API_KEY
+            }
+            
+            # Map out Brevo's exact HTTP JSON contract payload
+            payload = {
+                "sender": {"name": "Submita", "email": EmailService.SENDER_EMAIL},
+                "to": [{"email": recipient}],
+                "subject": subject,
+                "htmlContent": html_content
+            }
+            
+            if text_content:
+                payload["textContent"] = text_content
+                
             try:
-                # Structure the parameters for Resend's client API
-                params = {
-                    "from": f"Submita <{EmailService.SENDER_EMAIL}>",
-                    "to": [recipient],
-                    "subject": subject,
-                    "html": html_content
-                }
+                # Fire the non-blocking HTTP post web request
+                response = requests.post(EmailService.BREVO_API_URL, json=payload, headers=headers, timeout=10)
                 
-                if text_content:
-                    params["text"] = text_content
-                
-                # Send via Resend's secure infrastructure
-                email = resend.Emails.send(params)
-                print(f"✅ Resend email sent successfully to {recipient}. ID: {email.get('id')}")
+                if response.status_code in [200, 201, 202]:
+                    print(f"✅ HTTP Email sent successfully to {recipient}! ID: {response.json().get('messageId')}")
+                else:
+                    print(f"❌ Brevo HTTP Error {response.status_code}: {response.text}")
                     
             except Exception as e:
-                print(f"❌ Resend API call failed for {recipient}: {e}")
+                print(f"❌ Network request exception while calling Brevo HTTP API: {e}")
 
         if app_context:
             with app_context.app_context():
@@ -73,227 +88,28 @@ class EmailService:
         verification_link = url_for('verify', _external=True)
         
         html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-                .header h1 {{ color: #fff; margin: 0; }}
-                .content {{ padding: 30px; background: #fff; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
-                .code {{ background: #f0fdf4; border: 2px dashed #059669; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0; }}
-                .code-value {{ font-size: 32px; font-weight: bold; color: #047857; letter-spacing: 5px; }}
-                .student-id {{ background: #f9fafb; padding: 15px; text-align: center; border-radius: 8px; margin: 15px 0; }}
-                .button {{ display: inline-block; background: #059669; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px; }}
-                .footer {{ text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>Welcome to Submita!</h1>
-                </div>
-                <div class="content">
-                    <p>Hello <strong>{user_name}</strong>,</p>
-                    <p>Thank you for creating an account with Submita. Please use the verification code below to activate your account:</p>
-                    
-                    <div class="code">
-                        <p style="margin-bottom: 10px;">Your Verification Code</p>
-                        <div class="code-value">{verification_code}</div>
-                        <p style="margin-top: 10px; font-size: 12px;">This code expires in 24 hours</p>
-                    </div>
-                    
-                    <div class="student-id">
-                        <p><strong>Your Student ID:</strong> {student_id}</p>
-                        <p style="font-size: 12px; margin-top: 5px;">Keep this ID for future logins</p>
-                    </div>
-                    
-                    <div style="text-align: center;">
-                        <a href="{verification_link}" class="button" style="color: white;">Verify Your Account</a>
-                    </div>
-                    
-                    <p style="margin-top: 20px;">Or enter the code manually on the verification page.</p>
-                    <p>If you didn't create this account, please ignore this email.</p>
-                </div>
-                <div class="footer">
-                    <p>&copy; 2026 Submita. All rights reserved.</p>
-                    <p>Your trusted assignment management platform</p>
-                </div>
-            </div>
-        </body>
-        </html>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2>Welcome to Submita!</h2>
+            <p>Hello <strong>{user_name}</strong>,</p>
+            <p>Your verification code is: <strong style="font-size: 24px; color: #059669; letter-spacing: 2px;">{verification_code}</strong></p>
+            <p>Your Student ID is: <strong>{student_id}</strong></p>
+            <p><a href="{verification_link}" style="background: #059669; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Account</a></p>
+        </div>
         """
-        
-        text_content = f"""
-        Welcome to Submita!
-        
-        Hello {user_name},
-        
-        Your verification code is: {verification_code}
-        Your Student ID is: {student_id}
-        
-        Verify your account at: {verification_link}
-        
-        This code expires in 24 hours.
-        
-        © 2026 Submita
-        """
-        
-        EmailService.send_email_async(user_email, "Verify Your Submita Account", html_content, text_content)
-    
-    @staticmethod
-    def send_lecturer_verification_email(lecturer_data, verification_code, expires_at):
-        """Send lecturer verification code email with secure short code"""
-        registration_link = url_for('register', _external=True)
-        
-        if len(verification_code) > 6:
-            formatted_code = ' '.join([verification_code[i:i+3] for i in range(0, len(verification_code), 3)])
-        else:
-            formatted_code = verification_code
-            
-        # Clean up code class calculation prior to multi-line evaluation
-        code_css_class = "code code-small" if len(verification_code) > 8 else "code"
-        
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 550px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 25px; text-align: center; border-radius: 10px 10px 0 0; }}
-                .header h1 {{ color: #fff; margin: 0; font-size: 22px; }}
-                .content {{ padding: 30px; background: #fff; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
-                .code-box {{ background: #f0fdf4; border: 3px solid #059669; border-radius: 12px; padding: 25px; text-align: center; margin: 20px 0; }}
-                .code {{ font-size: 36px; font-weight: bold; color: #047857; font-family: 'Courier New', monospace; letter-spacing: 5px; }}
-                .code-small {{ font-size: 28px; }}
-                .warning {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px; }}
-                .info {{ background: #e0f2fe; border-left: 4px solid #0284c7; padding: 15px; margin: 20px 0; border-radius: 8px; }}
-                .button {{ display: inline-block; background: #059669; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 8px; }}
-                .footer {{ margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>🔐 Lecturer Verification Code</h1>
-                </div>
-                <div class="content">
-                    <p>Dear <strong>{lecturer_data['full_name']}</strong>,</p>
-                    <p>You have been invited to join Submita as a lecturer. Use the verification code below to complete your registration:</p>
-                    
-                    <div class="code-box">
-                        <p style="margin-bottom: 10px; font-size: 14px;">Your Secure Verification Code</p>
-                        <div class="{code_css_class}">{formatted_code}</div>
-                        <p style="margin-top: 15px; font-size: 12px; color: #059669;">🔑 {len(verification_code)}-character code</p>
-                    </div>
-                    
-                    <div class="info">
-                        <p><strong>📝 How to use:</strong></p>
-                        <p style="margin: 5px 0 0 20px;">1. Copy the code above (case-sensitive)</p>
-                        <p style="margin: 5px 0 0 20px;">2. Enter it in the verification field during registration</p>
-                    </div>
-                    
-                    <div class="warning">
-                        <p><strong>⚠️ Security Notice:</strong></p>
-                        <p>• Code expires on <strong>{expires_at.strftime('%Y-%m-%d at %H:%M')}</strong></p>
-                    </div>
-                    
-                    <div style="text-align: center;">
-                        <a href="{registration_link}" class="button" style="color: white;">Complete Registration →</a>
-                    </div>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        
-        text_content = f"""
-        🔐 Lecturer Verification Code
-        
-        Dear {lecturer_data['full_name']},
-        
-        Your secure verification code is: {verification_code}
-        Expires: {expires_at.strftime('%Y-%m-%d %H:%M')}
-        
-        Complete your registration at: {registration_link}
-        """
-        EmailService.send_email_async(lecturer_data['email'], "🔐 Submita Lecturer Verification Code", html_content, text_content)
+        EmailService.send_email_async(user_email, "Verify Your Submita Account", html_content)
 
     @staticmethod
-    def send_password_reset_email(user_email, reset_token):
-        """Send password reset email"""
-        reset_link = url_for('reset_password', token=reset_token, _external=True)
-        
+    def send_otp(user_email, user_name, otp_code):
+        """Send a transactional 6-digit login OTP code anywhere in the world"""
         html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; }}
-                .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: #059669; padding: 20px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
-                .content {{ padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
-                .button {{ background: #059669; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h2>Password Reset Request</h2>
-                </div>
-                <div class="content">
-                    <p>You requested to reset your password. Click the button below to proceed:</p>
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="{reset_link}" class="button" style="color: white;">Reset Password</a>
-                    </div>
-                    <p>This link expires in 1 hour.</p>
-                </div>
+        <div style="font-family: sans-serif; max-width: 400px; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; margin: 0 auto;">
+            <h2 style="color: #059669; text-align: center;">Your Login Code</h2>
+            <p>Hello {user_name},</p>
+            <p>Use this one-time token to access your account:</p>
+            <div style="font-size: 32px; font-weight: bold; background: #f0fdf4; color: #047857; text-align: center; padding: 10px; border-radius: 6px; letter-spacing: 5px;">
+                {otp_code}
             </div>
-        </body>
-        </html>
+            <p style="font-size: 11px; color: #6b7280; text-align: center; margin-top: 15px;">Valid for 10 minutes.</p>
+        </div>
         """
-        EmailService.send_email_async(user_email, "Reset Your Submita Password", html_content)
-        
-    @staticmethod
-    def send_grade_notification(student_email, student_name, assignment_title, grade, feedback=None):
-        """Send grade notification email"""
-        dashboard_link = url_for('student_dashboard', _external=True)
-        
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; }}
-                .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 20px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
-                .content {{ padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
-                .grade {{ font-size: 36px; font-weight: bold; color: #059669; text-align: center; margin: 20px 0; }}
-                .feedback {{ background: #f9fafb; padding: 15px; border-radius: 8px; margin: 15px 0; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h2>Assignment Graded!</h2>
-                </div>
-                <div class="content">
-                    <p>Hello <strong>{student_name}</strong>,</p>
-                    <p>Your assignment "<strong>{assignment_title}</strong>" has been graded.</p>
-                    <div class="grade">{grade}%</div>
-                    {f'<div class="feedback"><strong>Feedback:</strong><br>{feedback}</div>' if feedback else ''}
-                    <div style="text-align: center; margin-top: 20px;">
-                        <a href="{dashboard_link}" style="color: #059669;">View on Dashboard →</a>
-                    </div>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        EmailService.send_email_async(student_email, f"Grade Posted: {assignment_title}", html_content)
+        EmailService.send_email_async(user_email, f"🔒 {otp_code} is your Submita code", html_content)
