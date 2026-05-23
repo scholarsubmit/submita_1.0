@@ -1,580 +1,508 @@
+<!-- templates/create_assignment.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .create-container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 1.5rem;
-    }
+<div class="dashboard-bg min-h-screen py-8">
+    <div class="max-w-5xl mx-auto px-4">
+        <!-- Decorative elements -->
+        <div class="fixed top-20 left-10 w-64 h-64 bg-emerald-200/20 rounded-full blur-3xl float-1 pointer-events-none"></div>
+        <div class="fixed bottom-20 right-10 w-80 h-80 bg-blue-200/20 rounded-full blur-3xl float-2 pointer-events-none"></div>
 
-    .create-card {
-        background: white;
-        border-radius: 24px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
+        <div class="relative z-10">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <button onclick="goBack()" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition">
+                    <i class="fas fa-arrow-left text-xs"></i> Back
+                </button>
+            </div>
 
-    body.dark-mode .create-card {
-        background: #1f2937;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-
-    .card-header {
-        background: linear-gradient(135deg, #059669, #047857);
-        padding: 1.5rem 2rem;
-        color: white;
-    }
-
-    body.dark-mode .card-header {
-        background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .card-header h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-    }
-
-    .card-header p {
-        font-size: 0.85rem;
-        opacity: 0.9;
-    }
-
-    .form-container {
-        padding: 2rem;
-    }
-
-    .form-section {
-        margin-bottom: 2rem;
-        padding-bottom: 1.5rem;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    body.dark-mode .form-section {
-        border-color: #374151;
-    }
-
-    .form-section-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    body.dark-mode .form-section-title {
-        color: #f3f4f6;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .form-group {
-        margin-bottom: 1rem;
-    }
-
-    .form-group label {
-        display: block;
-        font-size: 0.85rem;
-        font-weight: 500;
-        color: #374151;
-        margin-bottom: 0.5rem;
-    }
-
-    body.dark-mode .form-group label {
-        color: #d1d5db;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        transition: all 0.2s ease;
-        background: white;
-    }
-
-    body.dark-mode .form-group input,
-    body.dark-mode .form-group textarea,
-    body.dark-mode .form-group select {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-        outline: none;
-        border-color: #059669;
-        box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
-    }
-
-    body.dark-mode .form-group input:focus,
-    body.dark-mode .form-group textarea:focus,
-    body.dark-mode .form-group select:focus {
-        border-color: #10b981;
-        box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
-    }
-
-    textarea {
-        resize: vertical;
-        min-height: 120px;
-        font-family: inherit;
-    }
-
-    /* Rich Text Editor */
-    .editor-toolbar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.25rem;
-        padding: 0.5rem;
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px 12px 0 0;
-        margin-bottom: 0;
-    }
-
-    body.dark-mode .editor-toolbar {
-        background: #111827;
-        border-color: #374151;
-    }
-
-    .editor-toolbar button {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        padding: 0.4rem 0.8rem;
-        font-size: 0.75rem;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    body.dark-mode .editor-toolbar button {
-        background: #1f2937;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .editor-toolbar button:hover {
-        background: #f0fdf4;
-        border-color: #059669;
-    }
-
-    body.dark-mode .editor-toolbar button:hover {
-        background: #374151;
-        border-color: #10b981;
-    }
-
-    .rich-editor {
-        border: 1px solid #e5e7eb;
-        border-top: none;
-        border-radius: 0 0 12px 12px;
-        padding: 1rem;
-        min-height: 200px;
-        background: white;
-        line-height: 1.6;
-        font-size: 0.85rem;
-    }
-
-    body.dark-mode .rich-editor {
-        background: #1f2937;
-        border-color: #374151;
-        color: #f3f4f6;
-    }
-
-    .rich-editor:focus {
-        outline: none;
-    }
-
-    /* File Upload */
-    .file-upload-area {
-        border: 2px dashed #e5e7eb;
-        border-radius: 16px;
-        padding: 2rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    body.dark-mode .file-upload-area {
-        border-color: #374151;
-    }
-
-    .file-upload-area:hover {
-        border-color: #059669;
-        background: #f0fdf4;
-    }
-
-    body.dark-mode .file-upload-area:hover {
-        border-color: #10b981;
-        background: #374151;
-    }
-
-    .upload-icon {
-        font-size: 2.5rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .upload-hint {
-        font-size: 0.7rem;
-        color: #6b7280;
-        margin-top: 0.5rem;
-    }
-
-    .current-file {
-        margin-top: 0.5rem;
-        padding: 0.5rem;
-        background: #f0fdf4;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    body.dark-mode .current-file {
-        background: #374151;
-    }
-
-    /* Form Actions */
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1rem;
-    }
-
-    .btn-submit {
-        flex: 1;
-        background: linear-gradient(135deg, #059669, #047857);
-        color: white;
-        border: none;
-        padding: 0.875rem;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(5,150,105,0.3);
-    }
-
-    body.dark-mode .btn-submit {
-        background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .btn-cancel {
-        flex: 0 0 auto;
-        background: white;
-        color: #6b7280;
-        border: 1px solid #e5e7eb;
-        padding: 0.875rem 1.5rem;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        text-decoration: none;
-        text-align: center;
-        transition: all 0.2s;
-    }
-
-    .btn-cancel:hover {
-        background: #f9fafb;
-    }
-
-    body.dark-mode .btn-cancel {
-        background: #1f2937;
-        border-color: #374151;
-        color: #9ca3af;
-    }
-
-    body.dark-mode .btn-cancel:hover {
-        background: #374151;
-    }
-
-    /* Info Cards */
-    .info-cards {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin: 1.5rem 0;
-    }
-
-    .info-card {
-        background: #f9fafb;
-        border-radius: 12px;
-        padding: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    body.dark-mode .info-card {
-        background: #374151;
-    }
-
-    .info-icon {
-        font-size: 1.5rem;
-    }
-
-    .info-text h4 {
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-bottom: 0.2rem;
-    }
-
-    .info-text p {
-        font-size: 0.7rem;
-        color: #6b7280;
-    }
-
-    @media (max-width: 768px) {
-        .create-container {
-            padding: 1rem;
-        }
-        .form-container {
-            padding: 1.5rem;
-        }
-        .form-row {
-            grid-template-columns: 1fr;
-            gap: 0;
-        }
-        .info-cards {
-            grid-template-columns: 1fr;
-        }
-        .form-actions {
-            flex-direction: column;
-        }
-    }
-</style>
-
-<div class="create-container">
-    <div class="create-card">
-        <div class="card-header">
-            <h1><i class="fas fa-plus-circle"></i> Create New Assignment</h1>
-            <p>Create and publish assignments for your students</p>
-        </div>
-
-        <div class="form-container">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}" style="margin-bottom: 1.5rem;">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-
-            <form method="POST" enctype="multipart/form-data" id="assignmentForm">
-                <!-- Course Information -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-graduation-cap"></i> Course Information
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Course Title *</label>
-                            <input type="text" name="course_title" placeholder="e.g., Data Structures and Algorithms" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Course Code *</label>
-                            <input type="text" name="course_code" placeholder="e.g., CSC301" required>
-                        </div>
-                    </div>
+            <!-- Form Card -->
+            <div class="glass-card rounded-2xl border border-white/40 overflow-hidden shadow-xl">
+                <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 px-6 py-5">
+                    <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-emerald-300"></i> Create New Assignment
+                    </h1>
+                    <p class="text-emerald-100 text-sm mt-1">Target specific students with secure assignment delivery</p>
                 </div>
 
-                <!-- Assignment Information -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-tasks"></i> Assignment Information
-                    </div>
-                    <div class="form-group">
-                        <label>Assignment Title *</label>
-                        <input type="text" name="title" placeholder="e.g., Binary Search Tree Implementation" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Deadline *</label>
-                        <input type="datetime-local" name="deadline" id="deadline" required>
-                        <small style="font-size: 0.7rem; color: #6b7280;">Students cannot submit after this time</small>
-                    </div>
-                </div>
-
-                <!-- Assignment Questions -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-question-circle"></i> Assignment Questions
-                    </div>
-                    <div class="form-group">
-                        <label>Questions / Description *</label>
-                        <div class="editor-toolbar">
-                            <button type="button" onclick="formatText('bold')"><strong>B</strong></button>
-                            <button type="button" onclick="formatText('italic')"><em>I</em></button>
-                            <button type="button" onclick="formatText('underline')"><u>U</u></button>
-                            <button type="button" onclick="formatText('insertOrderedList')">1.</button>
-                            <button type="button" onclick="formatText('insertUnorderedList')">•</button>
-                        </div>
-                        <div id="questionsEditor" class="rich-editor" contenteditable="true" 
-                             placeholder="Describe the assignment requirements, questions, and expectations..."></div>
-                        <textarea name="questions" style="display:none;"></textarea>
-                    </div>
-                </div>
-
-                <!-- Instructions -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-info-circle"></i> Instructions (Optional)
-                    </div>
-                    <div class="form-group">
-                        <textarea name="instructions" rows="4" 
-                                  placeholder="Provide additional instructions or guidelines for students..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Attachment -->
-                <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-paperclip"></i> Attachment (Optional)
-                    </div>
-                    <div class="form-group">
-                        <div class="file-upload-area" onclick="document.getElementById('attachment').click()">
-                            <div class="upload-icon">📎</div>
-                            <div>Click to upload or drag and drop</div>
-                            <div class="upload-hint">Supported: PDF, DOC, DOCX, TXT, ZIP, JPG, PNG (Max 20MB)</div>
-                            <input type="file" id="attachment" name="attachment" style="display:none;" 
-                                   accept=".pdf,.doc,.docx,.txt,.zip,.jpg,.jpeg,.png,.gif">
-                        </div>
-                        <div id="attachmentInfo" style="display:none;" class="current-file">
-                            <i class="fas fa-file"></i>
-                            <span id="attachmentName"></span>
-                            <button type="button" onclick="clearAttachment()" style="margin-left: auto; background: none; border: none; cursor: pointer; color: #dc2626;">✖</button>
+                <form method="POST" action="{{ url_for('create_assignment') }}" enctype="multipart/form-data" class="p-6 space-y-6" id="assignmentForm">
+                    
+                    <!-- Basic Information Section -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-info-circle text-emerald-600"></i> Basic Information
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Assignment Title <span class="text-red-500">*</span></label>
+                                <input type="text" name="title" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" placeholder="e.g., Data Structures Assignment 2">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Course Code <span class="text-red-500">*</span></label>
+                                <input type="text" name="course_code" id="courseCode" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" placeholder="e.g., CSC 301">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Course Title <span class="text-red-500">*</span></label>
+                                <input type="text" name="course_title" id="courseTitle" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" placeholder="e.g., Data Structures and Algorithms">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Info Cards -->
-                <div class="info-cards">
-                    <div class="info-card">
-                        <div class="info-icon">🔍</div>
-                        <div class="info-text">
-                            <h4>Plagiarism Detection</h4>
-                            <p>Submissions will be automatically checked for similarity</p>
+                    <!-- Questions & Instructions -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-file-alt text-emerald-600"></i> Assignment Content
+                        </h2>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Questions/Description <span class="text-red-500">*</span></label>
+                            <textarea name="questions" rows="6" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none" placeholder="Describe the assignment requirements, questions, or instructions in detail..."></textarea>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Additional Instructions (Optional)</label>
+                            <textarea name="instructions" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none" placeholder="Formatting guidelines, resources, submission requirements..."></textarea>
                         </div>
                     </div>
-                    <div class="info-card">
-                        <div class="info-icon">🤖</div>
-                        <div class="info-text">
-                            <h4>Auto-Grading Ready</h4>
-                            <p>Test cases can be added after creation</p>
+
+                    <!-- Targeting Section -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-target text-emerald-600"></i> Targeting - Who can see this assignment?
+                        </h2>
+                        <p class="text-sm text-gray-500 mb-4">Select the specific students who should have access to this assignment</p>
+                        
+                        <!-- Level Selection -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-layer-group text-emerald-600 mr-1"></i> Target Levels
+                            </label>
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="levelCheckboxes">
+                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
+                                    <input type="checkbox" name="levels" value="100" class="w-4 h-4 text-emerald-600 rounded">
+                                    <span class="text-sm font-medium">100 Level</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
+                                    <input type="checkbox" name="levels" value="200" class="w-4 h-4 text-emerald-600 rounded">
+                                    <span class="text-sm font-medium">200 Level</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
+                                    <input type="checkbox" name="levels" value="300" class="w-4 h-4 text-emerald-600 rounded">
+                                    <span class="text-sm font-medium">300 Level</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
+                                    <input type="checkbox" name="levels" value="400" class="w-4 h-4 text-emerald-600 rounded">
+                                    <span class="text-sm font-medium">400 Level</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
+                                    <input type="checkbox" name="levels" value="500" class="w-4 h-4 text-emerald-600 rounded">
+                                    <span class="text-sm font-medium">500 Level</span>
+                                </label>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Select the academic levels that should see this assignment</p>
+                        </div>
+
+                        <!-- College Selection -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-university text-emerald-600 mr-1"></i> Target Colleges
+                            </label>
+                            <div class="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-xl" id="collegeCheckboxes">
+                                {% if colleges %}
+                                    {% for college in colleges %}
+                                    <label class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-emerald-50 transition">
+                                        <input type="checkbox" name="colleges" value="{{ college.id }}" class="w-4 h-4 text-emerald-600 rounded">
+                                        <span class="text-sm">{{ college.name }}</span>
+                                    </label>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-4 text-gray-500">
+                                        <i class="fas fa-building"></i> No colleges available
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Select specific colleges (leave empty for all colleges)</p>
+                        </div>
+
+                        <!-- Department Selection -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-building text-emerald-600 mr-1"></i> Target Departments
+                            </label>
+                            <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-xl" id="departmentCheckboxes">
+                                {% if departments %}
+                                    {% for dept in departments %}
+                                    <label class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-emerald-50 transition">
+                                        <input type="checkbox" name="departments" value="{{ dept.id }}" class="w-4 h-4 text-emerald-600 rounded">
+                                        <span class="text-sm">{{ dept.name }} ({{ dept.code }})</span>
+                                    </label>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-4 text-gray-500">
+                                        <i class="fas fa-book"></i> No departments available
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2">Select specific departments (leave empty for all departments)</p>
+                        </div>
+
+                        <!-- Quick Select Buttons -->
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <button type="button" onclick="selectAllLevels()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Select All Levels</button>
+                            <button type="button" onclick="deselectAllLevels()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Deselect All Levels</button>
+                            <button type="button" onclick="selectAllColleges()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Select All Colleges</button>
+                            <button type="button" onclick="deselectAllColleges()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Deselect All Colleges</button>
+                            <button type="button" onclick="selectAllDepartments()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Select All Departments</button>
+                            <button type="button" onclick="deselectAllDepartments()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Deselect All Departments</button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Form Actions -->
-                <div class="form-actions">
-                    <button type="submit" class="btn-submit" onclick="prepareSubmit()">
-                        <i class="fas fa-check"></i> Create Assignment
-                    </button>
-                    <a href="{{ url_for('lecturer_dashboard') }}" class="btn-cancel">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
+                    <!-- Semester & Academic Calendar -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-calendar-alt text-emerald-600"></i> Academic Calendar
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Academic Year</label>
+                                <select name="academic_year" id="academicYear" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                    <option value="">Select Academic Year</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                                <select name="semester" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                    <option value="">Select Semester</option>
+                                    <option value="First">First Semester</option>
+                                    <option value="Second">Second Semester</option>
+                                    <option value="Summer">Summer Semester</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
+                                <input type="datetime-local" name="deadline" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security & Submission Rules -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-shield-alt text-emerald-600"></i> Security & Submission Rules
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Late Submission Penalty (% per day)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="range" name="late_penalty" min="0" max="50" value="10" step="5" class="flex-1" id="penaltySlider">
+                                    <span id="penaltyValue" class="text-sm font-semibold text-emerald-600 w-12">10%</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Max File Size (MB)</label>
+                                <select name="max_file_size" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                    <option value="5">5 MB</option>
+                                    <option value="10" selected>10 MB</option>
+                                    <option value="20">20 MB</option>
+                                    <option value="50">50 MB</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Allowed File Types</label>
+                                <select name="allowed_types" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                    <option value="pdf,doc,docx">PDF, DOC, DOCX</option>
+                                    <option value="pdf,doc,docx,ppt,pptx">Office Documents</option>
+                                    <option value="pdf,zip,rar">PDF + Archives</option>
+                                    <option value="pdf,py,java,cpp">Code Files + PDF</option>
+                                    <option value="*">All File Types</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Plagiarism Alert Threshold</label>
+                                <select name="plagiarism_threshold" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                    <option value="20">20% (Strict)</option>
+                                    <option value="30" selected>30% (Moderate)</option>
+                                    <option value="40">40% (Lenient)</option>
+                                    <option value="50">50% (Very Lenient)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attachment Upload -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="fas fa-paperclip text-emerald-600"></i> Attachment (Optional)
+                        </h2>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-emerald-400 transition cursor-pointer" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="text-sm text-gray-500">Drag & drop or click to upload</p>
+                            <p class="text-xs text-gray-400 mt-1">PDF, DOC, DOCX, ZIP (Max 10MB)</p>
+                            <input type="file" name="attachment" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.zip">
+                            <button type="button" onclick="document.getElementById('fileInput').click()" class="mt-3 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">Choose File</button>
+                        </div>
+                        <div id="fileInfo" class="hidden mt-3 p-3 bg-emerald-50 rounded-lg">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-file-pdf text-emerald-600"></i>
+                                    <span id="fileName" class="text-sm text-gray-700"></span>
+                                </div>
+                                <button type="button" onclick="clearFile()" class="text-red-500 hover:text-red-700 text-sm">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Publish Options -->
+                    <div class="pt-2">
+                        <div class="flex items-center gap-4 p-4 bg-amber-50 rounded-xl">
+                            <input type="checkbox" name="save_draft" id="saveDraft" class="w-5 h-5 text-emerald-600 rounded">
+                            <div>
+                                <label for="saveDraft" class="font-medium text-gray-700 cursor-pointer">Save as Draft</label>
+                                <p class="text-xs text-gray-500">Students won't see the assignment until you publish it</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-4 pt-4">
+                        <button type="submit" name="action" value="publish" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition btn-shine">
+                            <i class="fas fa-paper-plane mr-2"></i> Publish Assignment
+                        </button>
+                        <button type="submit" name="action" value="draft" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition">
+                            <i class="fas fa-save mr-2"></i> Save as Draft
+                        </button>
+                        <a href="{{ url_for('lecturer_dashboard') }}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition text-center">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security Tips -->
+            <div class="mt-6 bg-blue-50/80 backdrop-blur-sm rounded-xl p-4 border border-blue-200">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-shield-alt text-blue-600 text-lg mt-0.5"></i>
+                    <div class="text-sm text-blue-800">
+                        <strong class="block mb-1">Security & Best Practices</strong>
+                        <ul class="space-y-1 text-xs">
+                            <li>✓ Students will only see assignments matching their level, department, and college</li>
+                            <li>✓ Late submissions automatically incur penalties based on your settings</li>
+                            <li>✓ Plagiarism detection runs automatically on all submissions</li>
+                            <li>✓ All submissions are timestamped for verification</li>
+                            <li>✓ You can lock assignments after the deadline to prevent late submissions</li>
+                        </ul>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-    // Set minimum date for deadline picker
-    const deadlineInput = document.getElementById('deadline');
-    if (deadlineInput) {
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        deadlineInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
-        
-        // Set default deadline to 7 days from now
-        const defaultDate = new Date();
-        defaultDate.setDate(defaultDate.getDate() + 7);
-        const defaultYear = defaultDate.getFullYear();
-        const defaultMonth = String(defaultDate.getMonth() + 1).padStart(2, '0');
-        const defaultDay = String(defaultDate.getDate()).padStart(2, '0');
-        deadlineInput.value = `${defaultYear}-${defaultMonth}-${defaultDay}T23:59`;
-    }
+<!-- Make sure these fields exist in your form -->
+<input type="text" name="title" required>
+<input type="text" name="course_code" required>
+<input type="text" name="course_title" required>
+<input type="datetime-local" name="deadline" required>
+<textarea name="questions" required></textarea>
+<!-- Levels checkboxes with name="levels" -->
+<input type="checkbox" name="levels" value="100">
 
-    // Rich text formatting
-    function formatText(command) {
-        document.execCommand(command, false, null);
-        document.getElementById('questionsEditor').focus();
+<style>
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
     }
-
-    // File upload handling
-    let selectedFile = null;
     
-    document.getElementById('attachment').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const maxSize = 20 * 1024 * 1024;
-            if (file.size > maxSize) {
-                alert('File size must be less than 20MB');
-                this.value = '';
-                return;
-            }
-            selectedFile = file;
-            document.getElementById('attachmentName').textContent = file.name;
-            document.getElementById('attachmentInfo').style.display = 'flex';
-            document.querySelector('.file-upload-area').style.display = 'none';
-        }
-    });
-
-    function clearAttachment() {
-        document.getElementById('attachment').value = '';
-        selectedFile = null;
-        document.getElementById('attachmentInfo').style.display = 'none';
-        document.querySelector('.file-upload-area').style.display = 'block';
+    .dashboard-bg {
+        background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
     }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    
+    .btn-shine {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-shine::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+        transform: rotate(30deg) translateX(-100%);
+        transition: transform 0.6s;
+    }
+    
+    .btn-shine:hover::after {
+        transform: rotate(30deg) translateX(100%);
+    }
+    
+    .level-option {
+        transition: all 0.2s ease;
+    }
+    
+    .level-option:hover {
+        transform: translateY(-2px);
+    }
+    
+    #dropZone {
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    #dropZone.dragover {
+        background: #f0fdf4;
+        border-color: #10b981;
+    }
+</style>
 
-    // Prepare form for submission
-    function prepareSubmit() {
-        const editor = document.getElementById('questionsEditor');
-        const textarea = document.querySelector('textarea[name="questions"]');
-        textarea.value = editor.innerHTML;
+<script>
+    // Generate progressive academic years
+    function generateAcademicYears() {
+        const currentYear = new Date().getFullYear();
+        const startYear = currentYear - 10;
+        const endYear = currentYear + 5;
+        const yearSelect = document.getElementById('academicYear');
         
-        // Validate required fields
-        const title = document.querySelector('input[name="title"]').value;
-        const courseTitle = document.querySelector('input[name="course_title"]').value;
-        const courseCode = document.querySelector('input[name="course_code"]').value;
+        if (!yearSelect) return;
         
-        if (!title || !courseTitle || !courseCode) {
-            alert('Please fill in all required fields');
-            return false;
+        while (yearSelect.options.length > 1) {
+            yearSelect.remove(1);
         }
         
-        if (!editor.innerText.trim()) {
-            alert('Please enter assignment questions');
+        for (let year = startYear; year <= endYear; year++) {
+            const nextYear = year + 1;
+            const option = document.createElement('option');
+            option.value = `${year}/${nextYear}`;
+            option.textContent = `${year}/${nextYear} Academic Year`;
+            
+            if (year === currentYear) {
+                option.selected = true;
+            }
+            
+            yearSelect.appendChild(option);
+        }
+    }
+    
+    // Quick select functions
+    function selectAllLevels() {
+        document.querySelectorAll('input[name="levels"]').forEach(cb => cb.checked = true);
+    }
+    
+    function deselectAllLevels() {
+        document.querySelectorAll('input[name="levels"]').forEach(cb => cb.checked = false);
+    }
+    
+    function selectAllColleges() {
+        document.querySelectorAll('input[name="colleges"]').forEach(cb => cb.checked = true);
+    }
+    
+    function deselectAllColleges() {
+        document.querySelectorAll('input[name="colleges"]').forEach(cb => cb.checked = false);
+    }
+    
+    function selectAllDepartments() {
+        document.querySelectorAll('input[name="departments"]').forEach(cb => cb.checked = true);
+    }
+    
+    function deselectAllDepartments() {
+        document.querySelectorAll('input[name="departments"]').forEach(cb => cb.checked = false);
+    }
+    
+    // Populate academic years on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        generateAcademicYears();
+    });
+    
+    // Penalty slider
+    const slider = document.getElementById('penaltySlider');
+    const penaltyValue = document.getElementById('penaltyValue');
+    if (slider) {
+        slider.addEventListener('input', function() {
+            penaltyValue.textContent = this.value + '%';
+        });
+    }
+    
+    // File upload handling
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    
+    if (dropZone) {
+        dropZone.addEventListener('click', () => fileInput?.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+    }
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
+    }
+    
+    function handleFile(file) {
+        if (fileName) fileName.textContent = file.name;
+        if (fileInfo) fileInfo.classList.remove('hidden');
+        if (dropZone) dropZone.classList.add('opacity-50');
+    }
+    
+    function clearFile() {
+        if (fileInfo) fileInfo.classList.add('hidden');
+        if (fileInput) fileInput.value = '';
+        if (dropZone) dropZone.classList.remove('opacity-50');
+    }
+    
+    // Level validation - at least one level required
+    function validateLevels() {
+        const levelCheckboxes = document.querySelectorAll('input[name="levels"]');
+        let checked = false;
+        levelCheckboxes.forEach(cb => { if (cb.checked) checked = true; });
+        if (!checked) {
+            alert('Please select at least one academic level');
             return false;
         }
-        
         return true;
     }
     
-    // Auto-capitalize course code
-    document.querySelector('input[name="course_code"]')?.addEventListener('input', function() {
-        this.value = this.value.toUpperCase();
-    });
+    // Form validation
+    const form = document.getElementById('assignmentForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateLevels()) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    function goBack() {
+        if (document.referrer && document.referrer !== window.location.href) {
+            window.history.back();
+        } else {
+            window.location.href = '/lecturer-dashboard';
+        }
+    }
 </script>
 {% endblock %}

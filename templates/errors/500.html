@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Error - Submita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.6s ease-out forwards;
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-2xl w-full text-center animate-slide-in">
+            <!-- Server Icon -->
+            <div class="relative mb-8">
+                <div class="w-40 h-40 mx-auto bg-gradient-to-br from-red-500 to-orange-600 rounded-full flex items-center justify-center shadow-2xl animate-pulse-slow">
+                    <i class="fas fa-server text-white text-6xl"></i>
+                </div>
+                <div class="absolute -top-2 -right-2 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-exclamation-triangle text-white text-xl"></i>
+                </div>
+            </div>
+            
+            <!-- Error Message -->
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">Server Error</h1>
+            <p class="text-gray-600 mb-4 max-w-md mx-auto">
+                Something went wrong on our end. Our technical team has been notified and is working on a fix.
+            </p>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 max-w-md mx-auto">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-info-circle text-yellow-600"></i>
+                    <p class="text-sm text-yellow-800">Error Reference: <span id="errorId" class="font-mono">Loading...</span></p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <button onclick="location.reload()" 
+                        class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-sync-alt"></i>
+                    Try Again
+                </button>
+                <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('home') }}" 
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all">
+                    <i class="fas fa-home"></i>
+                    Go Home
+                </a>
+            </div>
+            
+            <!-- Report Issue -->
+            <button onclick="reportIssue()" class="text-sm text-gray-500 hover:text-red-600 transition">
+                <i class="fas fa-bug mr-1"></i> Report this issue
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Generate random error ID
+        document.getElementById('errorId').textContent = 'ERR-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+        
+        function reportIssue() {
+            alert('Our team has been automatically notified. If the issue persists, please contact support@submita.com');
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

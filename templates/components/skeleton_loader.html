@@ -1,0 +1,63 @@
+<!-- Skeleton Loader Component -->
+<div class="skeleton-container">
+    <!-- Stats Skeleton -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-2xl p-6 shadow-lg">
+            <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+            <div class="skeleton h-8 w-24 mb-2"></div>
+            <div class="skeleton h-4 w-32"></div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-lg">
+            <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+            <div class="skeleton h-8 w-24 mb-2"></div>
+            <div class="skeleton h-4 w-32"></div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-lg">
+            <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+            <div class="skeleton h-8 w-24 mb-2"></div>
+            <div class="skeleton h-4 w-32"></div>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-lg">
+            <div class="skeleton h-12 w-12 rounded-xl mb-4"></div>
+            <div class="skeleton h-8 w-24 mb-2"></div>
+            <div class="skeleton h-4 w-32"></div>
+        </div>
+    </div>
+    
+    <!-- Content Skeleton -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl p-6">
+                <div class="skeleton h-6 w-40 mb-6"></div>
+                <div class="space-y-4">
+                    <div class="skeleton h-16 w-full"></div>
+                    <div class="skeleton h-16 w-full"></div>
+                    <div class="skeleton h-16 w-full"></div>
+                </div>
+            </div>
+        </div>
+        <div class="space-y-6">
+            <div class="bg-white rounded-2xl p-6">
+                <div class="skeleton h-6 w-32 mb-6"></div>
+                <div class="space-y-3">
+                    <div class="skeleton h-12 w-full"></div>
+                    <div class="skeleton h-12 w-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes skeleton-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .skeleton {
+        background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+        background-size: 200% 100%;
+        animation: skeleton-pulse 1.5s ease-in-out infinite;
+        border-radius: 8px;
+    }
+</style>

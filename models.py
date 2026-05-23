@@ -1,3 +1,6 @@
+# FILE: models.py
+# FIXES: Added overlaps parameters to fix relationship conflicts, added indexes
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from datetime import datetime
@@ -9,76 +12,296 @@ class UserRole:
     LECTURER = 'lecturer'
     ADMIN = 'admin'
 
+
 class User(UserMixin, db.Model):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
+    
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     matric = db.Column(db.String(50), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)    
     password = db.Column(db.String(200), nullable=False)
-    code = db.Column(db.String(6))
+    code = db.Column(db.String(10))
     verified = db.Column(db.Boolean, default=False)
     role = db.Column(db.String(20), default=UserRole.STUDENT)
     department = db.Column(db.String(100), default='Computer Science')
+    college = db.Column(db.String(100), default='College of Natural Sciences')
+    level = db.Column(db.String(10))
     created_at = db.Column(db.DateTime, default=datetime.now)
     last_login = db.Column(db.DateTime)
+    account_active = db.Column(db.Boolean, default=True)
+    
+    # Student fields
+    student_id = db.Column(db.String(50), unique=True, nullable=True)
+    email_verified = db.Column(db.Boolean, default=False)
+    email_verified_at = db.Column(db.DateTime)
+    verification_token = db.Column(db.String(100), unique=True)
+    token_expires_at = db.Column(db.DateTime)
+    registration_number = db.Column(db.Integer)
+    
+    # Foreign keys
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
+    college_id = db.Column(db.Integer, db.ForeignKey('colleges.id'), nullable=True)
+    
+    # Relationships
+    submissions = db.relationship('Submission', backref='student', lazy='select', cascade='all, delete-orphan')
+    created_assignments = db.relationship('Assignment', backref='creator', lazy='select', foreign_keys='Assignment.created_by')
+    verification_codes = db.relationship('VerificationCode', backref='user', lazy='select')
+    activity_logs = db.relationship('ActivityLog', backref='user', lazy='select')
+    
+    # Lecturer verification relationships
+    created_verification_codes = db.relationship(
+        'LecturerVerification',
+        foreign_keys='LecturerVerification.created_by',
+        backref='code_creator',
+        lazy='select'
+    )
+    
+    # Indexes for faster queries
+    __table_args__ = (
+        db.Index('idx_users_email', 'email'),
+        db.Index('idx_users_matric', 'matric'),
+        db.Index('idx_users_role', 'role'),
+        db.Index('idx_users_created_at', 'created_at'),
+        db.Index('idx_users_student_id', 'student_id'),
+        db.Index('idx_users_role_verified', 'role', 'verified'),
+    )
     
     def get_id(self):
         return str(self.id)
     
+    @property
+    def is_active(self):
+        return self.account_active and self.verified
+    
+    @property
+    def is_authenticated(self):
+        return True
+    
+    @property
+    def is_anonymous(self):
+        return False
+    
     def is_admin(self):
+        """Check if user is admin - safe access without session"""
         return self.role == UserRole.ADMIN
     
     def is_lecturer(self):
+        """Check if user is lecturer - safe access without session"""
         return self.role == UserRole.LECTURER
     
     def is_student(self):
+        """Check if user is student - safe access without session"""
         return self.role == UserRole.STUDENT
+    
+    def __repr__(self):
+        return f"<User {self.email}>"
+
+
+class College(db.Model):
+    __tablename__ = 'colleges'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    code = db.Column(db.String(20), unique=True, nullable=False)
+    description = db.Column(db.Text)
+    dean_name = db.Column(db.String(200))
+    dean_email = db.Column(db.String(120))
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    departments = db.relationship('Department', backref='college_ref', lazy='select', cascade='all, delete-orphan')
+    courses = db.relationship('Course', backref='college_ref', lazy='select')
+    
+    __table_args__ = (
+        db.Index('idx_colleges_name', 'name'),
+        db.Index('idx_colleges_code', 'code'),
+    )
+    
+    def __repr__(self):
+        return f"<College {self.name}>"
+
+
+class Department(db.Model):
+    __tablename__ = 'departments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    code = db.Column(db.String(20), unique=True, nullable=False)
+    description = db.Column(db.Text)
+    hod_name = db.Column(db.String(200))
+    hod_email = db.Column(db.String(120))
+    college_id = db.Column(db.Integer, db.ForeignKey('colleges.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    courses = db.relationship('Course', backref='department_ref', lazy='select', cascade='all, delete-orphan')
+    
+    __table_args__ = (
+        db.Index('idx_departments_name', 'name'),
+        db.Index('idx_departments_code', 'code'),
+        db.Index('idx_departments_college', 'college_id'),
+    )
+    
+    def __repr__(self):
+        return f"<Department {self.name}>"
+
+
+class Course(db.Model):
+    __tablename__ = 'courses'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    credits = db.Column(db.Integer, default=3)
+    level = db.Column(db.String(10), nullable=False)
+    semester = db.Column(db.String(20), nullable=False)
+    academic_year = db.Column(db.String(20))
+    is_active = db.Column(db.Boolean, default=True)
+    
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=False)
+    college_id = db.Column(db.Integer, db.ForeignKey('colleges.id'), nullable=False)
+    lecturer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    # Fixed: Added overlaps parameter to resolve conflict
+    enrollments = db.relationship(
+        'StudentEnrollment', 
+        backref='course_ref', 
+        lazy='select', 
+        cascade='all, delete-orphan',
+        overlaps="enrolled_students,course"  # FIX: Added overlaps
+    )
+    assignments = db.relationship('Assignment', backref='course_ref', lazy='select')
+    
+    __table_args__ = (
+        db.Index('idx_courses_code', 'code'),
+        db.Index('idx_courses_level', 'level'),
+        db.Index('idx_courses_department', 'department_id'),
+        db.Index('idx_courses_lecturer', 'lecturer_id'),
+        db.UniqueConstraint('code', 'academic_year', 'semester', name='unique_course_period'),
+    )
+    
+    def __repr__(self):
+        return f"<Course {self.code} - {self.title}>"
+
+
+class StudentEnrollment(db.Model):
+    __tablename__ = 'student_enrollments'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    academic_year = db.Column(db.String(20), nullable=False)
+    semester = db.Column(db.String(20), nullable=False)
+    enrollment_date = db.Column(db.DateTime, default=datetime.now)
+    status = db.Column(db.String(20), default='active')
+    grade = db.Column(db.Float, default=0.0)
+    
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    # Fixed: Added overlaps parameter to resolve conflict
+    student = db.relationship('User', foreign_keys=[student_id], backref='enrollments')
+    course = db.relationship(
+        'Course', 
+        foreign_keys=[course_id], 
+        backref='enrolled_students',
+        overlaps="enrollments,course_ref"  # FIX: Added overlaps
+    )
+    
+    __table_args__ = (
+        db.UniqueConstraint('student_id', 'course_id', 'academic_year', 'semester', name='unique_enrollment'),
+        db.Index('idx_enrollments_student', 'student_id'),
+        db.Index('idx_enrollments_course', 'course_id'),
+        db.Index('idx_enrollments_status', 'status'),
+    )
+
+
+class Semester(db.Model):
+    __tablename__ = 'semesters'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    academic_year = db.Column(db.String(20), nullable=False)
+    semester_type = db.Column(db.String(20), nullable=False)
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    registration_deadline = db.Column(db.Date)
+    is_current = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    
+    __table_args__ = (
+        db.Index('idx_semesters_current', 'is_current'),
+        db.Index('idx_semesters_active', 'is_active'),
+    )
+    
+    def __repr__(self):
+        return f"<Semester {self.name}>"
 
 
 class Assignment(db.Model):
-    __tablename__ = 'assignment'
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.Text)
-    course_code = db.Column(db.String(20))
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    submitted_at = db.Column(db.DateTime, default=datetime.now)
-    plagiarism_score = db.Column(db.Float, default=0.0)
-    grade = db.Column(db.Float)
-    feedback = db.Column(db.Text)
+    __tablename__ = 'assignments'
     
-    # Relationship - simple backref
-    user = db.relationship('User', backref='assignments', foreign_keys=[user_id])
-
-
-class AssignmentSubmission(db.Model):
-    __tablename__ = 'assignment_submission'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
-    course_title = db.Column(db.String(200), nullable=False, default='')
     course_code = db.Column(db.String(20), nullable=False)
+    course_title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
-    questions = db.Column(db.Text, nullable=False, default='')
+    questions = db.Column(db.Text, nullable=False)
     instructions = db.Column(db.Text)
+    deadline = db.Column(db.DateTime, nullable=False)
+    total_points = db.Column(db.Integer, default=100)
     attachment_path = db.Column(db.String(500))
     attachment_filename = db.Column(db.String(200))
     attachment_type = db.Column(db.String(50))
-    test_cases = db.Column(db.JSON, default=list)
-    deadline = db.Column(db.DateTime, nullable=False)
-    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now)
     
-    # Relationships - simple backrefs to avoid conflicts
-    creator = db.relationship('User', backref='created_assignments', foreign_keys=[created_by])
+    # Targeting fields
+    target_levels = db.Column(db.String(100), default='all')
+    target_departments = db.Column(db.String(500))
+    target_colleges = db.Column(db.String(500))
+    target_semester = db.Column(db.String(50))
+    target_academic_year = db.Column(db.String(20))
+    
+    # Security fields
+    is_published = db.Column(db.Boolean, default=False)
+    published_at = db.Column(db.DateTime)
+    is_locked = db.Column(db.Boolean, default=False)
+    late_submission_penalty = db.Column(db.Float, default=10.0)
+    max_file_size = db.Column(db.Integer, default=10)
+    allowed_file_types = db.Column(db.String(200))
+    plagiarism_threshold = db.Column(db.Float, default=30.0)
+    
+    # Tracking
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
+    
+    # Relationships
+    submissions = db.relationship('Submission', backref='assignment', lazy='select', cascade='all, delete-orphan')
+    
+    __table_args__ = (
+        db.Index('idx_assignments_created_by', 'created_by'),
+        db.Index('idx_assignments_deadline', 'deadline'),
+        db.Index('idx_assignments_is_published', 'is_published'),
+        db.Index('idx_assignments_created_at', 'created_at'),
+        db.Index('idx_assignments_course', 'course_code'),
+        db.Index('idx_assignments_lecturer_published', 'created_by', 'is_published'),
+    )
 
 
 class Submission(db.Model):
-    __tablename__ = 'submission'
+    __tablename__ = 'submissions'
+    
     id = db.Column(db.Integer, primary_key=True)
-    assignment_id = db.Column(db.Integer, db.ForeignKey('assignment_submission.id'), nullable=False)
-    student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     content = db.Column(db.Text)
     file_path = db.Column(db.String(500))
     original_filename = db.Column(db.String(200))
@@ -90,38 +313,154 @@ class Submission(db.Model):
     feedback = db.Column(db.Text)
     auto_graded = db.Column(db.Boolean, default=False)
     grade_breakdown = db.Column(db.Text)
-    # NEW FIELDS
     is_draft = db.Column(db.Boolean, default=False)
     draft_saved_at = db.Column(db.DateTime)
     resubmission_count = db.Column(db.Integer, default=0)
     last_resubmitted_at = db.Column(db.DateTime)
     
-    student = db.relationship('User', backref='submissions', foreign_keys=[student_id])
-    assignment = db.relationship('AssignmentSubmission', backref='submissions', foreign_keys=[assignment_id])
+    # Late submission tracking
+    is_late = db.Column(db.Boolean, default=False)
+    late_penalty_applied = db.Column(db.Float, default=0.0)
+    
+    # Security
+    ip_address = db.Column(db.String(50))
+    user_agent = db.Column(db.String(500))
+    
+    __table_args__ = (
+        db.Index('idx_submissions_assignment_id', 'assignment_id'),
+        db.Index('idx_submissions_student_id', 'student_id'),
+        db.Index('idx_submissions_submitted_at', 'submitted_at'),
+        db.Index('idx_submissions_grade', 'grade'),
+        db.Index('idx_submissions_is_draft', 'is_draft'),
+        db.Index('idx_submissions_assignment_student', 'assignment_id', 'student_id'),
+    )
 
 
 class ActivityLog(db.Model):
-    __tablename__ = 'activity_log'
+    __tablename__ = 'activity_logs'
+    
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     action = db.Column(db.String(200), nullable=False)
     details = db.Column(db.Text)
+    ip_address = db.Column(db.String(50))
+    user_agent = db.Column(db.String(500))
     timestamp = db.Column(db.DateTime, default=datetime.now)
     
-    # Relationship
-    user = db.relationship('User', backref='activity_logs', foreign_keys=[user_id])
+    __table_args__ = (
+        db.Index('idx_activity_logs_user_id', 'user_id'),
+        db.Index('idx_activity_logs_timestamp', 'timestamp'),
+        db.Index('idx_activity_logs_action', 'action'),
+    )
 
 
 class VerificationCode(db.Model):
-    __tablename__ = 'verification_code'
+    __tablename__ = 'verification_codes'
+    
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    assignment_id = db.Column(db.Integer, db.ForeignKey('assignment_submission.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), nullable=True)
     code = db.Column(db.String(10), nullable=False)
+    purpose = db.Column(db.String(50), default='email_verification')
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_used = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    
+    __table_args__ = (
+        db.Index('idx_verification_codes_user', 'user_id'),
+        db.Index('idx_verification_codes_code', 'code'),
+        db.Index('idx_verification_codes_expires', 'expires_at'),
+    )
+
+
+class LecturerVerification(db.Model):
+    __tablename__ = 'lecturer_verifications'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    verification_code = db.Column(db.String(50), unique=True, nullable=False)
+    verification_code_hash = db.Column(db.String(255), nullable=True)
+    staff_id = db.Column(db.String(50), nullable=False)
+    full_name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    department = db.Column(db.String(200))
+    college = db.Column(db.String(200))
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     expires_at = db.Column(db.DateTime, nullable=False)
     is_used = db.Column(db.Boolean, default=False)
+    used_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    used_at = db.Column(db.DateTime)
     
-    # Relationships - simple backrefs
-    user = db.relationship('User', backref='verification_codes', foreign_keys=[user_id])
-    assignment = db.relationship('AssignmentSubmission', backref='verification_codes', foreign_keys=[assignment_id])
+    # Email tracking
+    email_sent = db.Column(db.Boolean, default=False)
+    email_sent_at = db.Column(db.DateTime)
+    email_opens = db.Column(db.Integer, default=0)
+    last_opened_at = db.Column(db.DateTime)
+    
+    # Security fields
+    ip_address = db.Column(db.String(50))
+    user_agent = db.Column(db.String(500))
+    security_token = db.Column(db.String(100), unique=True)
+    
+    # Rate limiting
+    verification_attempts = db.Column(db.Integer, default=0)
+    last_verification_attempt = db.Column(db.DateTime)
+    
+    __table_args__ = (
+        db.Index('idx_lecturer_verification_code', 'verification_code'),
+        db.Index('idx_lecturer_verification_email', 'email'),
+        db.Index('idx_lecturer_verification_expires', 'expires_at'),
+        db.Index('idx_lecturer_verification_used', 'is_used'),
+    )
+    
+    def __repr__(self):
+        return f"<LecturerVerification {self.verification_code[:15]}... for {self.email}>"
+
+
+class LecturerRegistrationRequest(db.Model):
+    __tablename__ = 'lecturer_registration_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    full_name = db.Column(db.String(200), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    staff_id = db.Column(db.String(50), nullable=False)
+    department = db.Column(db.String(200), nullable=False)
+    college = db.Column(db.String(200), nullable=False)
+    phone = db.Column(db.String(20))
+    qualification = db.Column(db.String(200))
+    years_of_experience = db.Column(db.Integer, default=0)
+    specializations = db.Column(db.Text)
+    reason = db.Column(db.Text)
+    status = db.Column(db.String(20), default='pending')
+    admin_notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    reviewed_at = db.Column(db.DateTime)
+    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    
+    # Relationships
+    requester = db.relationship('User', foreign_keys=[user_id], backref='lecturer_requests')
+    reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='reviewed_requests')
+    
+    __table_args__ = (
+        db.Index('idx_lecturer_requests_status', 'status'),
+        db.Index('idx_lecturer_requests_email', 'email'),
+        db.Index('idx_lecturer_requests_created', 'created_at'),
+    )
+
+
+def get_current_semester():
+    """Get the current active semester"""
+    return Semester.query.filter_by(is_current=True, is_active=True).first()
+
+
+def is_student_enrolled(student_id, course_id, academic_year, semester):
+    """Check if a student is enrolled in a specific course"""
+    enrollment = StudentEnrollment.query.filter_by(
+        student_id=student_id,
+        course_id=course_id,
+        academic_year=academic_year,
+        semester=semester,
+        status='active'
+    ).first()
+    return enrollment is not None

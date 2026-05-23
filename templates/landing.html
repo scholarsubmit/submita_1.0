@@ -1,1055 +1,1457 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
-<style>
-    /* Hero Section - Light Mode */
-    .hero-section {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8f0e8 100%);
-        padding: 60px 0 80px;
-        position: relative;
-        transition: background 0.3s ease;
-    }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0">
+    <meta name="theme-color" content="#10b981">
+    <title>Submita — Modern Assignment Management for Nigerian Universities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-    /* Hero Section - Dark Mode (Transparent) */
-    body.dark-mode .hero-section {
-        background: transparent;
-    }
-
-    /* Features Section - Dark Mode (Transparent) */
-    body.dark-mode #features {
-        background: transparent !important;
-    }
-
-    /* How It Works Section - Dark Mode (Transparent) */
-    body.dark-mode .how-it-works-section {
-        background: transparent !important;
-    }
-
-    /* Testimonials Section - Dark Mode (Transparent) */
-    body.dark-mode .testimonials-section {
-        background: transparent !important;
-    }
-
-    /* FAQ Section - Dark Mode */
-    body.dark-mode .faq-section {
-        background: #1f2937 !important;
-    }
-
-    .hero-section h1 {
-        font-size: 48px;
-        font-weight: 800;
-        line-height: 1.2;
-        margin: 20px 0;
-    }
-
-    .glow-text {
-        background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-    }
-
-    body.dark-mode .glow-text {
-        background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #6ee7b7 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-    }
-
-    .trust-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(5, 150, 105, 0.1);
-        padding: 8px 16px;
-        border-radius: 40px;
-        font-size: 13px;
-        font-weight: 500;
-        color: #059669;
-    }
-
-    body.dark-mode .trust-badge {
-        background: rgba(16, 185, 129, 0.15);
-        color: #6ee7b7;
-    }
-
-    /* Feature Card Animations */
-    .feature-card {
-        background: white;
-        border-radius: 20px;
-        padding: 32px;
-        text-align: center;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.6s ease forwards;
-    }
-
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
+        * {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        to {
+        /* ===== ANIMATED GRADIENT BACKGROUND ===== */
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-bg {
+            background: linear-gradient(-45deg, #ecfdf5, #ffffff, #f0fdf4, #ffffff);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        /* ===== FLOATING ELEMENTS - Responsive ===== */
+        @keyframes float1 {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(-2deg); }
+        }
+
+        @keyframes float3 {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(1deg); }
+        }
+
+        .float-1 { animation: float1 6s ease-in-out infinite; }
+        .float-2 { animation: float2 7s ease-in-out infinite 0.5s; }
+        .float-3 { animation: float3 5s ease-in-out infinite 1s; }
+
+        /* Mobile: reduce float distance */
+        @media (max-width: 768px) {
+            @keyframes float1 {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-10px) rotate(1deg); }
+            }
+            @keyframes float2 {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-8px) rotate(-1deg); }
+            }
+            @keyframes float3 {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-12px) rotate(0.5deg); }
+            }
+        }
+
+        /* ===== GLASS MORPHISM ===== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .glass-card {
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+        }
+
+        /* ===== TEXT REVEAL ANIMATION ===== */
+        .reveal-text {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal-text.visible {
             opacity: 1;
             transform: translateY(0);
         }
-    }
 
-    .feature-card:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .feature-card:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .feature-card:nth-child(3) {
-        animation-delay: 0.3s;
-    }
-
-    .feature-card:nth-child(4) {
-        animation-delay: 0.4s;
-    }
-
-    .feature-card:nth-child(5) {
-        animation-delay: 0.5s;
-    }
-
-    .feature-card:nth-child(6) {
-        animation-delay: 0.6s;
-    }
-
-    body.dark-mode .feature-card {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    body.dark-mode .feature-card:hover {
-        border-color: #10b981;
-    }
-
-    .feature-icon {
-        width: 70px;
-        height: 70px;
-        background: linear-gradient(135deg, #059669, #10b981);
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-    }
-
-    body.dark-mode .feature-icon {
-        background: linear-gradient(135deg, #10b981, #059669);
-    }
-
-    .feature-icon i {
-        font-size: 32px;
-        color: white;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 20px 30px;
-        border-radius: 16px;
-        text-align: center;
-        transition: all 0.3s ease;
-        border: 1px solid #e5e7eb;
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.6s ease forwards;
-    }
-
-    .stat-card:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .stat-card:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .stat-card:nth-child(3) {
-        animation-delay: 0.3s;
-    }
-
-    body.dark-mode .stat-card {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(5, 150, 105, 0.15);
-    }
-
-    body.dark-mode .stat-card:hover {
-        border-color: #10b981;
-    }
-
-    .stat-number {
-        font-size: 36px;
-        font-weight: 800;
-        color: #059669;
-    }
-
-    body.dark-mode .stat-number {
-        color: #10b981;
-    }
-
-    .btn-pulse {
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0% {
-            box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
+        /* Mobile: faster reveal */
+        @media (max-width: 768px) {
+            .reveal-text {
+                transform: translateY(20px);
+                transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
         }
 
-        70% {
-            box-shadow: 0 0 0 15px rgba(5, 150, 105, 0);
+        /* ===== STAGGER CHILDREN ===== */
+        .stagger-children > * {
+            opacity: 0;
+            transform: translateY(20px);
         }
 
-        100% {
-            box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
-        }
-    }
+        .stagger-children.visible > *:nth-child(1) { animation: fadeUp 0.6s ease forwards 0.1s; }
+        .stagger-children.visible > *:nth-child(2) { animation: fadeUp 0.6s ease forwards 0.2s; }
+        .stagger-children.visible > *:nth-child(3) { animation: fadeUp 0.6s ease forwards 0.3s; }
+        .stagger-children.visible > *:nth-child(4) { animation: fadeUp 0.6s ease forwards 0.4s; }
+        .stagger-children.visible > *:nth-child(5) { animation: fadeUp 0.6s ease forwards 0.5s; }
+        .stagger-children.visible > *:nth-child(6) { animation: fadeUp 0.6s ease forwards 0.6s; }
 
-    .testimonial-card {
-        background: white;
-        border-radius: 20px;
-        padding: 24px;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.6s ease forwards;
-    }
-
-    .testimonial-card:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .testimonial-card:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .testimonial-card:nth-child(3) {
-        animation-delay: 0.3s;
-    }
-
-    body.dark-mode .testimonial-card {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .testimonial-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    body.dark-mode .testimonial-card:hover {
-        border-color: #10b981;
-    }
-
-    .cta-section {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        padding: 80px 0;
-        text-align: center;
-        position: relative;
-        transition: background 0.3s ease;
-    }
-
-    body.dark-mode .cta-section {
-        background: linear-gradient(135deg, #065f46, #047857);
-    }
-
-    /* Step circles dark mode */
-    body.dark-mode .step-circle {
-        background: #10b981 !important;
-    }
-
-    /* Paragraph text dark mode */
-    body.dark-mode p,
-    body.dark-mode .step-description {
-        color: #9ca3af !important;
-    }
-
-    /* Section headings dark mode */
-    body.dark-mode .section-title,
-    body.dark-mode .section-subtitle {
-        color: #f3f4f6;
-    }
-
-    /* Video Section Styles */
-    .video-section {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .video-wrapper {
-        position: relative;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-
-    .video-wrapper iframe {
-        display: block;
-        width: 100%;
-        height: 400px;
-        border: none;
-    }
-
-    .play-button {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 80px;
-        height: 80px;
-        background: rgba(5, 150, 105, 0.9);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        z-index: 10;
-    }
-
-    .play-button:hover {
-        transform: translate(-50%, -50%) scale(1.1);
-        background: #059669;
-    }
-
-    .play-button i {
-        font-size: 32px;
-        color: white;
-        margin-left: 5px;
-    }
-
-    /* FAQ Styles */
-    .faq-item {
-        background: white;
-        border-radius: 16px;
-        margin-bottom: 16px;
-        overflow: hidden;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s ease;
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeInUp 0.5s ease forwards;
-    }
-
-    .faq-item:nth-child(1) {
-        animation-delay: 0.1s;
-    }
-
-    .faq-item:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .faq-item:nth-child(3) {
-        animation-delay: 0.3s;
-    }
-
-    .faq-item:nth-child(4) {
-        animation-delay: 0.4s;
-    }
-
-    .faq-item:nth-child(5) {
-        animation-delay: 0.5s;
-    }
-
-    .faq-item:nth-child(6) {
-        animation-delay: 0.6s;
-    }
-
-    body.dark-mode .faq-item {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .faq-question {
-        padding: 20px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 1rem;
-        color: #1f2937;
-        transition: all 0.3s ease;
-    }
-
-    body.dark-mode .faq-question {
-        color: #f3f4f6;
-    }
-
-    .faq-question:hover {
-        background: rgba(5, 150, 105, 0.05);
-    }
-
-    .faq-question i {
-        transition: transform 0.3s ease;
-        color: #059669;
-    }
-
-    .faq-question.active i {
-        transform: rotate(180deg);
-    }
-
-    .faq-answer {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-        padding: 0 24px;
-        color: #6b7280;
-        line-height: 1.6;
-        font-size: 0.9rem;
-    }
-
-    body.dark-mode .faq-answer {
-        color: #9ca3af;
-    }
-
-    .faq-answer.active {
-        max-height: 300px;
-        padding: 0 24px 20px 24px;
-    }
-
-    @media (max-width: 768px) {
-        .hero-section h1 {
-            font-size: 32px;
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
         }
 
+        /* Mobile: faster stagger */
+        @media (max-width: 768px) {
+            .stagger-children.visible > *:nth-child(1) { animation: fadeUp 0.4s ease forwards 0.05s; }
+            .stagger-children.visible > *:nth-child(2) { animation: fadeUp 0.4s ease forwards 0.1s; }
+            .stagger-children.visible > *:nth-child(3) { animation: fadeUp 0.4s ease forwards 0.15s; }
+            .stagger-children.visible > *:nth-child(4) { animation: fadeUp 0.4s ease forwards 0.2s; }
+            .stagger-children.visible > *:nth-child(5) { animation: fadeUp 0.4s ease forwards 0.25s; }
+            .stagger-children.visible > *:nth-child(6) { animation: fadeUp 0.4s ease forwards 0.3s; }
+        }
+
+        /* ===== FEATURE CARD HOVER/TAP EFFECTS ===== */
         .feature-card {
-            padding: 24px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            touch-action: manipulation;
         }
 
-        .stat-card {
-            padding: 15px 20px;
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
         }
 
-        .stat-number {
-            font-size: 28px;
+        .feature-card:hover::before,
+        .feature-card:active::before {
+            opacity: 1;
         }
 
-        .video-wrapper iframe {
-            height: 250px;
+        .feature-card:hover,
+        .feature-card:active {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
         }
 
-        .play-button {
-            width: 60px;
-            height: 60px;
+        .feature-card:hover .feature-icon,
+        .feature-card:active .feature-icon {
+            transform: scale(1.1) rotate(5deg);
         }
 
-        .play-button i {
-            font-size: 24px;
+        /* Mobile: reduce lift effect */
+        @media (max-width: 768px) {
+            .feature-card:hover,
+            .feature-card:active {
+                transform: translateY(-4px) scale(1.01);
+            }
+            .feature-card:hover .feature-icon,
+            .feature-card:active .feature-icon {
+                transform: scale(1.05) rotate(3deg);
+            }
         }
-    }
-</style>
 
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="container">
-        <div style="text-align: center; max-width: 800px; margin: 0 auto;">
-            <div>
-                <span class="trust-badge">
-                    <i class="fas fa-check-circle"></i> Trusted by CS Departments
-                </span>
-            </div>
+        .feature-icon {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-            <h1>
-                Submit Smarter.<br>
-                <span class="glow-text">Grade Faster.</span>
-            </h1>
+        /* ===== STEP CONNECTOR LINES ===== */
+        .step-connector {
+            position: absolute;
+            top: 50%;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 1s ease 0.5s;
+        }
 
-            <p
-                style="font-size: 18px; color: #4b5563; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">
-                The complete assignment management platform for Computer Science departments.
-                Automate plagiarism detection, streamline grading, and empower student learning.
-            </p>
+        .step-connector.active {
+            transform: scaleX(1);
+        }
 
-            <!-- Buttons Container -->
-            <div
-                style="display: flex; gap: 20px; justify-content: center; align-items: center; flex-wrap: wrap; margin: 30px 0 0;">
-                <a href="{{ url_for('register') }}" class="hero-btn-primary btn-pulse">
-                    <i class="fas fa-rocket"></i> Start Now
+        /* Mobile: hide connectors, show vertical */
+        @media (max-width: 768px) {
+            .step-connector { display: none; }
+        }
+
+        /* ===== LIVE TICKER ===== */
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .ticker-track {
+            animation: ticker 30s linear infinite;
+        }
+
+        .ticker-track:hover,
+        .ticker-track:active {
+            animation-play-state: paused;
+        }
+
+        /* ===== BUTTON SHINE EFFECT ===== */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-shine::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    transparent 100%);
+            transform: rotate(30deg) translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .btn-shine:hover::after,
+        .btn-shine:active::after {
+            transform: rotate(30deg) translateX(100%);
+        }
+
+        /* ===== NAVBAR SCROLL EFFECT ===== */
+        .navbar-scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ===== MOBILE MENU ===== */
+        .mobile-menu-enter {
+            animation: slideDown 0.3s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== SCROLL INDICATOR ===== */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        .scroll-bounce {
+            animation: bounce 2s ease infinite;
+        }
+
+        /* ===== TRUST BADGE HOVER ===== */
+        .trust-badge {
+            filter: grayscale(100%);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .trust-badge:hover,
+        .trust-badge:active {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+
+        /* ===== CTA PATTERN ===== */
+        .cta-pattern {
+            background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
+            background-size: 40px 40px;
+        }
+
+        /* ===== STICKY BOTTOM BAR ===== */
+        .sticky-cta {
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sticky-cta.visible {
+            transform: translateY(0);
+        }
+
+        /* ===== SVG DRAW ANIMATION ===== */
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .animate-draw {
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300;
+            animation: draw 2s ease forwards 0.5s;
+        }
+
+        /* ===== PULSE ANIMATION ===== */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        /* ===== REDUCED MOTION SUPPORT ===== */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .reveal-text {
+                opacity: 1;
+                transform: none;
+            }
+
+            .stagger-children > * {
+                opacity: 1;
+                transform: none;
+            }
+
+            .hero-bg {
+                animation: none;
+            }
+
+            .ticker-track {
+                animation: none;
+            }
+        }
+
+        /* ===== MOBILE-SPECIFIC FIXES ===== */
+        @media (max-width: 640px) {
+            /* Prevent horizontal scroll */
+            body {
+                overflow-x: hidden;
+                width: 100%;
+            }
+
+            /* Adjust hero text sizes */
+            .hero-title {
+                font-size: 2.25rem !important;
+                line-height: 1.15 !important;
+            }
+
+            /* Adjust floating elements */
+            .float-element {
+                transform: scale(0.8);
+            }
+
+            /* Video container adjustments */
+            .video-container {
+                border-radius: 1rem;
+            }
+
+            /* Stats grid */
+            .stats-grid {
+                gap: 1.5rem;
+            }
+
+            /* Feature cards */
+            .feature-grid {
+                gap: 1rem;
+            }
+
+            /* Testimonial cards */
+            .testimonial-grid {
+                gap: 1rem;
+            }
+
+            /* Footer grid */
+            .footer-grid {
+                gap: 2rem;
+            }
+        }
+
+        /* ===== TABLET FIXES ===== */
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .hero-title {
+                font-size: 3rem !important;
+            }
+
+            .float-element {
+                transform: scale(0.9);
+            }
+        }
+
+        /* ===== TOUCH DEVICE OPTIMIZATIONS ===== */
+        @media (hover: none) and (pointer: coarse) {
+            /* Remove hover effects that don't work on touch */
+            .feature-card:hover {
+                transform: none;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+            .feature-card:active {
+                transform: translateY(-2px) scale(0.98);
+                box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            }
+
+            .btn-shine:hover::after {
+                transform: rotate(30deg) translateX(-100%);
+            }
+
+            .btn-shine:active::after {
+                transform: rotate(30deg) translateX(100%);
+            }
+
+            /* Larger touch targets */
+            a, button {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+
+        /* ===== LANDSCAPE MOBILE ===== */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .hero-section {
+                padding-top: 5rem;
+                padding-bottom: 3rem;
+            }
+
+            .scroll-indicator {
+                display: none;
+            }
+
+            .sticky-cta {
+                display: none;
+            }
+        }
+
+        /* ===== SAFE AREA INSETS (Notch phones) ===== */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .safe-top {
+                padding-top: env(safe-area-inset-top);
+            }
+
+            .safe-bottom {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+
+        /* ===== SMOOTH SCROLL ===== */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ===== SCROLLBAR STYLING ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #10b981;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #059669;
+        }
+
+        /* ===== SELECTION COLOR ===== */
+        ::selection {
+            background: rgba(16, 185, 129, 0.2);
+            color: inherit;
+        }
+    </style>
+
+</head>
+
+<body class="bg-white text-gray-800 antialiased overflow-x-hidden touch-manipulation">
+
+    <!-- Navigation -->
+    <nav id="navbar"
+        class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100 safe-top">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-18">
+                <!-- Logo -->
+                <a href="{{ url_for('home') }}" class="flex items-center gap-2.5 group shrink-0">
+                    <div
+                        class="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:shadow-emerald-300 transition-all duration-300 group-hover:scale-105">
+                        <i class="fa-solid fa-paper-plane text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-bold text-gray-900 tracking-tight">Submita</span>
+                    </div>
                 </a>
-                <a href="#features" class="hero-btn-outline"
-                    onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'}); return false;">
-                    <i class="fas fa-play"></i> Learn More
-                </a>
-            </div>
 
-            <div style="display: flex; justify-content: center; gap: 20px; margin-top: 50px; flex-wrap: wrap;">
-                <div class="stat-card">
-                    <div class="stat-number">99%</div>
-                    <div style="font-size: 14px; color: #6b7280;">Plagiarism Accuracy</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">3x</div>
-                    <div style="font-size: 14px; color: #6b7280;">Faster Grading</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">100%</div>
-                    <div style="font-size: 14px; color: #6b7280;">Secure Submissions</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Features Section -->
-<div id="features" style="padding: 80px 0; background: white;">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 60px;">
-            <span class="trust-badge" style="margin-bottom: 16px;">Why Choose Submita</span>
-            <h2 style="font-size: 36px; font-weight: 700; margin-bottom: 16px;">Everything you need in one platform</h2>
-            <p style="font-size: 18px; color: #6b7280; max-width: 600px; margin: 0 auto;">Powerful features designed to
-                transform assignment management</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px;">
-
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Smart Submission</h3>
-                <p style="color: #6b7280; line-height: 1.6;">Upload files, zip archives, or link GitHub repos. Automatic
-                    deadline tracking.</p>
-                <div style="margin-top: 15px;"><span
-                        style="display: inline-block; background: rgba(5,150,105,0.1); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #059669;">Multi-format
-                        support</span></div>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-search"></i></div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Advanced Plagiarism Detection</h3>
-                <p style="color: #6b7280; line-height: 1.6;">Multi-layer similarity analysis with detailed reports and
-                    side-by-side comparisons.</p>
-                <div style="margin-top: 15px;"><span
-                        style="display: inline-block; background: rgba(5,150,105,0.1); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #059669;">99%
-                        accuracy rate</span></div>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-robot"></i></div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">AI-Powered Grading</h3>
-                <p style="color: #6b7280; line-height: 1.6;">Run test cases, evaluate assignment quality, and generate
-                    grade
-                    summaries automatically.</p>
-                <div style="margin-top: 15px;"><span
-                        style="display: inline-block; background: rgba(5,150,105,0.1); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #059669;">Save
-                        70% grading time</span></div>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Real-time Analytics</h3>
-                <p style="color: #6b7280; line-height: 1.6;">Track student progress, identify at-risk students, and
-                    export comprehensive reports.</p>
-                <div style="margin-top: 15px;"><span
-                        style="display: inline-block; background: rgba(5,150,105,0.1); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #059669;">Data-driven
-                        insights</span></div>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Secure & Reliable</h3>
-                <p style="color: #6b7280; line-height: 1.6;">Bank-grade encryption, secure file storage, and role-based
-                    access control.</p>
-                <div style="margin-top: 15px;"><span
-                        style="display: inline-block; background: rgba(5,150,105,0.1); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #059669;">100%
-                        secure</span></div>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fas fa-comments"></i></div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Collaborative Feedback</h3>
-                <p style="color: #6b7280; line-height: 1.6;">Inline comments, rubrics-based grading, and instant
-                    notifications.</p>
-                <div style="margin-top: 15px;"><span
-                        style="display: inline-block; background: rgba(5,150,105,0.1); padding: 4px 12px; border-radius: 20px; font-size: 12px; color: #059669;">Enhanced
-                        learning</span></div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<!-- How It Works Section -->
-<div id="how-it-works" class="how-it-works-section" style="background: #f9fafb; padding: 80px 0;">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 60px;">
-            <span class="trust-badge">Simple Process</span>
-            <h2 style="font-size: 36px; font-weight: 700; margin: 16px 0;">How Submita Works</h2>
-            <p style="font-size: 18px; color: #6b7280;">From submission to grade in three simple steps</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
-            <div style="text-align: center;">
-                <div class="step-circle"
-                    style="width: 80px; height: 80px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
-                    1</div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Student Submits</h3>
-                <p class="step-description" style="color: #6b7280;">Upload assignment files or link GitHub repository
-                    before deadline</p>
-            </div>
-            <div style="text-align: center;">
-                <div class="step-circle"
-                    style="width: 80px; height: 80px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
-                    2</div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Auto-Check & Scan</h3>
-                <p class="step-description" style="color: #6b7280;">System automatically checks for similarity and
-                    assignment quality</p>
-            </div>
-            <div style="text-align: center;">
-                <div class="step-circle"
-                    style="width: 80px; height: 80px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; font-weight: bold; color: white;">
-                    3</div>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">Lecturer Grades</h3>
-                <p class="step-description" style="color: #6b7280;">Review, grade, and give detailed feedback instantly
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Video Section - Professional Animated Explainer -->
-<div class="video-section" style="padding: 80px 0;">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 60px;">
-            <span class="trust-badge" style="background: rgba(255,255,255,0.2); color: white;">Watch Demo</span>
-            <h2 style="font-size: 36px; font-weight: 700; margin: 16px 0; color: white;">See Submita in Action</h2>
-            <p style="font-size: 18px; color: #d1d5db; max-width: 600px; margin: 0 auto;">Watch how Submita transforms
-                assignment management</p>
-        </div>
-
-        <div class="video-wrapper"
-            style="max-width: 900px; margin: 0 auto; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.3); background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
-            <!-- Video Player Container -->
-            <div id="explainerVideo"
-                style="position: relative; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); min-height: 500px;">
-
-                <!-- Video Placeholder with Animation -->
-                <div id="videoPlaceholder" style="position: relative; padding: 40px; text-align: center;">
-                    <!-- Animated Gradient Background -->
-                    <div
-                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #05966920, #10b98120, #34d39920); animation: gradientShift 3s ease infinite;">
-                    </div>
-
-                    <!-- Animated Circles -->
-                    <div
-                        style="position: absolute; top: 20%; left: 10%; width: 100px; height: 100px; background: rgba(5,150,105,0.1); border-radius: 50%; animation: float 6s ease-in-out infinite;">
-                    </div>
-                    <div
-                        style="position: absolute; bottom: 20%; right: 10%; width: 150px; height: 150px; background: rgba(16,185,129,0.08); border-radius: 50%; animation: float 8s ease-in-out infinite reverse;">
-                    </div>
-                    <div
-                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; background: rgba(52,211,153,0.05); border-radius: 50%; animation: pulse 4s ease-in-out infinite;">
-                    </div>
-
-                    <!-- Play Button -->
-                    <div
-                        style="position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px;">
-                        <div class="play-button-large" onclick="playExplainerVideo()"
-                            style="width: 100px; height: 100px; background: linear-gradient(135deg, #059669, #10b981); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 30px rgba(5,150,105,0.5); margin-bottom: 30px;">
-                            <i class="fas fa-play" style="font-size: 40px; color: white; margin-left: 8px;"></i>
-                        </div>
-                        <h3 style="color: white; font-size: 24px; margin-bottom: 10px;">Watch Explainer Video</h3>
-                        <p style="color: #94a3b8;">2 minutes • Learn how Submita works</p>
-                    </div>
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-6 lg:gap-8">
+                    <a href="#features"
+                        class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors">Features</a>
+                    <a href="#how-it-works"
+                        class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors">How It Works</a>
+                    <a href="#testimonials"
+                        class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors">Testimonials</a>
+                    <a href="#pricing"
+                        class="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors">Pricing</a>
                 </div>
 
-                <!-- Video Content (hidden initially) -->
-                <div id="videoContent" style="display: none; padding: 40px;">
-                    <!-- Animated Steps -->
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-bottom: 40px;">
-                        <div class="video-step"
-                            style="text-align: center; animation: fadeInUp 0.6s ease forwards; opacity: 0;">
-                            <div
-                                style="width: 60px; height: 60px; background: rgba(5,150,105,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                                <i class="fas fa-cloud-upload-alt" style="font-size: 24px; color: #10b981;"></i>
-                            </div>
-                            <h4 style="color: white; margin-bottom: 8px;">1. Student Submits</h4>
-                            <p style="color: #94a3b8; font-size: 13px;">Upload assignment files or link GitHub
-                                repository</p>
-                        </div>
-                        <div class="video-step"
-                            style="text-align: center; animation: fadeInUp 0.6s ease forwards 0.2s; opacity: 0;">
-                            <div
-                                style="width: 60px; height: 60px; background: rgba(5,150,105,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                                <i class="fas fa-search" style="font-size: 24px; color: #10b981;"></i>
-                            </div>
-                            <h4 style="color: white; margin-bottom: 8px;">2. Auto-Check & Scan</h4>
-                            <p style="color: #94a3b8; font-size: 13px;">Plagiarism detection and assignment quality
-                                analysis
-                            </p>
-                        </div>
-                        <div class="video-step"
-                            style="text-align: center; animation: fadeInUp 0.6s ease forwards 0.4s; opacity: 0;">
-                            <div
-                                style="width: 60px; height: 60px; background: rgba(5,150,105,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                                <i class="fas fa-star" style="font-size: 24px; color: #10b981;"></i>
-                            </div>
-                            <h4 style="color: white; margin-bottom: 8px;">3. Lecturer Grades</h4>
-                            <p style="color: #94a3b8; font-size: 13px;">Review, grade, and provide instant feedback</p>
-                        </div>
-                    </div>
-
-                    <!-- Key Features -->
-                    <div
-                        style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 25px; margin-bottom: 30px;">
-                        <h4 style="color: white; text-align: center; margin-bottom: 20px;">✨ Key Highlights</h4>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                                <span style="color: #cbd5e1; font-size: 14px;">99% Plagiarism Accuracy</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                                <span style="color: #cbd5e1; font-size: 14px;">70% Faster Grading</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                                <span style="color: #cbd5e1; font-size: 14px;">Real-time Analytics</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
-                                <span style="color: #cbd5e1; font-size: 14px;">Secure & Reliable</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CTA within video -->
-                    <div style="text-align: center;">
-                        <a href="{{ url_for('register') }}"
-                            style="display: inline-block; background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 12px 28px; border-radius: 40px; text-decoration: none; font-weight: 600; transition: all 0.3s;">Get
-                            Started Free →</a>
-                    </div>
+                <!-- Desktop CTA -->
+                <div class="hidden md:flex items-center gap-3">
+                    <a href="{{ url_for('login') }}"
+                        class="text-sm font-medium text-gray-600 hover:text-emerald-600 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all">Log in</a>
+                    <a href="{{ url_for('register') }}"
+                        class="btn-shine bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200 hover:shadow-emerald-300 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md">
+                        Get Started Free
+                    </a>
                 </div>
 
-                <!-- Close Button -->
-                <button id="closeVideoBtn" onclick="closeExplainerVideo()"
-                    style="display: none; position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.5); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; color: white; z-index: 20;">
-                    <i class="fas fa-times"></i>
+                <!-- Mobile menu button -->
+                <button id="mobileMenuBtn" class="md:hidden p-2.5 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition touch-manipulation"
+                    aria-label="Toggle menu" aria-expanded="false">
+                    <i class="fas fa-bars text-gray-600 text-lg transition-transform duration-300" id="menuIcon"></i>
                 </button>
             </div>
         </div>
-        <p style="text-align: center; color: #9ca3af; margin-top: 20px; font-size: 14px;">Interactive walkthrough of
-            Submita's key features</p>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-100 mobile-menu-enter shadow-lg">
+            <div class="px-4 py-4 space-y-1">
+                <a href="#features"
+                    class="block px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition touch-manipulation">Features</a>
+                <a href="#how-it-works"
+                    class="block px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition touch-manipulation">How It Works</a>
+                <a href="#testimonials"
+                    class="block px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition touch-manipulation">Testimonials</a>
+                <a href="#pricing"
+                    class="block px-4 py-3 rounded-xl text-sm font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition touch-manipulation">Pricing</a>
+                <div class="pt-3 mt-3 border-t border-gray-100 flex flex-col gap-2">
+                    <a href="{{ url_for('login') }}"
+                        class="block px-4 py-3 rounded-xl text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition text-center touch-manipulation">Log in</a>
+                    <a href="{{ url_for('register') }}"
+                        class="block px-4 py-3 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 transition text-center touch-manipulation">Get Started Free</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg pt-28 sm:pt-32 pb-16 sm:pb-20 md:pt-40 md:pb-32 relative overflow-hidden hero-section">
+        <!-- Decorative blobs - Responsive sizing -->
+        <div class="absolute top-20 right-0 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-emerald-200/30 rounded-full blur-3xl float-1 float-element"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 sm:w-60 sm:h-60 md:w-72 md:h-72 bg-blue-200/20 rounded-full blur-3xl float-2 float-element"></div>
+        <div class="absolute top-1/2 left-1/2 w-40 h-40 sm:w-52 sm:h-52 md:w-64 md:h-64 bg-purple-200/20 rounded-full blur-3xl float-3 float-element"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+                <!-- Left Content -->
+                <div class="text-center lg:text-left order-2 lg:order-1">
+                    <div class="inline-flex items-center gap-2 bg-emerald-100/80 text-emerald-800 px-3 sm:px-4 py-2 rounded-full text-xs font-semibold mb-4 sm:mb-6 reveal-text">
+                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shrink-0"></span>
+                        <span>Trusted by 10+ Nigerian Universities</span>
+                    </div>
+
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.1] mb-4 sm:mb-6 reveal-text hero-title"
+                        style="transition-delay: 0.1s">
+                        Assignment Management<br>
+                        <span class="text-emerald-600 relative inline-block">
+                            Made Simple
+                            <svg class="absolute -bottom-1 sm:-bottom-2 left-0 w-full h-3 sm:h-4" viewBox="0 0 300 12" fill="none" preserveAspectRatio="none">
+                                <path d="M2 10C50 2 100 2 150 6C200 10 250 10 298 2" stroke="#10b981" stroke-width="4"
+                                    stroke-linecap="round" class="animate-draw" />
+                            </svg>
+                        </span>
+                    </h1>
+
+                    <p class="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0 reveal-text"
+                        style="transition-delay: 0.2s">
+                        Streamline assignment creation, submission, and grading for your entire university. Built
+                        specifically for the Nigerian academic structure.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-8 sm:mb-10 reveal-text"
+                        style="transition-delay: 0.3s">
+                        <a href="{{ url_for('register') }}"
+                            class="btn-shine bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-semibold transition-all shadow-xl shadow-emerald-200 hover:shadow-emerald-300 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2 touch-manipulation">
+                            <span>Start Free Trial</span>
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </a>
+                        <button onclick="openDemo()"
+                            class="group bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-700 border-2 border-gray-200 hover:border-gray-300 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center justify-center gap-2 touch-manipulation">
+                            <i class="fa-solid fa-play text-emerald-600 group-hover:scale-110 group-active:scale-95 transition-transform"></i>
+                            <span>Watch Demo</span>
+                        </button>
+                    </div>
+
+                    <!-- Social Proof -->
+                    <div class="flex items-center gap-3 sm:gap-4 justify-center lg:justify-start reveal-text"
+                        style="transition-delay: 0.4s">
+                        <div class="flex -space-x-2 sm:-space-x-3">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-emerald-100 border-2 border-white flex items-center justify-center text-emerald-700 text-[10px] sm:text-xs font-bold">MO</div>
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-blue-700 text-[10px] sm:text-xs font-bold">UN</div>
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-amber-100 border-2 border-white flex items-center justify-center text-amber-700 text-[10px] sm:text-xs font-bold">FU</div>
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-purple-700 text-[10px] sm:text-xs font-bold">AB</div>
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-gray-600 text-[10px] sm:text-xs font-bold">+6</div>
+                        </div>
+                        <div class="text-left">
+                            <div class="flex items-center gap-0.5">
+                                <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                                <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                                <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                                <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                                <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                            </div>
+                            <p class="text-[10px] sm:text-xs text-gray-500 font-medium">4.9/5 from 500+ reviews</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Visual - Dashboard Mockup -->
+                <div class="relative hidden lg:block order-1 lg:order-2">
+                    <!-- Main Dashboard Mockup -->
+                    <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-2xl float-1 relative z-10">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+                            <div class="ml-auto text-xs text-gray-400">Dashboard</div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex gap-3">
+                                <div class="flex-1 bg-emerald-50 rounded-xl p-3 sm:p-4">
+                                    <div class="text-xs text-emerald-600 font-semibold mb-1">Total Submissions</div>
+                                    <div class="text-xl sm:text-2xl font-bold text-gray-900">1,247</div>
+                                    <div class="text-xs text-emerald-600 mt-1">↑ 12% this week</div>
+                                </div>
+                                <div class="flex-1 bg-blue-50 rounded-xl p-3 sm:p-4">
+                                    <div class="text-xs text-blue-600 font-semibold mb-1">Pending Grading</div>
+                                    <div class="text-xl sm:text-2xl font-bold text-gray-900">48</div>
+                                    <div class="text-xs text-blue-600 mt-1">Due tomorrow</div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-3 sm:p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-xs font-semibold text-gray-700">Recent Assignments</span>
+                                    <span class="text-xs text-emerald-600">View all</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3 bg-white rounded-lg p-2.5 sm:p-3">
+                                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-xs shrink-0">
+                                            <i class="fa-solid fa-file-code"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-xs font-semibold text-gray-800 truncate">CSC 301 - Data Structures</div>
+                                            <div class="text-[10px] text-gray-400">Due: 24 Apr 2026</div>
+                                        </div>
+                                        <span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full shrink-0">Active</span>
+                                    </div>
+                                    <div class="flex items-center gap-3 bg-white rounded-lg p-2.5 sm:p-3">
+                                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-xs shrink-0">
+                                            <i class="fa-solid fa-calculator"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-xs font-semibold text-gray-800 truncate">MAT 201 - Linear Algebra</div>
+                                            <div class="text-[10px] text-gray-400">Due: 26 Apr 2026</div>
+                                        </div>
+                                        <span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-1 rounded-full shrink-0">Draft</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Card 1 -->
+                    <div class="absolute -top-6 sm:-top-8 -right-2 sm:-right-4 glass-card rounded-xl p-3 sm:p-4 shadow-lg float-2 z-20">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-100 rounded-full flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-check text-emerald-600 text-xs sm:text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-semibold text-gray-800">Assignment Submitted</div>
+                                <div class="text-[10px] text-gray-400">Just now</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Card 2 -->
+                    <div class="absolute -bottom-2 sm:-bottom-4 -left-4 sm:-left-8 glass-card rounded-xl p-3 sm:p-4 shadow-lg float-3 z-20">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-5 h-5 sm:w-6 sm:h-6 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 text-xs shrink-0">
+                                <i class="fa-solid fa-bell text-[10px]"></i>
+                            </div>
+                            <span class="text-xs font-semibold text-gray-800">Deadline Alert</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500">CSC 401 project due in 2 hours</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="hidden lg:flex justify-center mt-12 sm:mt-16 scroll-indicator">
+                <a href="#features"
+                    class="flex flex-col items-center gap-2 text-gray-400 hover:text-emerald-600 transition scroll-bounce">
+                    <span class="text-xs font-medium">Scroll to explore</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Bar -->
+    <section class="py-6 sm:py-8 bg-gray-50 border-y border-gray-100 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 sm:mb-6">
+            <p class="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest">Trusted by leading institutions</p>
+        </div>
+        <div class="relative">
+            <div class="ticker-track flex items-center gap-8 sm:gap-16 whitespace-nowrap">
+                <span class="text-lg sm:text-xl font-bold text-gray-300">Ahmadu Bello University</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">University of Nigeria</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">University of Lagos</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">Michael Okpara University</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">University of Ibadan</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">Federal University of Technology</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <!-- Duplicate for seamless loop -->
+                <span class="text-lg sm:text-xl font-bold text-gray-300">Michael Okpara University</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">University of Nigeria</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">University of Lagos</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">Ahmadu Bello University</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">University of Ibadan</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">Federal University of Technology</span>
+                <span class="text-lg sm:text-xl font-bold text-gray-300">•</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 sm:py-16 md:py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 stagger-children stats-grid">
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-600 mb-2">10k+</div>
+                    <div class="text-xs sm:text-sm text-gray-500 font-medium">Assignments Created</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-600 mb-2">50k+</div>
+                    <div class="text-xs sm:text-sm text-gray-500 font-medium">Submissions Processed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-600 mb-2">99.9%</div>
+                    <div class="text-xs sm:text-sm text-gray-500 font-medium">Uptime Guaranteed</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl sm:text-4xl md:text-5xl font-bold text-emerald-600 mb-2">24/7</div>
+                    <div class="text-xs sm:text-sm text-gray-500 font-medium">Support Available</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Video Section -->
+    <section id="demo" class="py-16 sm:py-20 md:py-32 bg-white relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 reveal-text">
+                <span class="text-emerald-600 text-xs sm:text-sm font-semibold uppercase tracking-wider">See It In Action</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-3 sm:mb-4">Watch how Submita works</h2>
+                <p class="text-sm sm:text-lg text-gray-600">A quick walkthrough of the platform from both lecturer and student perspectives.</p>
+            </div>
+
+            <!-- Video Container -->
+            <div class="max-w-5xl mx-auto reveal-text video-container">
+                <div class="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl bg-gray-900 group cursor-pointer touch-manipulation"
+                    onclick="playDemoVideo()">
+                    <!-- Thumbnail / Poster -->
+                    <div id="videoPoster" class="aspect-video relative">
+                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&h=675&fit=crop"
+                            alt="Submita Demo Preview"
+                            class="w-full h-full object-cover opacity-80 group-hover:opacity-60 group-active:opacity-50 transition-opacity duration-500"
+                            loading="lazy">
+
+                        <!-- Play Button Overlay -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 group-active:scale-95 transition-transform duration-300 border-2 border-white/30">
+                                <div class="w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-600/40 group-hover:bg-emerald-500 group-active:bg-emerald-700 transition-colors">
+                                    <i class="fa-solid fa-play text-white text-lg sm:text-xl md:text-2xl ml-0.5 sm:ml-1"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Duration Badge -->
+                        <div class="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-black/70 text-white text-xs font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg backdrop-blur-sm">
+                            <i class="fa-regular fa-clock mr-1"></i> 2:34
+                        </div>
+
+                        <!-- Labels -->
+                        <div class="absolute top-3 sm:top-4 left-3 sm:left-4 flex gap-2">
+                            <span class="bg-emerald-600 text-white text-xs font-semibold px-2.5 sm:px-3 py-1 rounded-full">Demo</span>
+                            <span class="bg-black/50 text-white text-xs font-medium px-2.5 sm:px-3 py-1 rounded-full backdrop-blur-sm">HD</span>
+                        </div>
+                    </div>
+
+                    <!-- Actual Video (hidden until play) -->
+                    <video id="demoVideo" class="aspect-video w-full hidden" controls
+                        poster="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&h=675&fit=crop"
+                        preload="none">
+                        <source src="{{ url_for('static', filename='videos/submita-demo.mp4') }}" type="video/mp4">
+                        <div class="flex items-center justify-center h-full text-white text-center p-6 sm:p-8">
+                            <div>
+                                <i class="fa-solid fa-film text-3xl sm:text-4xl mb-4 text-emerald-400"></i>
+                                <p class="text-base sm:text-lg font-semibold mb-2">Video not available</p>
+                                <p class="text-xs sm:text-sm text-gray-400">Please upload demo video to static/videos/submita-demo.mp4</p>
+                            </div>
+                        </div>
+                    </video>
+                </div>
+
+                <!-- Video Chapters / Highlights -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8 stagger-children">
+                    <div class="flex items-start gap-3 p-3 sm:p-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer group touch-manipulation"
+                        onclick="seekTo(0)">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-emerald-200 group-active:bg-emerald-300 transition">
+                            <span class="text-emerald-700 font-bold text-xs sm:text-sm">01</span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-emerald-700 group-active:text-emerald-800 transition">Admin Setup</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">0:00 — 0:45</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 sm:p-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer group touch-manipulation"
+                        onclick="seekTo(45)">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 group-active:bg-blue-300 transition">
+                            <span class="text-blue-700 font-bold text-xs sm:text-sm">02</span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-blue-700 group-active:text-blue-800 transition">Lecturer Workflow</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">0:45 — 1:30</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 sm:p-4 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition cursor-pointer group touch-manipulation"
+                        onclick="seekTo(90)">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-amber-200 group-active:bg-amber-300 transition">
+                            <span class="text-amber-700 font-bold text-xs sm:text-sm">03</span>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 group-hover:text-amber-700 group-active:text-amber-800 transition">Student Submission</h4>
+                            <p class="text-xs text-gray-500 mt-0.5">1:30 — 2:34</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 sm:py-20 md:py-32 bg-gray-50/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 reveal-text">
+                <span class="text-emerald-600 text-xs sm:text-sm font-semibold uppercase tracking-wider">Powerful Features</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-3 sm:mb-4">Everything you need to manage assignments</h2>
+                <p class="text-sm sm:text-lg text-gray-600">From creation to grading, we've got every step covered with tools designed for Nigerian universities.</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 stagger-children feature-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm touch-manipulation">
+                    <div class="feature-icon w-12 h-12 sm:w-14 sm:h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fa-solid fa-sitemap text-emerald-600 text-lg sm:text-xl"></i>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">University Hierarchy</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">Complete support for Colleges → Departments → Levels → Courses structure. Mirror your institution's exact organization.</p>
+                    <a href="#" class="text-xs sm:text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group touch-manipulation">
+                        Learn more <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 group-active:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm touch-manipulation">
+                    <div class="feature-icon w-12 h-12 sm:w-14 sm:h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fa-solid fa-file-pen text-blue-600 text-lg sm:text-xl"></i>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Smart Assignment Creation</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">Create assignments with rich text, file attachments, deadlines, and automatic target-level filtering.</p>
+                    <a href="#" class="text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 group touch-manipulation">
+                        Learn more <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 group-active:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm touch-manipulation">
+                    <div class="feature-icon w-12 h-12 sm:w-14 sm:h-14 bg-amber-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fa-solid fa-shield-halved text-amber-600 text-lg sm:text-xl"></i>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Plagiarism Detection</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">Built-in similarity checking ensures academic integrity across all submissions automatically.</p>
+                    <a href="#" class="text-xs sm:text-sm font-semibold text-amber-600 hover:text-amber-700 flex items-center gap-1 group touch-manipulation">
+                        Learn more <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 group-active:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm touch-manipulation">
+                    <div class="feature-icon w-12 h-12 sm:w-14 sm:h-14 bg-purple-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fa-solid fa-robot text-purple-600 text-lg sm:text-xl"></i>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">AI-Powered Grading</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">Intelligent auto-grading for objective questions with detailed feedback generation for students.</p>
+                    <a href="#" class="text-xs sm:text-sm font-semibold text-purple-600 hover:text-purple-700 flex items-center gap-1 group touch-manipulation">
+                        Learn more <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 group-active:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm touch-manipulation">
+                    <div class="feature-icon w-12 h-12 sm:w-14 sm:h-14 bg-rose-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fa-solid fa-bell text-rose-600 text-lg sm:text-xl"></i>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Smart Notifications</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">Email and in-app alerts for deadlines, grades, and announcements. Never miss important updates.</p>
+                    <a href="#" class="text-xs sm:text-sm font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1 group touch-manipulation">
+                        Learn more <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 group-active:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm touch-manipulation">
+                    <div class="feature-icon w-12 h-12 sm:w-14 sm:h-14 bg-cyan-50 rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
+                        <i class="fa-solid fa-chart-pie text-cyan-600 text-lg sm:text-xl"></i>
+                    </div>
+                    <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Analytics Dashboard</h3>
+                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed mb-3 sm:mb-4">Comprehensive insights into submission rates, performance trends, and engagement metrics.</p>
+                    <a href="#" class="text-xs sm:text-sm font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 group touch-manipulation">
+                        Learn more <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 group-active:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-16 sm:py-20 md:py-32 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-white pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 reveal-text">
+                <span class="text-emerald-600 text-xs sm:text-sm font-semibold uppercase tracking-wider">Simple Process</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-3 sm:mb-4">Get started in three easy steps</h2>
+                <p class="text-sm sm:text-lg text-gray-600">From setup to first submission in under 10 minutes.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 sm:gap-8 md:gap-12 relative">
+                <!-- Connecting line (desktop only) -->
+                <div class="hidden md:block absolute top-20 sm:top-24 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-200"></div>
+
+                <!-- Step 1 -->
+                <div class="relative text-center reveal-text">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg shadow-emerald-200 relative z-10">
+                        <span class="text-white text-xl sm:text-2xl font-bold">1</span>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm hover:shadow-md active:shadow-lg transition-shadow">
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Setup Your Structure</h3>
+                        <p class="text-gray-600 text-xs sm:text-sm leading-relaxed">Admin configures colleges, departments, levels, and courses. One-time setup for your entire institution.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="relative text-center reveal-text" style="transition-delay: 0.15s">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg shadow-emerald-200 relative z-10">
+                        <span class="text-white text-xl sm:text-2xl font-bold">2</span>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm hover:shadow-md active:shadow-lg transition-shadow">
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Create & Assign</h3>
+                        <p class="text-gray-600 text-xs sm:text-sm leading-relaxed">Lecturers create targeted assignments with deadlines, resources, and specific course targeting.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="relative text-center reveal-text" style="transition-delay: 0.3s">
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-lg shadow-emerald-200 relative z-10">
+                        <span class="text-white text-xl sm:text-2xl font-bold">3</span>
+                    </div>
+                    <div class="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm hover:shadow-md active:shadow-lg transition-shadow">
+                        <h3 class="text-base sm:text-lg font-bold text-gray-900 mb-2 sm:mb-3">Submit & Grade</h3>
+                        <p class="text-gray-600 text-xs sm:text-sm leading-relaxed">Students submit work securely. Lecturers grade with AI assistance and provide instant feedback.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-16 sm:py-20 md:py-32 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 reveal-text">
+                <span class="text-emerald-600 text-xs sm:text-sm font-semibold uppercase tracking-wider">Testimonials</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 sm:mt-3 mb-3 sm:mb-4">Loved by educators and students</h2>
+                <p class="text-sm sm:text-lg text-gray-600">See what our users say about transforming their academic workflow.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 sm:gap-8 stagger-children testimonial-grid">
+                <!-- Testimonial 1 -->
+                <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-lg active:shadow-xl transition-all">
+                    <div class="flex items-center gap-1 mb-4 sm:mb-6">
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                    </div>
+                    <p class="text-gray-700 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">"Submita has eliminated the chaos of email-based submissions. My students now submit on time, and I can track everything from one dashboard. Game changer for our department."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-sm shrink-0">DS</div>
+                        <div>
+                            <div class="font-semibold text-gray-900 text-xs sm:text-sm">Dr. Samuel Gregory Ugboaja</div>
+                            <div class="text-[10px] sm:text-xs text-gray-500">HOD, Computer Science — MOUAU</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-lg active:shadow-xl transition-all">
+                    <div class="flex items-center gap-1 mb-4 sm:mb-6">
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                    </div>
+                    <p class="text-gray-700 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">"As a 400-level student, juggling multiple projects was overwhelming. Submita keeps all my deadlines organized and sends reminders. I've never missed a submission since."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">UO</div>
+                        <div>
+                            <div class="font-semibold text-gray-900 text-xs sm:text-sm">Uchechi Odinakachi</div>
+                            <div class="text-[10px] sm:text-xs text-gray-500">100L Student — MOUAU</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-lg active:shadow-xl transition-all">
+                    <div class="flex items-center gap-1 mb-4 sm:mb-6">
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star text-amber-400 text-xs sm:text-sm"></i>
+                        <i class="fa-solid fa-star-half-stroke text-amber-400 text-xs sm:text-sm"></i>
+                    </div>
+                    <p class="text-gray-700 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-6">"The AI grading feature saves me hours every week. I can focus on giving meaningful feedback instead of marking hundreds of objective questions manually."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-700 font-bold text-sm shrink-0">MD</div>
+                        <div>
+                            <div class="font-semibold text-gray-900 text-xs sm:text-sm">Mr. Daniel Obiyo (Inpsirer)</div>
+                            <div class="text-[10px] sm:text-xs text-gray-500">Lecturer — MOUAU</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 sm:py-20 md:py-32 bg-emerald-600 relative overflow-hidden cta-pattern">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-600 to-emerald-700"></div>
+        <div class="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-white/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 sm:w-72 sm:h-72 bg-white/5 rounded-full blur-3xl"></div>
+
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 reveal-text">
+            <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight">Ready to transform your<br class="hidden sm:block">university's workflow?</h2>
+            <p class="text-emerald-100 text-sm sm:text-lg mb-6 sm:mb-10 max-w-2xl mx-auto">Join hundreds of lecturers and thousands of students already using Submita to streamline academic assignments.</p>
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <a href="{{ url_for('register') }}"
+                    class="btn-shine bg-white text-emerald-700 hover:bg-gray-50 active:bg-gray-100 px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2 touch-manipulation">
+                    <span>Start Free — No Credit Card</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            <p class="text-emerald-200 text-xs sm:text-sm mt-4 sm:mt-6">Free for students and Lecturer plans start at No Cost.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12 sm:py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12 mb-10 sm:mb-12 footer-grid">
+                <div class="col-span-2 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <i class="fa-solid fa-paper-plane text-white text-sm"></i>
+                        </div>
+                        <span class="text-white font-bold text-lg">Submita</span>
+                    </div>
+                    <p class="text-xs sm:text-sm leading-relaxed">Modern assignment management built specifically for Nigerian universities. Streamline, submit, succeed.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-3 sm:mb-4 text-xs sm:text-sm">Product</h4>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Features</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Pricing</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Changelog</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Roadmap</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-3 sm:mb-4 text-xs sm:text-sm">Resources</h4>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Documentation</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">API Reference</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Help Center</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Community</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-3 sm:mb-4 text-xs sm:text-sm">Company</h4>
+                    <ul class="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">About</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Blog</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Careers</a></li>
+                        <li><a href="#" class="hover:text-emerald-400 transition touch-manipulation">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <p class="text-xs sm:text-sm order-2 sm:order-1">© 2026 Submita. All rights reserved.</p>
+                <div class="flex items-center gap-3 sm:gap-4 order-1 sm:order-2">
+                    <a href="#" class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white active:bg-emerald-700 transition-all touch-manipulation"><i class="fa-brands fa-twitter text-sm"></i></a>
+                    <a href="#" class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white active:bg-emerald-700 transition-all touch-manipulation"><i class="fa-brands fa-linkedin-in text-sm"></i></a>
+                    <a href="#" class="w-9 h-9 sm:w-10 sm:h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-emerald-600 hover:text-white active:bg-emerald-700 transition-all touch-manipulation"><i class="fa-brands fa-github text-sm"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Sticky Bottom CTA (appears on scroll) -->
+    <div id="stickyCta" class="sticky-cta fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 px-4 py-2.5 sm:py-3 safe-bottom">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="hidden sm:block">
+                <p class="text-sm font-semibold text-gray-900">Ready to streamline assignments?</p>
+                <p class="text-xs text-gray-500">Join 10,000+ users today</p>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <a href="{{ url_for('register') }}" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-sm font-semibold transition text-center touch-manipulation">
+                    Get Started Free
+                </a>
+                <button onclick="closeStickyCta()" class="p-2 text-gray-400 hover:text-gray-600 active:text-gray-800 transition touch-manipulation" aria-label="Close sticky CTA">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
     </div>
-</div>
 
-<style>
-    @keyframes gradientShift {
-        0% {
-            opacity: 0.3;
-        }
-
-        50% {
-            opacity: 0.6;
-        }
-
-        100% {
-            opacity: 0.3;
-        }
-    }
-
-    @keyframes float {
-        0% {
-            transform: translateY(0px);
-        }
-
-        50% {
-            transform: translateY(-20px);
-        }
-
-        100% {
-            transform: translateY(0px);
-        }
-    }
-
-    @keyframes pulse {
-        0% {
-            transform: translate(-50%, -50%) scale(0.9);
-            opacity: 0.5;
-        }
-
-        50% {
-            transform: translate(-50%, -50%) scale(1.1);
-            opacity: 0.2;
-        }
-
-        100% {
-            transform: translate(-50%, -50%) scale(0.9);
-            opacity: 0.5;
-        }
-    }
-
-    .play-button-large {
-        transition: all 0.3s ease;
-        animation: buttonPulse 2s infinite;
-    }
-
-    @keyframes buttonPulse {
-        0% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7);
-        }
-
-        70% {
-            transform: scale(1.05);
-            box-shadow: 0 0 0 20px rgba(5, 150, 105, 0);
-        }
-
-        100% {
-            transform: scale(1);
-            box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
-        }
-    }
-
-    .play-button-large:hover {
-        transform: scale(1.1);
-    }
-
-    body.dark-mode .video-wrapper {
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    }
-</style>
-
-<script>
-    function playExplainerVideo() {
-        const placeholder = document.getElementById('videoPlaceholder');
-        const videoContent = document.getElementById('videoContent');
-        const closeBtn = document.getElementById('closeVideoBtn');
-
-        placeholder.style.display = 'none';
-        videoContent.style.display = 'block';
-        closeBtn.style.display = 'block';
-
-        // Animate the steps when they become visible
-        document.querySelectorAll('.video-step').forEach((step, index) => {
-            step.style.animation = `fadeInUp 0.6s ease forwards ${index * 0.2}s`;
-        });
-    }
-
-    function closeExplainerVideo() {
-        const placeholder = document.getElementById('videoPlaceholder');
-        const videoContent = document.getElementById('videoContent');
-        const closeBtn = document.getElementById('closeVideoBtn');
-
-        placeholder.style.display = 'block';
-        videoContent.style.display = 'none';
-        closeBtn.style.display = 'none';
-    }
-</script>
-
-<!-- Testimonials -->
-<div class="testimonials-section" style="padding: 80px 0; background: white;">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 60px;">
-            <span class="trust-badge">Testimonials</span>
-            <h2 style="font-size: 36px; font-weight: 700; margin: 16px 0;">Loved by Educators</h2>
-            <p style="font-size: 18px; color: #6b7280;">See what our users are saying about Submita</p>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
-            <div class="testimonial-card">
-                <i class="fas fa-quote-left"
-                    style="font-size: 32px; color: #059669; opacity: 0.3; margin-bottom: 16px; display: block;"></i>
-                <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">"Submita has revolutionized how we
-                    handle assignments. The plagiarism detection is incredibly accurate."</p>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div
-                        style="width: 50px; height: 50px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                        Dr</div>
-                    <div><strong>Dr. Samuel Gregory Ugboaja</strong><br><span
-                            style="font-size: 12px; color: #6b7280;">CS Department Head</span></div>
+    <!-- Demo Modal -->
+    <div id="demoModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 relative mx-4">
+            <button onclick="closeDemo()" class="absolute top-3 sm:top-4 right-3 sm:right-4 w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200 active:bg-gray-300 transition touch-manipulation" aria-label="Close demo modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 pr-8">See Submita in Action</h3>
+            <div class="aspect-video bg-gray-100 rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                <div class="text-center p-4">
+                    <i class="fa-solid fa-play-circle text-4xl sm:text-6xl text-emerald-600 mb-2"></i>
+                    <p class="text-xs sm:text-sm text-gray-500">Demo video coming soon</p>
                 </div>
             </div>
-
-            <div class="testimonial-card">
-                <i class="fas fa-quote-left"
-                    style="font-size: 32px; color: #059669; opacity: 0.3; margin-bottom: 16px; display: block;"></i>
-                <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">"The automated grading feature has cut
-                    my grading time by 70%. My students love the fast feedback."</p>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div
-                        style="width: 50px; height: 50px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                        Pr</div>
-                    <div><strong>Mr. Daniel Obiyo</strong><br><span
-                            style="font-size: 12px; color: #6b7280;">Lecturer</span></div>
-                </div>
-            </div>
-
-            <div class="testimonial-card">
-                <i class="fas fa-quote-left"
-                    style="font-size: 32px; color: #059669; opacity: 0.3; margin-bottom: 16px; display: block;"></i>
-                <p style="color: #4b5563; line-height: 1.6; margin-bottom: 20px;">"The interface is intuitive and easy
-                    to use. Students can track their progress and see feedback instantly."</p>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div
-                        style="width: 50px; height: 50px; background: #059669; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                        St</div>
-                    <div><strong>Student Representative</strong><br><span style="font-size: 12px; color: #6b7280;">CS
-                            Department</span></div>
-                </div>
-            </div>
+            <p class="text-xs sm:text-sm text-gray-600">Experience how Submita transforms assignment management for Nigerian universities. From creation to grading, every step simplified.</p>
         </div>
     </div>
-</div>
 
-<!-- FAQ Section -->
-<div class="faq-section" style="padding: 80px 0; background: #f9fafb;">
-    <div class="container">
-        <div style="text-align: center; margin-bottom: 60px;">
-            <span class="trust-badge">FAQ</span>
-            <h2 style="font-size: 36px; font-weight: 700; margin: 16px 0;">Frequently Asked Questions</h2>
-            <p style="font-size: 18px; color: #6b7280; max-width: 600px; margin: 0 auto;">Got questions? We've got
-                answers</p>
-        </div>
+    <script>
+        // ===== MOBILE MENU TOGGLE =====
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuIcon = document.getElementById('menuIcon');
+        let menuOpen = false;
 
-        <div style="max-width: 800px; margin: 0 auto;">
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>What is Submita and who is it for?</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer">
-                    Submita is an all-in-one assignment management platform designed specifically for Computer Science
-                    departments. It serves students, lecturers, and administrators by streamlining assignment
-                    submission, plagiarism detection, automated grading, and feedback delivery.
-                </div>
-            </div>
+        function toggleMenu() {
+            menuOpen = !menuOpen;
+            mobileMenu.classList.toggle('hidden');
+            mobileMenuBtn.setAttribute('aria-expanded', menuOpen);
 
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>How accurate is the plagiarism detection?</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer">
-                    Our plagiarism detection system has a 99% accuracy rate. It uses multi-layer similarity analysis to
-                    compare submissions against current and past assignments, as well as external sources. The system
-                    provides detailed reports with side-by-side comparisons.
-                </div>
-            </div>
+            if (menuOpen) {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+                document.body.style.overflow = 'hidden';
+            } else {
+                menuIcon.classList.add('fa-bars');
+                menuIcon.classList.remove('fa-times');
+                document.body.style.overflow = '';
+            }
+        }
 
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>What file formats are supported for submissions?</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer">
-                    Submita supports a wide range of file formats including Python (.py), Java (.java), C++ (.cpp),
-                    JavaScript (.js), ZIP archives, PDFs, Word documents (.doc, .docx), Excel files (.xls, .xlsx),
-                    PowerPoint presentations (.ppt, .pptx), and image files (.jpg, .png, .gif).
-                </div>
-            </div>
+        mobileMenuBtn.addEventListener('click', toggleMenu);
 
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>Can lecturers customize the grading criteria?</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer">
-                    Yes, lecturers have full control over grading criteria. They can set custom rubrics, define test
-                    cases for auto-grading, adjust grade weights, and override any auto-generated grades. The system
-                    also allows for manual feedback and comments.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>Is my data secure on Submita?</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer">
-                    Absolutely! Submita uses bank-grade encryption for all data transmission and storage. We implement
-                    role-based access control, secure file storage, and regular security audits. Your academic data is
-                    protected and never shared with third parties.
-                </div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
-                    <span>How much does Submita cost?</span>
-                    <i class="fas fa-chevron-down"></i>
-                </div>
-                <div class="faq-answer">
-                    Submita is completely free for educational institutions and departments. There's no credit card
-                    required to get started. We believe in making quality education tools accessible to everyone.
-                    Contact us for enterprise-level features and support.
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CTA Section -->
-<div class="cta-section">
-    <div class="container">
-        <h2 style="font-size: 36px; font-weight: 800; color: white; margin-bottom: 16px;">Ready to Transform Your
-            Department?</h2>
-        <p
-            style="font-size: 18px; color: #d1fae5; margin-bottom: 32px; max-width: 600px; margin-left: auto; margin-right: auto;">
-            Join hundreds of educators already using Submita to save time and maintain academic integrity.</p>
-        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-            <a href="{{ url_for('register') }}"
-                style="background: white; color: #059669; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block; transition: all 0.3s;">
-                <i class="fas fa-rocket"></i> Get Started Free
-            </a>
-            <a href="#"
-                style="background: transparent; border: 2px solid white; color: white; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block; transition: all 0.3s;">
-                <i class="fas fa-calendar-alt"></i> Schedule Demo
-            </a>
-        </div>
-        <p style="font-size: 14px; color: #d1fae5; margin-top: 24px;">No credit card required · Free for educational
-            institutions</p>
-    </div>
-</div>
-
-<script>
-    // FAQ Toggle Function
-    function toggleFAQ(element) {
-        element.classList.toggle('active');
-        const answer = element.nextElementSibling;
-        answer.classList.toggle('active');
-    }
-
-    // Intersection Observer for scroll animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-                observer.unobserve(entry.target);
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (menuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                toggleMenu();
             }
         });
-    }, observerOptions);
 
-    // Observe all animated elements
-    document.addEventListener('DOMContentLoaded', function () {
-        const animatedElements = document.querySelectorAll('.feature-card, .stat-card, .testimonial-card, .faq-item');
-        animatedElements.forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menuOpen) {
+                toggleMenu();
+            }
+        });
+
+        // ===== NAVBAR SCROLL EFFECT =====
+        const navbar = document.getElementById('navbar');
+        let lastScrollY = 0;
+        let ticking = false;
+
+        function updateNavbar() {
+            const scrollY = window.scrollY;
+
+            if (scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+            }
+
+            // Hide/show navbar on scroll direction (mobile optimization)
+            if (window.innerWidth < 768) {
+                if (scrollY > lastScrollY && scrollY > 100) {
+                    navbar.style.transform = 'translateY(-100%)';
+                } else {
+                    navbar.style.transform = 'translateY(0)';
+                }
+            }
+
+            lastScrollY = scrollY;
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(updateNavbar);
+                ticking = true;
+            }
+        });
+
+        // ===== SCROLL REVEAL OBSERVER =====
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -30px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal-text, .stagger-children').forEach(el => {
             observer.observe(el);
         });
-    });
-</script>
-{% endblock %}
+
+        // ===== STICKY CTA =====
+        const stickyCta = document.getElementById('stickyCta');
+        let stickyShown = false;
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 800 && !stickyShown) {
+                stickyCta.classList.add('visible');
+                stickyShown = true;
+            }
+        });
+
+        function closeStickyCta() {
+            stickyCta.classList.remove('visible');
+            sessionStorage.setItem('stickyCtaClosed', 'true');
+        }
+
+        if (sessionStorage.getItem('stickyCtaClosed') === 'true') {
+            stickyShown = true;
+        }
+
+        // ===== DEMO MODAL =====
+        function openDemo() {
+            const modal = document.getElementById('demoModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDemo() {
+            const modal = document.getElementById('demoModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('demoModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeDemo();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('demoModal');
+                if (!modal.classList.contains('hidden')) {
+                    closeDemo();
+                }
+            }
+        });
+
+        // ===== VIDEO PLAYER =====
+        function playDemoVideo() {
+            const video = document.getElementById('demoVideo');
+            const poster = document.getElementById('videoPoster');
+
+            poster.style.display = 'none';
+            video.classList.remove('hidden');
+            video.play().catch(e => {
+                console.log('Video play failed:', e);
+                poster.style.display = 'block';
+                video.classList.add('hidden');
+            });
+        }
+
+        function seekTo(seconds) {
+            const video = document.getElementById('demoVideo');
+            if (!video.classList.contains('hidden')) {
+                video.currentTime = seconds;
+                video.play();
+            } else {
+                playDemoVideo();
+                setTimeout(() => {
+                    video.currentTime = seconds;
+                }, 100);
+            }
+        }
+
+        // ===== SMOOTH SCROLL FOR ANCHOR LINKS =====
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const target = document.querySelector(targetId);
+
+                if (target) {
+                    const navHeight = navbar.offsetHeight;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight - 20;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    if (menuOpen) {
+                        toggleMenu();
+                    }
+                }
+            });
+        });
+
+        // ===== TOUCH DEVICE DETECTION & OPTIMIZATIONS =====
+        const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+        if (isTouchDevice) {
+            document.body.classList.add('touch-device');
+
+            document.querySelectorAll('.feature-card').forEach(card => {
+                card.addEventListener('touchstart', function() {
+                    this.classList.add('touch-active');
+                }, {passive: true});
+
+                card.addEventListener('touchend', function() {
+                    setTimeout(() => this.classList.remove('touch-active'), 300);
+                }, {passive: true});
+            });
+        }
+
+        // ===== RESIZE HANDLER =====
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                if (window.innerWidth >= 768) {
+                    navbar.style.transform = '';
+                }
+
+                if (window.innerWidth >= 768 && menuOpen) {
+                    toggleMenu();
+                }
+            }, 250);
+        });
+
+        // ===== PERFORMANCE: Pause animations when tab is hidden =====
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                document.querySelectorAll('.ticker-track').forEach(el => {
+                    el.style.animationPlayState = 'paused';
+                });
+            } else {
+                document.querySelectorAll('.ticker-track').forEach(el => {
+                    el.style.animationPlayState = 'running';
+                });
+            }
+        });
+
+        // ===== LAZY LOAD IMAGES =====
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                        }
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+
+        // ===== PREFERS REDUCED MOTION =====
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+        if (prefersReducedMotion.matches) {
+            document.querySelectorAll('.reveal-text, .stagger-children > *').forEach(el => {
+                el.style.opacity = '1';
+                el.style.transform = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

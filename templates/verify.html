@@ -1,500 +1,228 @@
+<!-- templates/verify.html -->
 {% extends "base.html" %}
 
+{% block title %}Verify Your Email{% endblock %}
+
 {% block content %}
-<style>
-    .verify-container {
-        max-width: 500px;
-        margin: 3rem auto;
-        padding: 1rem;
-    }
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-gray-100 flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
 
-    .verify-card {
-        background: white;
-        border-radius: 24px;
-        padding: 2rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        text-align: center;
-        transition: transform 0.3s ease;
-    }
-
-    body.dark-mode .verify-card {
-        background: #1f2937;
-    }
-
-    .verify-icon {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #059669, #047857);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-        0% {
-            box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
-        }
-        70% {
-            box-shadow: 0 0 0 15px rgba(5, 150, 105, 0);
-        }
-        100% {
-            box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
-        }
-    }
-
-    .verify-icon i {
-        font-size: 2.5rem;
-        color: white;
-    }
-
-    .verify-card h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: #1f2937;
-    }
-
-    body.dark-mode .verify-card h2 {
-        color: #f3f4f6;
-    }
-
-    .verify-card p {
-        color: #6b7280;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-    }
-
-    body.dark-mode .verify-card p {
-        color: #9ca3af;
-    }
-
-    .email-display {
-        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-        padding: 0.75rem 1rem;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        font-weight: 500;
-        color: #059669;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        border: 1px solid #a7f3d0;
-    }
-
-    body.dark-mode .email-display {
-        background: #064e3b;
-        color: #6ee7b7;
-        border-color: #065f46;
-    }
-
-    .code-input-wrapper {
-        margin-bottom: 1.5rem;
-    }
-
-    .code-input {
-        width: 100%;
-        padding: 1rem;
-        font-size: 1.5rem;
-        text-align: center;
-        letter-spacing: 8px;
-        border: 2px solid #e5e7eb;
-        border-radius: 16px;
-        font-family: 'Courier New', monospace;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .code-input:focus {
-        outline: none;
-        border-color: #059669;
-        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-        transform: scale(1.02);
-    }
-
-    body.dark-mode .code-input {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .btn-verify {
-        background: #059669;
-        color: white;
-        border: none;
-        padding: 0.875rem 1.5rem;
-        border-radius: 14px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        transition: all 0.3s ease;
-        margin-bottom: 1rem;
-    }
-
-    .btn-verify:hover {
-        background: #047857;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
-    }
-
-    .btn-verify:active {
-        transform: translateY(0);
-    }
-
-    /* Resend Code Section - Professional */
-    .resend-section {
-        border-top: 1px solid #e5e7eb;
-        padding-top: 1.25rem;
-        margin-top: 0.5rem;
-    }
-
-    body.dark-mode .resend-section {
-        border-color: #374151;
-    }
-
-    .resend-timer {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #f3f4f6;
-        padding: 0.5rem 1rem;
-        border-radius: 40px;
-        font-size: 0.85rem;
-        color: #6b7280;
-        margin-bottom: 1rem;
-    }
-
-    body.dark-mode .resend-timer {
-        background: #374151;
-        color: #9ca3af;
-    }
-
-    .resend-timer i {
-        color: #f59e0b;
-    }
-
-    .timer-count {
-        font-weight: 700;
-        color: #059669;
-        font-size: 1rem;
-    }
-
-    body.dark-mode .timer-count {
-        color: #10b981;
-    }
-
-    .resend-btn {
-        background: transparent;
-        color: #059669;
-        border: 1.5px solid #059669;
-        padding: 0.6rem 1.2rem;
-        border-radius: 40px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .resend-btn:hover:not(:disabled) {
-        background: #059669;
-        color: white;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(5, 150, 105, 0.2);
-    }
-
-    .resend-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        border-color: #9ca3af;
-        color: #9ca3af;
-    }
-
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6b7280;
-        text-decoration: none;
-        font-size: 0.85rem;
-        margin-top: 1rem;
-        transition: color 0.2s;
-    }
-
-    .back-link:hover {
-        color: #059669;
-    }
-
-    /* Alert Styles */
-    .alert {
-        padding: 0.875rem 1rem;
-        border-radius: 12px;
-        margin-bottom: 1.25rem;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .alert-success {
-        background: #d1fae5;
-        color: #065f46;
-        border-left: 4px solid #059669;
-    }
-
-    .alert-danger {
-        background: #fee2e2;
-        color: #991b1b;
-        border-left: 4px solid #dc2626;
-    }
-
-    .alert-warning {
-        background: #fed7aa;
-        color: #9a3412;
-        border-left: 4px solid #f59e0b;
-    }
-
-    .alert-info {
-        background: #dbeafe;
-        color: #1e40af;
-        border-left: 4px solid #3b82f6;
-    }
-
-    body.dark-mode .alert-success {
-        background: #064e3b;
-        color: #a7f3d0;
-    }
-
-    body.dark-mode .alert-danger {
-        background: #7f1d1d;
-        color: #fecaca;
-    }
-
-    body.dark-mode .alert-warning {
-        background: #78350f;
-        color: #fdba74;
-    }
-
-    body.dark-mode .alert-info {
-        background: #1e3a5f;
-        color: #93c5fd;
-    }
-
-    /* Loading spinner */
-    .loading {
-        display: inline-block;
-        width: 14px;
-        height: 14px;
-        border: 2px solid white;
-        border-radius: 50%;
-        border-top-color: transparent;
-        animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-</style>
-
-<div class="verify-container">
-    <div class="verify-card">
-        <div class="verify-icon">
-            <i class="fas fa-envelope"></i>
-        </div>
-        
-        <h2>Verify Your Email</h2>
-        <p>We've sent a verification code to your email address</p>
-        
-        <div class="email-display">
-            <i class="fas fa-envelope"></i> {{ email }}
-        </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST" id="verifyForm">
-            <div class="code-input-wrapper">
-                <input type="text" name="code" class="code-input" 
-                       placeholder="000000" maxlength="6" autofocus required>
-            </div>
-            <button type="submit" class="btn-verify" id="verifyBtn">
-                <i class="fas fa-check-circle"></i> Verify Account
-            </button>
-        </form>
-
-        <div class="resend-section">
-            <div id="resendStatus" style="text-align: center;">
-                <div class="resend-timer" id="timerDisplay" style="display: none;">
-                    <i class="fas fa-clock"></i>
-                    Resend code in <span id="countdown" class="timer-count">60</span> seconds
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <a href="{{ url_for('home') }}" class="inline-flex items-center gap-2.5 group">
+                <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-all">
+                    <i class="fa-solid fa-paper-plane text-white text-sm"></i>
                 </div>
-                <button id="resendBtn" class="resend-btn" onclick="resendCode()">
-                    <i class="fas fa-redo-alt"></i> Resend Verification Code
-                </button>
+                <span class="text-xl font-bold text-gray-900">Submita</span>
+            </a>
+        </div>
+
+        <!-- Card -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-8 text-center">
+                <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-envelope-open-text text-white text-3xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Check Your Email</h1>
+                <p class="text-emerald-100 text-sm mt-2 leading-relaxed">
+                    We sent your verification code to<br>
+                    <strong class="text-white font-semibold">{{ email }}</strong>
+                </p>
+            </div>
+
+            <div class="p-6 space-y-5">
+
+                <!-- Student ID — prominent -->
+                <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/60 border-2 border-emerald-200 rounded-2xl p-5 text-center">
+                    <div class="flex items-center justify-center gap-2 mb-3">
+                        <div class="w-7 h-7 bg-emerald-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-id-badge text-white text-xs"></i>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-700 uppercase tracking-widest">Your Student ID</span>
+                    </div>
+                    <p class="text-3xl font-extrabold text-emerald-800 font-mono tracking-wide mb-2">
+                        {{ student_id }}
+                    </p>
+                    <div class="inline-flex items-center gap-1.5 bg-emerald-600/10 rounded-full px-3 py-1">
+                        <i class="fas fa-save text-emerald-600 text-xs"></i>
+                        <span class="text-xs text-emerald-700 font-medium">Save this — you need it for all submissions</span>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-100"></div>
+                    </div>
+                    <div class="relative flex justify-center">
+                        <span class="bg-white px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            Enter Code to Activate
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Verification code form -->
+                <form method="POST" action="{{ url_for('verify') }}" id="verifyForm">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3 text-center">
+                                6-Digit Verification Code
+                            </label>
+                            <div class="flex gap-2 justify-center" id="codeBoxes">
+                                <input type="text" maxlength="1" inputmode="numeric"
+                                    class="digit-box w-12 h-14 border-2 border-gray-200 rounded-xl text-center text-2xl font-bold font-mono text-gray-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric"
+                                    class="digit-box w-12 h-14 border-2 border-gray-200 rounded-xl text-center text-2xl font-bold font-mono text-gray-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric"
+                                    class="digit-box w-12 h-14 border-2 border-gray-200 rounded-xl text-center text-2xl font-bold font-mono text-gray-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric"
+                                    class="digit-box w-12 h-14 border-2 border-gray-200 rounded-xl text-center text-2xl font-bold font-mono text-gray-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric"
+                                    class="digit-box w-12 h-14 border-2 border-gray-200 rounded-xl text-center text-2xl font-bold font-mono text-gray-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" autocomplete="off">
+                                <input type="text" maxlength="1" inputmode="numeric"
+                                    class="digit-box w-12 h-14 border-2 border-gray-200 rounded-xl text-center text-2xl font-bold font-mono text-gray-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 transition-all" autocomplete="off">
+                            </div>
+                            <input type="hidden" name="code" id="hiddenCode">
+                            <p class="text-xs text-gray-400 mt-2.5 text-center">
+                                <i class="fas fa-clock mr-1"></i>Code expires in 24 hours &nbsp;·&nbsp; Also check your spam folder
+                            </p>
+                        </div>
+
+                        <button type="submit" id="verifyBtn"
+                                class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold py-3.5 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm btn-shine">
+                            <i class="fas fa-check-circle text-sm" id="verifyIcon"></i>
+                            <span id="verifyText">Activate My Account</span>
+                            <svg id="verifySpinner" class="hidden animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Resend -->
+                <div class="text-center">
+                    <p class="text-sm text-gray-500">
+                        Didn't receive a code?
+                        <a href="{{ url_for('resend_code', email=email) }}"
+                           class="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline transition ml-1">
+                            <i class="fas fa-redo text-xs mr-1"></i>Resend Code
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                <a href="{{ url_for('login') }}" class="text-sm text-gray-500 hover:text-gray-700 transition inline-flex items-center gap-1.5">
+                    <i class="fas fa-arrow-left text-xs"></i> Back to Login
+                </a>
+                <a href="{{ url_for('home') }}" class="text-sm text-gray-400 hover:text-gray-600 transition">Home</a>
             </div>
         </div>
 
-        <a href="{{ url_for('login') }}" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back to Login
-        </a>
+        <p class="text-center text-xs text-gray-400 mt-6">
+            Need help? <a href="mailto:support@submita.com" class="text-emerald-600 hover:underline">Contact support</a>
+        </p>
     </div>
 </div>
 
+<style>
+    .btn-shine { position: relative; overflow: hidden; }
+    .btn-shine::after {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+        transform: rotate(30deg) translateX(-100%);
+        transition: transform 0.6s;
+    }
+    .btn-shine:hover::after { transform: rotate(30deg) translateX(100%); }
+    .digit-box { caret-color: #059669; }
+    .digit-box.filled { border-color: #059669; background: #f0fdf4; }
+    .digit-box.error  { border-color: #ef4444; animation: shake 0.4s ease; }
+    @keyframes shake {
+        0%,100% { transform: translateX(0); }
+        20%,60% { transform: translateX(-4px); }
+        40%,80% { transform: translateX(4px); }
+    }
+</style>
+
 <script>
-    let countdown = 0;
-    let timerInterval = null;
+(function () {
+    const boxes         = Array.from(document.querySelectorAll('.digit-box'));
+    const hidden        = document.getElementById('hiddenCode');
+    const form          = document.getElementById('verifyForm');
+    const verifyBtn     = document.getElementById('verifyBtn');
+    const verifyText    = document.getElementById('verifyText');
+    const verifyIcon    = document.getElementById('verifyIcon');
+    const verifySpinner = document.getElementById('verifySpinner');
 
-    // Auto-submit when 6 digits are entered
-    const codeInput = document.querySelector('.code-input');
-    if (codeInput) {
-        codeInput.addEventListener('input', function(e) {
-            // Remove any non-digit characters
-            this.value = this.value.replace(/[^0-9]/g, '');
-            
-            if (this.value.length === 6) {
-                // Show loading state on button
-                const verifyBtn = document.getElementById('verifyBtn');
-                verifyBtn.innerHTML = '<span class="loading"></span> Verifying...';
-                verifyBtn.disabled = true;
-                this.form.submit();
+    boxes[0]?.focus();
+
+    function syncHidden() {
+        hidden.value = boxes.map(b => b.value).join('');
+    }
+
+    boxes.forEach((box, i) => {
+        box.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace') {
+                if (!box.value && i > 0) {
+                    boxes[i-1].value = '';
+                    boxes[i-1].classList.remove('filled');
+                    boxes[i-1].focus();
+                } else {
+                    box.value = '';
+                    box.classList.remove('filled');
+                }
+                syncHidden();
+                e.preventDefault();
+                return;
             }
+            if (e.key === 'ArrowLeft'  && i > 0) { boxes[i-1].focus(); e.preventDefault(); return; }
+            if (e.key === 'ArrowRight' && i < 5) { boxes[i+1].focus(); e.preventDefault(); return; }
+            if (!/^\d$/.test(e.key) && !['Tab','Enter'].includes(e.key)) e.preventDefault();
         });
-    }
 
-    // Start countdown if timer was active (from session)
-    function startCountdown(seconds) {
-        if (timerInterval) clearInterval(timerInterval);
-        countdown = seconds;
-        const timerDisplay = document.getElementById('timerDisplay');
-        const resendBtn = document.getElementById('resendBtn');
-        const countdownSpan = document.getElementById('countdown');
-        
-        timerDisplay.style.display = 'inline-flex';
-        resendBtn.disabled = true;
-        
-        timerInterval = setInterval(function() {
-            countdown--;
-            if (countdownSpan) countdownSpan.textContent = countdown;
-            
-            if (countdown <= 0) {
-                clearInterval(timerInterval);
-                timerDisplay.style.display = 'none';
-                resendBtn.disabled = false;
-                timerInterval = null;
-            }
-        }, 1000);
-    }
-
-    // Resend code function
-    function resendCode() {
-        const resendBtn = document.getElementById('resendBtn');
-        const originalText = resendBtn.innerHTML;
-        
-        // Disable button and show loading
-        resendBtn.disabled = true;
-        resendBtn.innerHTML = '<span class="loading"></span> Sending...';
-        
-        fetch("{{ url_for('resend_code', email=email) }}", {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.text())
-        .then(data => {
-            // Show success message
-            showAlert('New verification code sent! Please check your email.', 'success');
-            // Start 60 second countdown
-            startCountdown(60);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showAlert('Failed to resend code. Please try again.', 'danger');
-            resetResendButton();
-        })
-        .finally(() => {
-            resetResendButton();
+        box.addEventListener('input', function () {
+            const digit = box.value.replace(/\D/g,'').slice(-1);
+            box.value = digit;
+            digit ? box.classList.add('filled') : box.classList.remove('filled');
+            if (digit && i < 5) boxes[i+1].focus();
+            syncHidden();
+            if (hidden.value.length === 6) setTimeout(() => form.requestSubmit(), 300);
         });
-        
-        function resetResendButton() {
-            resendBtn.innerHTML = originalText;
-            if (countdown <= 0) {
-                resendBtn.disabled = false;
-            }
+
+        box.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData)
+                            .getData('text').replace(/\D/g,'').slice(0,6);
+            pasted.split('').forEach((ch, j) => {
+                if (boxes[j]) { boxes[j].value = ch; boxes[j].classList.add('filled'); }
+            });
+            syncHidden();
+            boxes[Math.min(pasted.length, 5)]?.focus();
+            if (pasted.length === 6) setTimeout(() => form.requestSubmit(), 300);
+        });
+    });
+
+    form.addEventListener('submit', function (e) {
+        syncHidden();
+        if (hidden.value.length < 6) {
+            e.preventDefault();
+            boxes.forEach(b => { if (!b.value) b.classList.add('error'); });
+            setTimeout(() => boxes.forEach(b => b.classList.remove('error')), 600);
+            boxes.find(b => !b.value)?.focus();
+            return;
         }
-    }
-
-    // Show alert message dynamically
-    function showAlert(message, type) {
-        // Remove existing alerts
-        const existingAlerts = document.querySelectorAll('.alert');
-        existingAlerts.forEach(alert => alert.remove());
-        
-        // Create new alert
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type}`;
-        
-        let icon = '';
-        if (type === 'success') icon = 'fa-check-circle';
-        else if (type === 'danger') icon = 'fa-exclamation-circle';
-        else if (type === 'warning') icon = 'fa-exclamation-triangle';
-        else icon = 'fa-info-circle';
-        
-        alertDiv.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
-        
-        // Insert after email display
-        const emailDisplay = document.querySelector('.email-display');
-        emailDisplay.insertAdjacentElement('afterend', alertDiv);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            alertDiv.style.opacity = '0';
-            setTimeout(() => alertDiv.remove(), 300);
-        }, 5000);
-    }
-
-    // Check if there's an active timer in localStorage
-    const lastResendTime = localStorage.getItem('lastResendTime');
-    if (lastResendTime) {
-        const elapsed = Math.floor((Date.now() - parseInt(lastResendTime)) / 1000);
-        const remaining = 60 - elapsed;
-        if (remaining > 0) {
-            startCountdown(remaining);
-        } else {
-            localStorage.removeItem('lastResendTime');
-        }
-    }
-
-    // Store resend time when user clicks resend
-    const originalResendFn = resendCode;
-    window.resendCode = function() {
-        localStorage.setItem('lastResendTime', Date.now().toString());
-        originalResendFn();
-    };
+        verifyBtn.disabled = true;
+        verifyIcon.classList.add('hidden');
+        verifySpinner.classList.remove('hidden');
+        if (verifyText) verifyText.textContent = 'Activating…';
+    });
+})();
 </script>
 {% endblock %}

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submita - Lecturer Verification</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b' },
+                        accent: { 50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a' },
+                    },
+                    animation: {
+                        'float-1': 'float1 6s ease-in-out infinite',
+                        'float-2': 'float2 5s ease-in-out infinite 1s',
+                        'float-3': 'float3 7s ease-in-out infinite 0.5s',
+                        'gradient-shift': 'gradientShift 15s ease infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 3s infinite',
+                    },
+                    keyframes: {
+                        float1: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-15px)' } },
+                        float2: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-12px)' } },
+                        float3: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } },
+                        gradientShift: { '0%, 100%': { backgroundPosition: '0% 50%' }, '50%': { backgroundPosition: '100% 50%' } },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .gradient-bg {
+            background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc, #e0f2fe, #f0fdf4);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shine::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.1) 60%, rgba(255,255,255,0) 100%);
+            transform: rotate(30deg) translateX(-100%);
+            transition: transform 0.6s;
+        }
+        .btn-shine:hover::after {
+            transform: rotate(30deg) translateX(100%);
+        }
+        .step-line::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, #10b981, #14b8a6);
+            z-index: 0;
+        }
+        .step-line > div:first-child::before { display: none; }
+        .step-line > div:last-child::before { width: 50%; left: 0; }
+        .step-line > div:first-child::before { width: 50%; left: 50%; }
+        @media (max-width: 768px) {
+            .step-line::before { width: 2px; height: 100%; left: 20px; top: 0; transform: none; }
+            .step-line > div::before { display: none !important; }
+        }
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .icon-float {
+            transition: transform 0.3s ease;
+        }
+        .card-hover:hover .icon-float {
+            transform: scale(1.15) rotate(-5deg);
+        }
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+        }
+        .typing-dot {
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body class="gradient-bg min-h-screen text-gray-800">
+
+    <!-- Floating Background Elements -->
+    <div class="fixed top-20 left-10 w-72 h-72 bg-emerald-200/30 rounded-full blur-3xl animate-float-1 pointer-events-none z-0"></div>
+    <div class="fixed bottom-20 right-10 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl animate-float-2 pointer-events-none z-0"></div>
+    <div class="fixed top-1/3 right-1/4 w-64 h-64 bg-yellow-200/20 rounded-full blur-3xl animate-float-3 pointer-events-none z-0"></div>
+
+    <div class="max-w-5xl mx-auto px-4 py-12 relative z-10">
+
+        <!-- Header Section -->
+        <div class="text-center mb-14">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 rounded-3xl shadow-2xl shadow-emerald-500/30 mb-6 relative">
+                <div class="absolute inset-0 bg-white/10 rounded-3xl"></div>
+                <i class="fas fa-shield-halved text-white text-4xl relative z-10"></i>
+                <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-star text-white text-xs"></i>
+                </div>
+            </div>
+            <h1 class="text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+                Need a <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Verification Code?</span>
+            </h1>
+            <p class="text-gray-500 max-w-lg mx-auto text-lg leading-relaxed">
+                Our admin team is ready to assist you with your lecturer verification process on <strong class="text-emerald-700">Submita</strong>.
+            </p>
+
+            <!-- Trust Badge -->
+            <div class="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-full">
+                <div class="flex -space-x-2">
+                    <div class="w-7 h-7 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-xs font-bold text-emerald-700">JD</div>
+                    <div class="w-7 h-7 rounded-full bg-teal-200 border-2 border-white flex items-center justify-center text-xs font-bold text-teal-700">AK</div>
+                    <div class="w-7 h-7 rounded-full bg-cyan-200 border-2 border-white flex items-center justify-center text-xs font-bold text-cyan-700">+5</div>
+                </div>
+                <span class="text-sm font-medium text-emerald-700">Trusted by 50+ lecturers</span>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="glass-card rounded-3xl shadow-2xl overflow-hidden mb-8">
+
+            <!-- WhatsApp Section -->
+            <div class="bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 p-10 text-center border-b border-emerald-100/50 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-40 h-40 bg-green-300/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-teal-300/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+
+                <div class="flex items-center justify-center mb-5 relative">
+                    <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl shadow-green-500/25 relative">
+                        <i class="fab fa-whatsapp text-white text-4xl"></i>
+                        <div class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-white animate-pulse"></div>
+                    </div>
+                </div>
+
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Contact via WhatsApp</h2>
+                <p class="text-gray-500 mb-8 max-w-md mx-auto">Get instant support by messaging our administrator. We're online and ready to help.</p>
+
+                <!-- Status Indicator -->
+                <div class="flex items-center justify-center gap-2 mb-6">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="text-sm font-semibold text-green-700">Admin Online Now</span>
+                </div>
+
+                <button onclick="openWhatsAppModal()" class="btn-shine inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-green-600/30 hover:shadow-green-600/50 hover:scale-[1.02] transition-all duration-300 cursor-pointer group">
+                    <i class="fab fa-whatsapp text-2xl group-hover:scale-110 transition-transform"></i>
+                    <span>Chat on WhatsApp</span>
+                    <i class="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
+                </button>
+
+                <div class="flex items-center justify-center gap-6 mt-6 text-sm">
+                    <span class="flex items-center gap-1.5 text-gray-500">
+                        <i class="fas fa-bolt text-yellow-500"></i>
+                        Avg. response: <strong class="text-gray-700">&lt; 5 min</strong>
+                    </span>
+                    <span class="flex items-center gap-1.5 text-gray-500">
+                        <i class="fas fa-clock text-blue-500"></i>
+                        Mon–Fri, <strong class="text-gray-700">8AM–6PM</strong>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Alternative Contact Methods -->
+            <div class="p-10">
+                <div class="flex items-center justify-center gap-3 mb-8">
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Alternative Ways to Reach Us</h3>
+                    <div class="h-px bg-gray-200 flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <a href="mailto:scholarsubmit1@gmail.com" class="card-hover flex items-center gap-5 p-5 bg-white border border-gray-100 rounded-2xl hover:border-red-200 group cursor-pointer">
+                        <div class="w-14 h-14 bg-gradient-to-br from-red-50 to-red-100 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                            <i class="fas fa-envelope text-red-500 text-xl icon-float"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 text-base">Email Support</p>
+                            <p class="text-sm text-gray-500 group-hover:text-red-600 transition-colors">scholarsubmit1@gmail.com</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Replies within 24 hours</p>
+                        </div>
+                        <i class="fas fa-external-link-alt text-gray-300 ml-auto group-hover:text-red-400 transition-colors text-sm"></i>
+                    </a>
+
+                    <a href="tel:+2348147050967" class="card-hover flex items-center gap-5 p-5 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 group cursor-pointer">
+                        <div class="w-14 h-14 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                            <i class="fas fa-phone-alt text-blue-500 text-xl icon-float"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 text-base">Phone Support</p>
+                            <p class="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">+234 814 705 0967</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Available during work hours</p>
+                        </div>
+                        <i class="fas fa-external-link-alt text-gray-300 ml-auto group-hover:text-blue-400 transition-colors text-sm"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="card-hover bg-white/90 backdrop-blur rounded-2xl p-7 text-center border border-white shadow-lg">
+                <div class="w-14 h-14 bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i class="fas fa-bolt text-emerald-600 text-xl icon-float"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2 text-lg">Fast Response</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">We respond within minutes during working hours. No long waits.</p>
+            </div>
+
+            <div class="card-hover bg-white/90 backdrop-blur rounded-2xl p-7 text-center border border-white shadow-lg">
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i class="fas fa-shield-halved text-blue-600 text-xl icon-float"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2 text-lg">Secure Process</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">Your information is handled with strict confidentiality.</p>
+            </div>
+
+            <div class="card-hover bg-white/90 backdrop-blur rounded-2xl p-7 text-center border border-white shadow-lg">
+                <div class="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <i class="fas fa-wand-magic-sparkles text-purple-600 text-xl icon-float"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-2 text-lg">Easy Process</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">Simple verification once you receive your unique code.</p>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="glass-card rounded-3xl p-10 mb-8 shadow-xl border border-white/60">
+            <div class="text-center mb-10">
+                <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase tracking-wider mb-3">How It Works</span>
+                <h3 class="text-2xl font-bold text-gray-800">Get Your Verification Code in 3 Steps</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative step-line">
+                <div class="relative z-10 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg shadow-lg shadow-emerald-500/30 ring-4 ring-white">
+                        1
+                    </div>
+                    <p class="font-bold text-gray-800 text-base mb-1">Click WhatsApp</p>
+                    <p class="text-sm text-gray-500">Start a chat with our admin team</p>
+                </div>
+                <div class="relative z-10 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg shadow-lg shadow-emerald-500/30 ring-4 ring-white">
+                        2
+                    </div>
+                    <p class="font-bold text-gray-800 text-base mb-1">Provide Details</p>
+                    <p class="text-sm text-gray-500">Share your name and email address</p>
+                </div>
+                <div class="relative z-10 text-center">
+                    <div class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg shadow-lg shadow-emerald-500/30 ring-4 ring-white">
+                        3
+                    </div>
+                    <p class="font-bold text-gray-800 text-base mb-1">Receive Code</p>
+                    <p class="text-sm text-gray-500">Get your unique verification code</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ / Tips Section -->
+        <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 mb-8 border border-gray-200/60">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-lightbulb text-yellow-600 text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800 mb-2">Pro Tip</h4>
+                    <p class="text-gray-600 text-sm leading-relaxed">Have your <strong>full name</strong> and <strong>registered email</strong> ready before reaching out. This helps us verify and process your request faster — usually within 2 minutes!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Login -->
+        <div class="text-center">
+            <a href="{{ url_for('login') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white/80 backdrop-blur text-gray-600 hover:text-emerald-700 hover:bg-white border border-gray-200 hover:border-emerald-200 rounded-xl transition-all duration-300 font-medium shadow-sm hover:shadow-md">
+                <i class="fas fa-arrow-left text-xs"></i>
+                Back to Login
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-12 pb-4">
+            <p class="text-xs text-gray-400">© 2026 Submita. All rights reserved. Secure & reliable verification.</p>
+        </div>
+    </div>
+
+    <!-- WhatsApp Modal -->
+    <div id="whatsappModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeWhatsAppModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-95 opacity-0" id="modalContent">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white relative">
+                    <button onclick="closeWhatsAppModal()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                            <i class="fab fa-whatsapp text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">Start Chat</h3>
+                            <p class="text-green-100 text-sm">Fill in your details below</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="modalName" placeholder="e.g. Dr. John Doe" class="input-focus w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email Address <span class="text-red-500">*</span></label>
+                        <input type="email" id="modalEmail" placeholder="e.g. john.doe@university.edu" class="input-focus w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 outline-none transition-all">
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="p-6 pt-0">
+                    <button onclick="submitWhatsApp()" class="w-full py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-bold text-base shadow-lg shadow-green-600/25 hover:shadow-green-600/40 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+                        <i class="fab fa-whatsapp text-xl"></i>
+                        Open WhatsApp Chat
+                    </button>
+                    <p class="text-center text-xs text-gray-400 mt-3">Your details are only used for verification purposes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openWhatsAppModal() {
+            const modal = document.getElementById('whatsappModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeWhatsAppModal() {
+            const modal = document.getElementById('whatsappModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function submitWhatsApp() {
+            const name = document.getElementById('modalName').value.trim() || '[Your Name]';
+            const email = document.getElementById('modalEmail').value.trim() || '[Your Email]';
+
+            if (!document.getElementById('modalName').value.trim() || !document.getElementById('modalEmail').value.trim()) {
+                // Shake animation for required fields
+                const inputs = document.querySelectorAll('#modalName, #modalEmail');
+                inputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        input.classList.add('border-red-400');
+                        input.classList.add('animate-pulse');
+                        setTimeout(() => {
+                            input.classList.remove('border-red-400', 'animate-pulse');
+                        }, 1000);
+                    }
+                });
+                return;
+            }
+
+            let message = "Hello Admin,%0A%0A";
+            message += "I need a lecturer verification code for Submita.%0A%0A";
+            message += "Name: " + encodeURIComponent(name) + "%0A";
+            message += "Email: " + encodeURIComponent(email) + "%0A%0A";
+            message += "Thank you for your assistance!";
+
+            window.open('https://wa.me/2348147050967?text=' + message, '_blank');
+            closeWhatsAppModal();
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeWhatsAppModal();
+        });
+    </script>
+</body>
+</html>

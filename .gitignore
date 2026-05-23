@@ -1,29 +1,95 @@
-# Byte-compiled files
+# Python
 __pycache__/
 *.py[cod]
-
-# Virtual environments (recommended to ignore)
-.env
-.venv
+*$py.class
+*.so
+.Python
 env/
 venv/
 ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Database (optional — remove if you want to upload your database)
-# db.sqlite3
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads
+uploads/
+submissions/
+assignments/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
 
 # Logs
 *.log
+logs/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Flask
+instance/
+.webassets-cache
 
-# IDE files (optional)
-.vscode/
-.idea/
-
-# Cache
-.cache/
+# Testing
 .pytest_cache/
-.mypy_cache/
+.coverage
+htmlcov/
+
+# Render
+.rendercv/_ _ p y c a c h e _ _ / 
+ 
+ * . d b 
+ 
+ u p l o a d s / 
+ 
+ . e n v 
+ 
+ _ _ p y c a c h e _ _ / 
+ 
+ * . d b 
+ 
+ u p l o a d s / 
+ 
+ . e n v 
+ 
+ _ _ p y c a c h e _ _ / 
+ 
+ * . d b 
+ 
+ u p l o a d s / 
+ 
+ . e n v 
+ 
+ _ _ p y c a c h e _ _ / 
+ 
+ * . d b 
+ 
+ u p l o a d s / 
+ 
+ . e n v 
+ 
+ 

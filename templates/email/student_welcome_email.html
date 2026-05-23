@@ -1,0 +1,80 @@
+<!-- templates/email/student_welcome_email.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Submita</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background-color: #f3f4f6; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .header { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 32px; text-align: center; }
+        .logo { font-size: 28px; font-weight: bold; margin-bottom: 8px; }
+        .content { padding: 40px; }
+        .code-box { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 2px solid #10b981; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0; }
+        .verification-code { font-size: 28px; font-weight: 700; letter-spacing: 2px; color: #059669; font-family: monospace; }
+        .student-id { background: #f0fdf4; padding: 16px; border-radius: 12px; text-align: center; margin: 20px 0; border-left: 4px solid #10b981; }
+        .student-id-number { font-size: 24px; font-weight: bold; color: #059669; font-family: monospace; letter-spacing: 1px; }
+        .button { display: inline-block; background: #10b981; color: white; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+        .footer { background: #f9fafb; padding: 24px; text-align: center; font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; }
+        .info-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin: 20px 0; padding: 16px; background: #f9fafb; border-radius: 8px; }
+        .info-label { font-weight: 600; color: #4b5563; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎓 Submita</div>
+            <p style="margin-top: 8px; opacity: 0.9;">Assignment Management System</p>
+        </div>
+        
+        <div class="content">
+            <h2 style="margin-bottom: 16px;">Dear {{ student_name }},</h2>
+            
+            <p>Welcome to <strong>Submita</strong>! Your account has been successfully created. Please find your login credentials below:</p>
+            
+            <div class="student-id">
+                <p style="margin-bottom: 8px; color: #065f46;">Your Student ID</p>
+                <div class="student-id-number">{{ student_id }}</div>
+                <p style="margin-top: 8px; font-size: 12px;">Use this ID for all your submissions</p>
+            </div>
+            
+            <div class="info-grid">
+                <span class="info-label">Full Name:</span>
+                <span>{{ student_name }}</span>
+                <span class="info-label">Student ID:</span>
+                <span><strong>{{ student_id }}</strong></span>
+                <span class="info-label">Email:</span>
+                <span>{{ student_email }}</span>
+                <span class="info-label">Department:</span>
+                <span>{{ department }}</span>
+                <span class="info-label">Level:</span>
+                <span>{{ level }} Level</span>
+            </div>
+            
+            <div class="code-box">
+                <p style="margin-bottom: 12px; color: #065f46;">Email Verification Code</p>
+                <div class="verification-code">{{ verification_code }}</div>
+                <p style="margin-top: 12px; font-size: 12px;">Valid for 24 hours</p>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="{{ verification_link }}" class="button">Verify Your Email →</a>
+            </div>
+            
+            <p style="margin-top: 24px; font-size: 14px;"><strong>Important Notes:</strong></p>
+            <ul style="margin-top: 8px; font-size: 13px; color: #4b5563;">
+                <li>Your Student ID is unique and will be used for assignment submissions</li>
+                <li>Keep your verification code confidential</li>
+                <li>Verify your email within 24 hours to activate your account</li>
+                <li>After verification, you can log in using your Student ID or Email</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 Submita - University Assignment Management System</p>
+            <p style="margin-top: 8px;">Michael Okpara University of Agriculture, Umudike</p>
+        </div>
+    </div>
+</body>
+</html>

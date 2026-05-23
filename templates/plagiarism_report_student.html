@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .plagiarism-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 1rem;
+    }
+
+    .similarity-meter {
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 20px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+
+    .similarity-fill {
+        height: 100%;
+        border-radius: 20px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .match-card {
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid;
+    }
+
+    body.dark-mode .match-card { background: #111827 !important; }
+
+    .sev-CRITICAL { border-left-color: #dc2626; background: #fef2f2; }
+    .sev-HIGH     { border-left-color: #f59e0b; background: #fffbeb; }
+    .sev-MODERATE { border-left-color: #fbbf24; background: #fefce8; }
+    .sev-LOW      { border-left-color: #10b981; background: #ecfdf5; }
+
+    body.dark-mode .sev-CRITICAL { background: #7f1d1d; }
+    body.dark-mode .sev-HIGH     { background: #78350f; }
+    body.dark-mode .sev-MODERATE { background: #854d0e; }
+    body.dark-mode .sev-LOW      { background: #064e3b; }
+</style>
+
+<div class="plagiarism-container">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden">
+
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fa-solid fa-shield-alt text-3xl"></i>
+                <h1 class="text-2xl font-bold">Plagiarism Report</h1>
+            </div>
+            <p class="text-purple-100">
+                <strong>{{ submission.assignment.title }}</strong>
+                &mdash; {{ submission.student.name }}
+            </p>
+            <p class="text-purple-200 text-sm mt-1">
+                Submitted: {{ submission.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}
+            </p>
+        </div>
+
+        <div class="p-6">
+
+            <!-- Similarity Score -->
+            <div class="text-center mb-8">
+                <div class="text-6xl font-extrabold mb-1"
+                     style="color: {{ report.color }}">
+                    {{ "%.1f"|format(plagiarism_score) }}%
+                </div>
+                <div class="text-sm text-gray-500 mb-2">Overall Similarity Score</div>
+
+                <div class="similarity-meter max-w-md mx-auto">
+                    <div class="similarity-fill"
+                         style="width: {{ plagiarism_score }}%; background: {{ report.color }}">
+                    </div>
+                </div>
+
+                <span class="inline-block px-4 py-2 rounded-full text-sm font-semibold mt-2"
+                      style="background: {{ report.color }}22; color: {{ report.color }}; border: 1px solid {{ report.color }}44">
+                    <i class="fas {{ report.icon }} mr-2"></i>
+                    {{ report.severity }} RISK
+                </span>
+            </div>
+
+            <!-- Message -->
+            <div class="rounded-xl p-4 mb-6 flex items-start gap-3"
+                 style="background: {{ report.color }}11; border: 1px solid {{ report.color }}33">
+                <i class="fas {{ report.icon }} mt-0.5 flex-shrink-0"
+                   style="color: {{ report.color }}"></i>
+                <p class="text-sm" style="color: {{ report.color }}">
+                    {{ report.message }}
+                </p>
+            </div>
+
+            <!-- Matches Table -->
+            {% if matches %}
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg mb-4 text-gray-800 dark:text-gray-100">
+                    📋 Similarity Breakdown
+                    <span class="text-sm font-normal text-gray-500">({{ matches|length }} match{{ 'es' if matches|length != 1 }})</span>
+                </h3>
+
+                {% for match in matches[:5] %}
+                <div class="match-card sev-{{ report.severity }}">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-medium text-gray-800 dark:text-gray-100">
+                            {{ match.student_name }}
+                        </span>
+                        <span class="text-lg font-bold" style="color: {{ report.color }}">
+                            {{ match.similarity }}%
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-2">ID: {{ match.student_id }}</p>
+                    <div class="similarity-meter">
+                        <div class="similarity-fill"
+                             style="width: {{ match.similarity }}%; background: {{ report.color }}">
+                        </div>
+                    </div>
+                    {% if match.seq_similarity is defined %}
+                    <div class="flex gap-4 mt-2 text-xs text-gray-500">
+                        <span>Sequence match: {{ match.seq_similarity }}%</span>
+                        <span>Phrase match: {{ match.shingle_similarity }}%</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-10">
+                <i class="fa-solid fa-check-circle text-5xl text-emerald-500 mb-3"></i>
+                <p class="text-gray-500 font-medium">No significant similarities found.</p>
+                <p class="text-sm text-gray-400 mt-1">
+                    This submission appears original compared to other submissions.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Recommendations -->
+            <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="font-semibold text-lg mb-4 text-gray-800 dark:text-gray-100">
+                    📌 Recommendations
+                </h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <i class="fas {{ report.icon }} mt-1 flex-shrink-0"
+                           style="color: {{ report.color }}"></i>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ report.recommendation }}
+                        </span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <i class="fas fa-arrow-right mt-1 text-emerald-500 flex-shrink-0"></i>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            <strong>Suggested action:</strong> {{ report.action }}
+                        </span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <a href="{{ url_for('student_dashboard') }}"
+                   class="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 font-medium transition text-sm">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Animate the fill bars on load
+    document.addEventListener('DOMContentLoaded', function () {
+        const fills = document.querySelectorAll('.similarity-fill');
+        fills.forEach(function (el) {
+            const target = el.style.width;
+            el.style.width = '0%';
+            setTimeout(function () { el.style.width = target; }, 200);
+        });
+    });
+</script>
+{% endblock %}

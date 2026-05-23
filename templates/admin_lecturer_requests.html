@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-bg min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="relative z-10">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <button onclick="goBack()" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition">
+                    <i class="fas fa-arrow-left text-xs"></i> Back
+                </button>
+            </div>
+
+            <!-- Header -->
+            <div class="glass-card rounded-2xl border border-white/40 overflow-hidden shadow-xl mb-6">
+                <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 px-6 py-5">
+                    <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-user-plus text-emerald-300"></i> Lecturer Registration Requests
+                    </h1>
+                    <p class="text-emerald-100 text-sm mt-1">Review and manage lecturer registration requests</p>
+                </div>
+            </div>
+
+            <!-- Pending Requests -->
+            <div class="glass-card rounded-2xl border border-white/40 overflow-hidden shadow-xl mb-6">
+                <div class="px-6 py-4 border-b border-gray-200 bg-amber-50/50">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-clock text-amber-600"></i> Pending Requests
+                        <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs">{{ pending_requests|length }}</span>
+                    </h2>
+                </div>
+
+                {% if pending_requests %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Staff ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Department</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Qualification</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Requested</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for request in pending_requests %}
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user-tie text-amber-600 text-xs"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-800">{{ request.full_name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ request.email }}</td>
+                                <td class="px-6 py-4"><code class="text-xs">{{ request.staff_id }}</code></td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ request.department }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ request.qualification or 'N/A' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        <button onclick="approveRequest({{ request.id }})" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg transition">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                        <button onclick="rejectRequest({{ request.id }})" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg transition">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-check-circle text-4xl text-green-500 mb-3"></i>
+                    <p class="text-gray-500">No pending requests</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Approved/Rejected Requests -->
+            {% if approved_requests %}
+            <div class="glass-card rounded-2xl border border-white/40 overflow-hidden shadow-xl">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-history text-gray-600"></i> Processed Requests
+                        <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">{{ approved_requests|length }}</span>
+                    </h2>
+                </div>
+                <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200 sticky top-0">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">Reviewed</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for request in approved_requests %}
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-800">{{ request.full_name }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ request.email }}</td>
+                                <td class="px-6 py-4">
+                                    {% if request.status == 'approved' %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                            <i class="fas fa-check-circle"></i> Approved
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                            <i class="fas fa-times-circle"></i> Rejected
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ request.reviewed_at.strftime('%Y-%m-%d') if request.reviewed_at else 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-bg {
+        background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
+    }
+    
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+</style>
+
+<script>
+    function goBack() {
+        if (document.referrer && document.referrer !== window.location.href) {
+            window.history.back();
+        } else {
+            window.location.href = '/admin-dashboard';
+        }
+    }
+    
+    function approveRequest(requestId) {
+        if (confirm('Approve this lecturer registration request?')) {
+            fetch(`/admin/approve-request/${requestId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Failed to approve request');
+                    }
+                })
+                .catch(() => alert('An error occurred'));
+        }
+    }
+    
+    function rejectRequest(requestId) {
+        const reason = prompt('Please provide a reason for rejection:');
+        if (reason !== null) {
+            fetch(`/admin/reject-request/${requestId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reason: reason })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Failed to reject request');
+                }
+            })
+            .catch(() => alert('An error occurred'));
+        }
+    }
+</script>
+{% endblock %}

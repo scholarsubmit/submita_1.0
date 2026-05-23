@@ -1,555 +1,717 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Submita Secure Login - Assignment Submission Platform">
+    <title>Submita — Secure Sign In</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
 
-{% block content %}
-<style>
-    .auth-container {
-        min-height: calc(100vh - 200px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem 1rem;
-    }
-    
-    .auth-card {
-        max-width: 480px;
-        width: 100%;
-        background: white;
-        border-radius: 24px;
-        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    body.dark-mode .auth-card {
-        background: #1f2937;
-        box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .auth-header {
-        padding: 2rem 2rem 1rem;
-        text-align: center;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    
-    body.dark-mode .auth-header {
-        border-color: #374151;
-    }
-    
-    .auth-header h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: #1f2937;
-    }
-    
-    body.dark-mode .auth-header h1 {
-        color: #f3f4f6;
-    }
-    
-    .auth-header p {
-        color: #6b7280;
-        font-size: 0.875rem;
-    }
-    
-    body.dark-mode .auth-header p {
-        color: #9ca3af;
-    }
-    
-    .auth-body {
-        padding: 2rem;
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-group label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-        color: #374151;
-    }
-    
-    body.dark-mode .form-group label {
-        color: #d1d5db;
-    }
-    
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-    
-    .input-icon {
-        position: absolute;
-        left: 14px;
-        color: #9ca3af;
-        font-size: 1rem;
-    }
-    
-    .form-group input {
-        width: 100%;
-        padding: 0.875rem 1rem 0.875rem 2.5rem;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-        background: white;
-    }
-    
-    body.dark-mode .form-group input {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-    
-    .form-group input:focus {
-        outline: none;
-        border-color: #059669;
-        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
-    }
-    
-    body.dark-mode .form-group input:focus {
-        border-color: #10b981;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-    }
-    
-    .password-wrapper {
-        position: relative;
-    }
-    
-    .password-wrapper input {
-        padding-right: 2.5rem;
-    }
-    
-    .toggle-password {
-        position: absolute;
-        right: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #9ca3af;
-        font-size: 1rem;
-    }
-    
-    .toggle-password:hover {
-        color: #059669;
-    }
-    
-    body.dark-mode .toggle-password:hover {
-        color: #10b981;
-    }
-    
-    .forgot-link {
-        text-align: right;
-        margin-top: 0.5rem;
-    }
-    
-    .forgot-link a {
-        font-size: 0.75rem;
-        color: #059669;
-        text-decoration: none;
-    }
-    
-    .forgot-link a:hover {
-        text-decoration: underline;
-    }
-    
-    body.dark-mode .forgot-link a {
-        color: #10b981;
-    }
-    
-    .auth-btn {
-        width: 100%;
-        padding: 0.875rem;
-        background: linear-gradient(135deg, #059669, #047857);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-top: 0.5rem;
-    }
-    
-    .auth-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
-    }
-    
-    body.dark-mode .auth-btn {
-        background: linear-gradient(135deg, #10b981, #059669);
-    }
-    
-    .auth-footer {
-        text-align: center;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
-        border-top: 1px solid #e5e7eb;
-        font-size: 0.875rem;
-        color: #6b7280;
-    }
-    
-    body.dark-mode .auth-footer {
-        border-color: #374151;
-        color: #9ca3af;
-    }
-    
-    .auth-footer a {
-        color: #059669;
-        text-decoration: none;
-        font-weight: 500;
-    }
-    
-    .auth-footer a:hover {
-        text-decoration: underline;
-    }
-    
-    body.dark-mode .auth-footer a {
-        color: #10b981;
-    }
-    
-    /* Demo Accounts Section */
-    .demo-section {
-        margin-top: 1.5rem;
-    }
-    
-    .demo-title {
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #6b7280;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 1rem;
-        text-align: center;
-    }
-    
-    .demo-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-    }
-    
-    .demo-card {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        padding: 0.75rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-align: center;
-    }
-    
-    body.dark-mode .demo-card {
-        background: #374151;
-        border-color: #4b5563;
-    }
-    
-    .demo-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border-color: #059669;
-        background: #f0fdf4;
-    }
-    
-    body.dark-mode .demo-card:hover {
-        border-color: #10b981;
-        background: #1f2937;
-    }
-    
-    .demo-role {
-        display: inline-block;
-        padding: 0.2rem 0.5rem;
-        border-radius: 20px;
-        font-size: 0.6rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    
-    .demo-role.student {
-        background: #d1fae5;
-        color: #065f46;
-    }
-    
-    .demo-role.lecturer {
-        background: #e0e7ff;
-        color: #3730a3;
-    }
-    
-    .demo-role.admin {
-        background: #fef3c7;
-        color: #92400e;
-    }
-    
-    body.dark-mode .demo-role.student {
-        background: #064e3b;
-        color: #6ee7b7;
-    }
-    
-    body.dark-mode .demo-role.lecturer {
-        background: #1e3a5f;
-        color: #93c5fd;
-    }
-    
-    body.dark-mode .demo-role.admin {
-        background: #78350f;
-        color: #fbbf24;
-    }
-    
-    .demo-id {
-        font-family: monospace;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin-bottom: 0.25rem;
-    }
-    
-    body.dark-mode .demo-id {
-        color: #f3f4f6;
-    }
-    
-    .demo-password {
-        font-size: 0.6rem;
-        color: #6b7280;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.25rem;
-    }
-    
-    body.dark-mode .demo-password {
-        color: #9ca3af;
-    }
-    
-    .demo-password i {
-        font-size: 0.5rem;
-    }
-    
-    .demo-hint {
-        text-align: center;
-        font-size: 0.65rem;
-        color: #9ca3af;
-        margin-top: 0.5rem;
-    }
-    
-    @media (max-width: 480px) {
-        .demo-grid {
-            grid-template-columns: 1fr;
+        /* Animated gradient background */
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
-        .auth-card {
-            margin: 0 1rem;
+        .login-bg {
+            background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
         }
-        .auth-header {
-            padding: 1.5rem;
-        }
-        .auth-body {
-            padding: 1.5rem;
-        }
-    }
-    
-    /* Loading spinner */
-    .loading-spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 0.6s linear infinite;
-        margin-left: 8px;
-    }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-</style>
 
-<div class="auth-container">
-    <div class="auth-card">
-        <div class="auth-header">
-            <h1>Welcome Back</h1>
-            <p>Sign in to continue to your account</p>
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.08);
+            animation: floatParticle linear infinite;
+            pointer-events: none;
+        }
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* Glass card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(24px) saturate(1.2);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.15), 0 0 0 1px rgba(16, 185, 129, 0.05);
+        }
+
+        /* Input styles */
+        .form-input {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .form-input:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px -4px rgba(16, 185, 129, 0.25);
+        }
+        .input-group:focus-within .input-icon {
+            color: #10b981;
+        }
+        .input-group:focus-within .input-label {
+            color: #059669;
+        }
+
+        /* Validation states */
+        .input-valid {
+            border-color: #10b981 !important;
+            background-color: #f0fdf4 !important;
+        }
+        .input-invalid {
+            border-color: #ef4444 !important;
+            background-color: #fef2f2 !important;
+        }
+
+        /* Button shine */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shine::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+            transform: rotate(30deg) translateX(-100%);
+            transition: transform 0.7s;
+        }
+        .btn-shine:hover::after {
+            transform: rotate(30deg) translateX(100%);
+        }
+        .btn-press:active {
+            transform: scale(0.97);
+        }
+
+        /* Shake error */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .error-shake { animation: shake 0.5s ease; }
+
+        /* Reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Role toggle pills */
+        .role-pill {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .role-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+        }
+        .role-pill.active {
+            border-color: #10b981;
+            background: #f0fdf4;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        /* Strength meter */
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Feature cards */
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateX(6px) scale(1.02);
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        /* Social buttons */
+        .social-btn {
+            transition: all 0.2s ease;
+        }
+        .social-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-color: #10b981;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.75rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .divider::before { margin-right: 0.75rem; }
+        .divider::after { margin-left: 0.75rem; }
+
+        /* Live elements */
+        .live-dot {
+            animation: livePulse 2s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+        .live-clock {
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Typing cursor */
+        .typing-cursor::after {
+            content: '|';
+            animation: blink 1s step-end infinite;
+            color: #10b981;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Security badge shimmer */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .security-badge {
+            background: linear-gradient(90deg, #f0fdf4, #ecfdf5, #f0fdf4);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease infinite;
+        }
+
+        /* Floating blobs */
+        @keyframes blobFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+        .blob {
+            animation: blobFloat 10s ease-in-out infinite;
+            filter: blur(60px);
+            opacity: 0.35;
+        }
+
+        /* Toast notification */
+        .toast {
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="login-bg min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+
+    <!-- Ambient background blobs -->
+    <div class="fixed top-0 left-0 w-96 h-96 bg-emerald-300/30 rounded-full blob pointer-events-none" style="animation-delay: 0s;"></div>
+    <div class="fixed bottom-0 right-0 w-80 h-80 bg-teal-300/25 rounded-full blob pointer-events-none" style="animation-delay: -3s;"></div>
+    <div class="fixed top-1/2 left-1/2 w-72 h-72 bg-green-200/20 rounded-full blob pointer-events-none" style="animation-delay: -6s;"></div>
+
+    <!-- Floating particles container -->
+    <div id="particles" class="fixed inset-0 pointer-events-none overflow-hidden"></div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast fixed top-4 right-4 z-50 bg-white border border-emerald-200 shadow-xl rounded-xl p-4 flex items-center gap-3 max-w-sm">
+        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-exclamation text-red-500 text-xs"></i>
         </div>
+        <div>
+            <p class="text-sm font-semibold text-gray-900" id="toastTitle">Error</p>
+            <p class="text-xs text-gray-500" id="toastMessage">Something went wrong</p>
+        </div>
+    </div>
+
+    <div class="w-full max-w-5xl mx-auto grid lg:grid-cols-5 gap-10 items-center relative z-10">
         
-        <div class="auth-body">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}" style="margin-bottom: 1.5rem;">{{ message }}</div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-            
-            <form method="POST" action="{{ url_for('login') }}" id="loginForm">
-                <div class="form-group">
-                    <label>Matric Number / Staff ID</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-id-card input-icon"></i>
-                        <input type="text" name="matric" id="matric" placeholder="e.g., STU001 or LEC001" required autofocus>
-                    </div>
+        <!-- Left Side - Branding -->
+        <div class="hidden lg:block lg:col-span-2 reveal" id="leftPanel">
+            <a href="{{ url_for('home') }}" class="inline-flex items-center gap-3 mb-8 group">
+                <div class="w-11 h-11 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:shadow-emerald-300 group-hover:scale-105 transition-all duration-300">
+                    <i class="fa-solid fa-paper-plane text-white text-sm"></i>
                 </div>
-                
-                <div class="form-group">
-                    <label>Password</label>
-                    <div class="password-wrapper">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" name="password" id="password" placeholder="Enter your password" required>
-                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
+                <span class="text-2xl font-bold text-gray-900 tracking-tight">Submita</span>
+            </a>
+
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight mb-4">
+                Welcome back to<br>
+                <span class="text-emerald-600" id="typewriter"></span><span class="typing-cursor"></span>
+            </h1>
+
+            <p class="text-sm text-gray-500 mb-8 leading-relaxed max-w-xs">
+                Sign in securely to manage courses, track submissions, and collaborate with your academic community.
+            </p>
+
+            <!-- Security Badge -->
+            <div class="security-badge rounded-xl p-3 mb-6 border border-emerald-200/50 flex items-center gap-3 max-w-xs">
+                <div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-shield-halved text-emerald-600 text-sm"></i>
                 </div>
-                
-                <div class="forgot-link">
-                    <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
-                </div>
-                
-                <button type="submit" class="auth-btn" id="loginBtn">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
-            </form>
-            
-            <!-- Demo Accounts Section - Click to Auto Login -->
-            <div class="demo-section">
-                <div class="demo-title">✨ Quick Demo Access</div>
-                <div class="demo-grid">
-                    <!-- Student 1 -->
-                    <div class="demo-card" onclick="autoLogin('STU001', 'Student123!')">
-                        <span class="demo-role student">🎓 Student</span>
-                        <div class="demo-id">STU001</div>
-                        <div class="demo-password">
-                            <i class="fas fa-lock"></i> Click to login
-                        </div>
-                    </div>
-                    
-                    <!-- Student 2 -->
-                    <div class="demo-card" onclick="autoLogin('STU002', 'Student456!')">
-                        <span class="demo-role student">🎓 Student</span>
-                        <div class="demo-id">STU002</div>
-                        <div class="demo-password">
-                            <i class="fas fa-lock"></i> Click to login
-                        </div>
-                    </div>
-                    
-                    <!-- Lecturer 1 -->
-                    <div class="demo-card" onclick="autoLogin('LEC001', 'Lecturer123!')">
-                        <span class="demo-role lecturer">👨‍🏫 Lecturer</span>
-                        <div class="demo-id">LEC001</div>
-                        <div class="demo-password">
-                            <i class="fas fa-lock"></i> Click to login
-                        </div>
-                    </div>
-                    
-                    <!-- Lecturer 2 -->
-                    <div class="demo-card" onclick="autoLogin('LEC002', 'Lecturer456!')">
-                        <span class="demo-role lecturer">👩‍🏫 Lecturer</span>
-                        <div class="demo-id">LEC002</div>
-                        <div class="demo-password">
-                            <i class="fas fa-lock"></i> Click to login
-                        </div>
-                    </div>
-                    
-                    <!-- Admin -->
-                    <div class="demo-card" onclick="autoLogin('ADMIN001', 'Admin123!')">
-                        <span class="demo-role admin">👑 Administrator</span>
-                        <div class="demo-id">ADMIN001</div>
-                        <div class="demo-password">
-                            <i class="fas fa-lock"></i> Click to login
-                        </div>
-                    </div>
-                </div>
-                <div class="demo-hint">
-                    <i class="fas fa-mouse-pointer"></i> Click any demo card to login instantly
+                <div>
+                    <p class="text-xs font-bold text-emerald-800">Bank-Grade Security</p>
+                    <p class="text-[11px] text-emerald-600">256-bit encryption & secure sessions</p>
                 </div>
             </div>
-            
-            <div class="auth-footer">
-                Don't have an account? <a href="{{ url_for('register') }}">Create an account</a>
+
+            <!-- Feature Cards -->
+            <div class="space-y-3">
+                <div class="feature-card flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm">
+                    <div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-bolt text-emerald-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 text-xs">Lightning Fast</h3>
+                        <p class="text-[11px] text-gray-500">Submit assignments in seconds</p>
+                    </div>
+                </div>
+                <div class="feature-card flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm">
+                    <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-fingerprint text-blue-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 text-xs">Identity Verified</h3>
+                        <p class="text-[11px] text-gray-500">Role-based secure access control</p>
+                    </div>
+                </div>
+                <div class="feature-card flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm">
+                    <div class="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-bell text-amber-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 text-xs">Smart Alerts</h3>
+                        <p class="text-[11px] text-gray-500">Never miss a deadline again</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Stats -->
+            <div class="mt-8 flex items-center gap-3">
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-emerald-700 text-[10px] font-bold">MO</div>
+                    <div class="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-blue-700 text-[10px] font-bold">UN</div>
+                    <div class="w-8 h-8 rounded-full bg-amber-200 border-2 border-white flex items-center justify-center text-amber-700 text-[10px] font-bold">FU</div>
+                </div>
+                <div class="text-xs text-gray-500">
+                    <span class="font-bold text-gray-800 counter" id="userCount">10,247</span> active now
+                    <span class="live-dot inline-block w-2 h-2 bg-emerald-500 rounded-full ml-1"></span>
+                </div>
+            </div>
+
+            <!-- Live Clock -->
+            <div class="mt-3 text-xs text-gray-400 font-mono live-clock" id="liveClock">--:--:--</div>
+        </div>
+
+        <!-- Right Side - Login Form -->
+        <div class="lg:col-span-3 reveal" style="transition-delay: 0.15s" id="rightPanel">
+            <div class="glass-card rounded-2xl shadow-2xl overflow-hidden max-w-md mx-auto lg:max-w-none">
+                <!-- Mobile Logo -->
+                <div class="lg:hidden pt-6 pb-2 text-center">
+                    <div class="inline-flex items-center gap-2 mb-2">
+                        <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <i class="fa-solid fa-paper-plane text-white text-sm"></i>
+                        </div>
+                        <span class="text-xl font-bold text-gray-900">Submita</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Secure Academic Portal</p>
+                </div>
+
+                <!-- Header -->
+                <div class="px-8 pt-6 pb-3 text-center">
+                    <h2 class="text-xl font-bold text-gray-900">Sign In</h2>
+                    <p class="text-xs text-gray-500 mt-1">Enter your credentials to continue</p>
+                </div>
+
+                <!-- Role Selector -->
+                <div class="px-8 pt-2 pb-1">
+                    <div class="grid grid-cols-2 gap-3 p-1 bg-gray-100/80 rounded-xl">
+                        <div class="role-pill active rounded-lg py-2.5 px-3 text-center text-xs font-semibold" data-role="student" onclick="selectLoginRole('student')">
+                            <i class="fa-solid fa-graduation-cap mr-1.5"></i>Student
+                        </div>
+                        <div class="role-pill rounded-lg py-2.5 px-3 text-center text-xs font-semibold bg-white text-gray-600" data-role="lecturer" onclick="selectLoginRole('lecturer')">
+                            <i class="fa-solid fa-chalkboard-user mr-1.5"></i>Lecturer
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="p-8 pt-4">
+                    <form method="POST" action="{{ url_for('login') }}" class="space-y-5" id="loginForm">
+                        <input type="hidden" name="loginRole" id="loginRole" value="student">
+                        
+                        <!-- Identifier Input -->
+                        <div class="input-group">
+                            <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5 transition-colors" id="identifierLabel">
+                                Matric Number or Email
+                            </label>
+                            <div class="relative">
+                                <div class="input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors">
+                                    <i class="fa-solid fa-id-card text-xs" id="identifierIcon"></i>
+                                </div>
+                                <input type="text" name="loginIdentifier" id="loginIdentifier" required 
+                                       class="form-input w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60"
+                                       placeholder="U2023/45678 or you@mouau.edu.ng" autocomplete="email"
+                                       oninput="validateIdentifier(this)">
+                                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 hidden" id="identifierCheck">
+                                    <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
+                                </div>
+                                <div class="absolute right-3.5 top-1/2 -translate-y-1/2 hidden" id="identifierX">
+                                    <i class="fa-solid fa-circle-xmark text-red-400 text-sm"></i>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-red-500 mt-1.5 hidden flex items-center gap-1" id="identifierError">
+                                <i class="fa-solid fa-triangle-exclamation text-[9px]"></i>
+                                <span id="identifierErrorText">Please enter a valid identifier</span>
+                            </p>
+                            <p class="text-[11px] text-gray-400 mt-1.5" id="identifierHint">Format: U2023/12345 or university email</p>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Password</label>
+                            <div class="relative input-group">
+                                <div class="input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors">
+                                    <i class="fa-solid fa-lock text-xs"></i>
+                                </div>
+                                <input type="password" name="loginPassword" id="loginPassword" required 
+                                       class="form-input w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60"
+                                       placeholder="••••••••" autocomplete="current-password"
+                                       oninput="checkStrength(this.value)">
+                                <button type="button" onclick="togglePassword('loginPassword', 'eyeIcon')" 
+                                        class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition-colors p-1 btn-press">
+                                    <i class="fa-solid fa-eye text-xs" id="eyeIcon"></i>
+                                </button>
+                            </div>
+                            <!-- Strength indicator -->
+                            <div class="mt-2.5 flex gap-1.5 opacity-0 transition-opacity" id="strengthIndicator">
+                                <div class="flex-1 strength-bar bg-gray-200" id="bar1"></div>
+                                <div class="flex-1 strength-bar bg-gray-200" id="bar2"></div>
+                                <div class="flex-1 strength-bar bg-gray-200" id="bar3"></div>
+                                <div class="flex-1 strength-bar bg-gray-200" id="bar4"></div>
+                            </div>
+                            <div class="flex justify-between mt-1.5">
+                                <p class="text-[10px] text-gray-400" id="strengthText">Enter password</p>
+                                <p class="text-[10px] text-gray-400 hidden" id="capsWarning"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Caps Lock</p>
+                            </div>
+                        </div>
+
+                        <!-- Remember & Forgot -->
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2.5 cursor-pointer group">
+                                <div class="relative">
+                                    <input type="checkbox" name="remember" class="peer sr-only">
+                                    <div class="w-4 h-4 border-2 border-gray-300 rounded peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all flex items-center justify-center">
+                                        <i class="fa-solid fa-check text-white text-[10px] opacity-0 peer-checked:opacity-100"></i>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-600 group-hover:text-gray-800 transition-colors font-medium">Remember me for 7 days</span>
+                            </label>
+                            <a href="#" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors hover:underline">Forgot password?</a>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="submitBtn"
+                                class="btn-shine btn-press w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-lg shadow-emerald-200 hover:shadow-emerald-300 hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0">
+                            <span id="btnText">Sign In Securely</span>
+                            <i class="fa-solid fa-arrow-right text-xs" id="btnIcon"></i>
+                            <i class="fa-solid fa-circle-notch fa-spin text-xs hidden" id="btnSpinner"></i>
+                        </button>
+                    </form>
+                    
+                <!-- Footer -->
+                <div class="px-8 py-5 bg-emerald-50/60 border-t border-emerald-100/50 text-center">
+                    <p class="text-xs text-gray-600">
+                        No account yet? 
+                        <a href="{{ url_for('register') }}" class="text-emerald-700 font-bold hover:text-emerald-800 transition-colors inline-flex items-center gap-1 group">
+                            Create account free
+                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Back to home -->
+            <div class="text-center mt-5">
+                <a href="{{ url_for('home') }}" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors group font-medium">
+                    <i class="fa-solid fa-arrow-left text-[10px] group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Homepage
+                </a>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    function togglePasswordVisibility() {
-        const passwordField = document.getElementById('password');
-        const icon = document.querySelector('.toggle-password i');
-        if (passwordField.type === 'password') {
-            passwordField.type = 'text';
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        } else {
-            passwordField.type = 'password';
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        }
-    }
-    
-    async function autoLogin(matric, password) {
-        // Show loading state on the clicked card
-        const cards = document.querySelectorAll('.demo-card');
-        let clickedCard = null;
-        
-        for (let card of cards) {
-            if (card.textContent.includes(matric)) {
-                clickedCard = card;
-                break;
+    <script>
+        // ==================== PARTICLES ====================
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['rgba(16,185,129,0.12)', 'rgba(5,150,105,0.08)', 'rgba(20,184,166,0.1)'];
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = Math.random() * 12 + 4;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                p.style.animationDelay = (Math.random() * 10) + 's';
+                container.appendChild(p);
             }
         }
-        
-        if (clickedCard) {
-            const originalHTML = clickedCard.innerHTML;
-            clickedCard.innerHTML = '<div class="loading-spinner"></div> Logging in...';
-            clickedCard.style.opacity = '0.7';
-            clickedCard.style.pointerEvents = 'none';
-            
-            // Fill the form
-            document.getElementById('matric').value = matric;
-            document.getElementById('password').value = password;
-            
-            // Submit the form
-            const form = document.getElementById('loginForm');
-            
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.redirect) {
-                    window.location.href = data.redirect;
+
+        // ==================== REVEAL ====================
+        window.addEventListener('load', () => {
+            createParticles();
+            document.querySelectorAll('.reveal').forEach((el, i) => {
+                setTimeout(() => el.classList.add('visible'), i * 120);
+            });
+            startTypewriter();
+            startClock();
+            animateCounter();
+        });
+
+        // ==================== TYPEWRITER ====================
+        const words = ['smarter learning', 'better grades', 'your future', 'academic excellence'];
+        let wordIndex = 0, charIndex = 0, isDeleting = false;
+        function startTypewriter() {
+            const el = document.getElementById('typewriter');
+            const current = words[wordIndex];
+            if (isDeleting) {
+                el.textContent = current.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                el.textContent = current.substring(0, charIndex + 1);
+                charIndex++;
+            }
+            let speed = isDeleting ? 45 : 100;
+            if (!isDeleting && charIndex === current.length) { speed = 2200; isDeleting = true; }
+            else if (isDeleting && charIndex === 0) { isDeleting = false; wordIndex = (wordIndex + 1) % words.length; speed = 400; }
+            setTimeout(startTypewriter, speed);
+        }
+
+        // ==================== CLOCK ====================
+        function startClock() {
+            const clock = document.getElementById('liveClock');
+            setInterval(() => {
+                const now = new Date();
+                clock.textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            }, 1000);
+        }
+
+        // ==================== COUNTER ====================
+        function animateCounter() {
+            const el = document.getElementById('userCount');
+            let count = 10247;
+            setInterval(() => { count += Math.floor(Math.random() * 3); el.textContent = count.toLocaleString(); }, 3000);
+        }
+
+        // ==================== ROLE SELECTOR ====================
+        function selectLoginRole(role) {
+            document.getElementById('loginRole').value = role;
+            document.querySelectorAll('.role-pill').forEach(pill => {
+                pill.classList.remove('active', 'bg-white', 'text-gray-600');
+                if (pill.dataset.role === role) {
+                    pill.classList.add('active');
                 } else {
-                    // If no redirect in JSON, submit normally
-                    form.submit();
+                    pill.classList.add('bg-white', 'text-gray-600');
                 }
-            } catch (error) {
-                // Fallback to normal form submission
-                form.submit();
+            });
+
+            const label = document.getElementById('identifierLabel');
+            const icon = document.getElementById('identifierIcon');
+            const input = document.getElementById('loginIdentifier');
+            const hint = document.getElementById('identifierHint');
+
+            if (role === 'student') {
+                label.textContent = 'Matric Number or Email';
+                icon.className = 'fa-solid fa-id-card text-xs';
+                input.placeholder = 'U2023/45678 or you@mouau.edu.ng';
+                hint.textContent = 'Format: U2023/12345 or university email address';
+            } else {
+                label.textContent = 'Staff ID or Email';
+                icon.className = 'fa-solid fa-id-badge text-xs';
+                input.placeholder = 'STF/2023/001 or you@mouau.edu.ng';
+                hint.textContent = 'Format: STF/2023/001 or university email address';
             }
-        } else {
-            // Just fill and submit normally
-            document.getElementById('matric').value = matric;
-            document.getElementById('password').value = password;
-            document.getElementById('loginForm').submit();
+            validateIdentifier(input);
         }
-    }
-    
-    // Also allow Enter key to submit
-    document.getElementById('loginForm').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            this.submit();
+
+        // ==================== PASSWORD TOGGLE ====================
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
         }
-    });
-</script>
-{% endblock %}
+
+        // ==================== IDENTIFIER VALIDATION ====================
+        function validateIdentifier(input) {
+            const val = input.value.trim();
+            const check = document.getElementById('identifierCheck');
+            const xmark = document.getElementById('identifierX');
+            const error = document.getElementById('identifierError');
+            const role = document.getElementById('loginRole').value;
+
+            const emailRegex = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+            const matricRegex = /^[A-Z]\d{4}\/\d{5,}$/i;
+            const staffRegex = /^STF\/\d{4}\/\d{3,}$/i;
+            const oldStaffRegex = /^[A-Z]{3}\d{3,}$/i;
+
+            if (val.length === 0) {
+                check.classList.add('hidden'); xmark.classList.add('hidden');
+                error.classList.add('hidden');
+                input.classList.remove('input-valid', 'input-invalid');
+                return;
+            }
+
+            let isValid = emailRegex.test(val);
+            if (!isValid && role === 'student') isValid = matricRegex.test(val);
+            if (!isValid && role === 'lecturer') isValid = staffRegex.test(val) || oldStaffRegex.test(val) || matricRegex.test(val);
+
+            if (isValid) {
+                check.classList.remove('hidden'); xmark.classList.add('hidden');
+                error.classList.add('hidden');
+                input.classList.add('input-valid');
+                input.classList.remove('input-invalid');
+            } else {
+                check.classList.add('hidden');
+                if (val.length > 5) {
+                    xmark.classList.remove('hidden');
+                    error.classList.remove('hidden');
+                    input.classList.add('input-invalid');
+                    input.classList.remove('input-valid');
+                } else {
+                    xmark.classList.add('hidden');
+                    error.classList.add('hidden');
+                    input.classList.remove('input-valid', 'input-invalid');
+                }
+            }
+        }
+
+        // ==================== PASSWORD STRENGTH ====================
+        function checkStrength(val) {
+            const indicator = document.getElementById('strengthIndicator');
+            const text = document.getElementById('strengthText');
+            const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+            indicator.classList.remove('opacity-0');
+
+            let strength = 0;
+            if (val.length > 0) strength++;
+            if (val.length >= 8) strength++;
+            if (/[A-Z]/.test(val)) strength++;
+            if (/[0-9]/.test(val)) strength++;
+            if (/[^A-Za-z0-9]/.test(val)) strength++;
+            strength = Math.min(strength, 4);
+
+            const colors = ['bg-red-400', 'bg-amber-400', 'bg-blue-400', 'bg-emerald-500'];
+            const labels = ['Too weak', 'Weak', 'Fair', 'Strong'];
+
+            bars.forEach((bar, i) => {
+                bar.className = 'flex-1 strength-bar ' + (i < strength ? colors[strength - 1] : 'bg-gray-200');
+            });
+
+            text.textContent = strength > 0 ? labels[strength - 1] : 'Enter password';
+            text.className = 'text-[10px] ' + (strength >= 4 ? 'text-emerald-600 font-semibold' : strength >= 3 ? 'text-blue-600' : strength >= 2 ? 'text-amber-600' : strength >= 1 ? 'text-red-500' : 'text-gray-400');
+        }
+
+        // ==================== CAPS LOCK WARNING ====================
+        document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+            const warning = document.getElementById('capsWarning');
+            if (e.getModifierState && e.getModifierState('CapsLock')) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        });
+
+        // ==================== FORM SUBMISSION ====================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const btnSpinner = document.getElementById('btnSpinner');
+            const identifier = document.getElementById('loginIdentifier');
+            const password = document.getElementById('loginPassword');
+
+            // Basic client-side validation
+            if (!identifier.value.trim() || !password.value) {
+                e.preventDefault();
+                showToast('Missing Information', 'Please fill in all fields before logging in.');
+                this.classList.add('error-shake');
+                setTimeout(() => this.classList.remove('error-shake'), 500);
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.textContent = 'Authenticating...';
+            btnIcon.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
+        });
+
+        // ==================== TOAST ====================
+        function showToast(title, message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // ==================== SOCIAL LOGIN ====================
+        function socialLogin(provider) {
+            const btn = event.currentTarget;
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs mr-2"></i> Connecting...';
+            btn.disabled = true;
+            setTimeout(() => {
+                showToast('Coming Soon', `${provider.charAt(0).toUpperCase() + provider.slice(1)} login will be available soon.`);
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }, 1200);
+        }
+
+        // ==================== ERROR SHAKE FROM URL ====================
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error')) {
+            const form = document.getElementById('loginForm');
+            form.classList.add('error-shake');
+            setTimeout(() => form.classList.remove('error-shake'), 500);
+            showToast('Authentication Failed', 'Invalid credentials. Please check your details and try again.');
+        }
+        
+        // Prevent any links from opening in new tabs by default
+        document.querySelectorAll('a').forEach(link => {
+            link.setAttribute('target', '_self');
+        });
+    </script>
+</body>
+</html>

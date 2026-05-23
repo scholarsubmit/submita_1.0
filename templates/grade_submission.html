@@ -1,502 +1,124 @@
+<!-- templates/grade_submission.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .grade-container {
-        max-width: 1000px;
-        margin: 2rem auto;
-        padding: 1rem;
-    }
+<div class="dashboard-bg min-h-screen py-8">
+    <div class="max-w-3xl mx-auto px-4">
+        <!-- Decorative elements -->
+        <div class="fixed top-20 left-10 w-64 h-64 bg-emerald-200/20 rounded-full blur-3xl float-1 pointer-events-none"></div>
+        <div class="fixed bottom-20 right-10 w-80 h-80 bg-blue-200/20 rounded-full blur-3xl float-2 pointer-events-none"></div>
 
-    .grade-card {
-        background: white;
-        border-radius: 24px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
-
-    body.dark-mode .grade-card {
-        background: #1f2937;
-    }
-
-    /* Header */
-    .grade-header {
-        background: linear-gradient(135deg, #059669, #047857);
-        padding: 1.5rem;
-        color: white;
-    }
-
-    .grade-header h1 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-    }
-
-    .grade-header p {
-        opacity: 0.9;
-        font-size: 0.9rem;
-    }
-
-    /* Content */
-    .grade-content {
-        padding: 1.5rem;
-    }
-
-    /* Student Info */
-    .student-info {
-        background: #f0fdf4;
-        border-radius: 16px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    body.dark-mode .student-info {
-        background: #064e3b;
-    }
-
-    .student-name {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #1f2937;
-    }
-
-    body.dark-mode .student-name {
-        color: #f3f4f6;
-    }
-
-    .student-matric {
-        font-size: 0.85rem;
-        color: #6b7280;
-    }
-
-    body.dark-mode .student-matric {
-        color: #9ca3af;
-    }
-
-    .submission-date {
-        font-size: 0.85rem;
-        color: #059669;
-    }
-
-    /* Section Styles */
-    .section {
-        margin-bottom: 1.5rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 16px;
-        overflow: hidden;
-    }
-
-    body.dark-mode .section {
-        border-color: #374151;
-    }
-
-    .section-title {
-        background: #f9fafb;
-        padding: 0.75rem 1rem;
-        font-weight: 600;
-        color: #1f2937;
-        border-bottom: 1px solid #e5e7eb;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    body.dark-mode .section-title {
-        background: #111827;
-        color: #f3f4f6;
-        border-color: #374151;
-    }
-
-    .section-title i {
-        color: #059669;
-    }
-
-    .section-content {
-        padding: 1rem;
-        line-height: 1.6;
-        font-size: 0.9rem;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-    }
-
-    /* Plagiarism Indicator */
-    .plagiarism-indicator {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .plagiarism-score {
-        font-size: 1.5rem;
-        font-weight: 700;
-    }
-
-    .plagiarism-low {
-        color: #059669;
-    }
-
-    .plagiarism-mid {
-        color: #f59e0b;
-    }
-
-    .plagiarism-high {
-        color: #dc2626;
-    }
-
-    .plagiarism-bar {
-        flex: 1;
-        height: 8px;
-        background: #e5e7eb;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    .plagiarism-bar-fill {
-        height: 100%;
-        border-radius: 10px;
-        transition: width 0.3s;
-    }
-
-    /* Auto Grade Box */
-    .auto-grade-box {
-        background: #eff6ff;
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    body.dark-mode .auto-grade-box {
-        background: #1e3a5f;
-    }
-
-    .auto-grade-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
-
-    .auto-grade-score {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #3b82f6;
-    }
-
-    .btn-use-auto {
-        background: #3b82f6;
-        color: white;
-        border: none;
-        padding: 0.25rem 0.75rem;
-        border-radius: 8px;
-        font-size: 0.75rem;
-        cursor: pointer;
-    }
-
-    .breakdown-list {
-        font-size: 0.8rem;
-        color: #6b7280;
-    }
-
-    .breakdown-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.25rem 0;
-    }
-
-    /* Grade Input */
-    .grade-input-group {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .grade-input {
-        width: 120px;
-        padding: 0.75rem;
-        font-size: 1.25rem;
-        font-weight: 600;
-        text-align: center;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
-    }
-
-    body.dark-mode .grade-input {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .grade-input:focus {
-        outline: none;
-        border-color: #059669;
-    }
-
-    .grade-max {
-        font-size: 1rem;
-        color: #6b7280;
-    }
-
-    textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        font-family: inherit;
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    body.dark-mode textarea {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .btn-primary {
-        background: #059669;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        flex: 1;
-        transition: all 0.2s;
-    }
-
-    .btn-primary:hover {
-        background: #047857;
-        transform: translateY(-2px);
-    }
-
-    .btn-secondary {
-        background: #6b7280;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        flex: 1;
-        transition: all 0.2s;
-    }
-
-    .btn-secondary:hover {
-        background: #4b5563;
-        transform: translateY(-2px);
-    }
-
-    .file-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #f0fdf4;
-        padding: 0.5rem 1rem;
-        border-radius: 10px;
-        color: #059669;
-        text-decoration: none;
-        font-size: 0.85rem;
-    }
-
-    body.dark-mode .file-link {
-        background: #064e3b;
-    }
-
-    @media (max-width: 768px) {
-        .grade-container {
-            padding: 0.5rem;
-        }
-        .action-buttons {
-            flex-direction: column;
-        }
-        .student-info {
-            flex-direction: column;
-            text-align: center;
-        }
-    }
-</style>
-
-<div class="grade-container">
-    <div class="grade-card">
-        <div class="grade-header">
-            <h1><i class="fas fa-star"></i> Grade Submission</h1>
-            <p>Review and grade student work</p>
-        </div>
-
-        <div class="grade-content">
-            <!-- Student Information -->
-            <div class="student-info">
-                <div>
-                    <div class="student-name">
-                        <i class="fas fa-user-graduate"></i> {{ submission.student.name }}
-                    </div>
-                    <div class="student-matric">{{ submission.student.matric }}</div>
-                </div>
-                <div class="submission-date">
-                    <i class="fas fa-clock"></i> Submitted: {{ submission.submitted_at.strftime('%B %d, %Y at %H:%M') }}
-                </div>
-            </div>
-
-            <!-- Submitted Content -->
-            <div class="section">
-                <div class="section-title">
-                    <i class="fas fa-file-alt"></i> Student's Solution
-                </div>
-                <div class="section-content">
-                    {% if submission.content %}
-                        {{ submission.content|safe }}
-                    {% else %}
-                        <em>No text submitted. Student uploaded a file instead.</em>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Submitted File -->
-            {% if submission.file_path %}
-            <div class="section">
-                <div class="section-title">
-                    <i class="fas fa-paperclip"></i> Submitted File
-                </div>
-                <div class="section-content">
-                    <a href="{{ url_for('download_submission_file', submission_id=submission.id) }}" class="file-link">
-                        <i class="fas fa-download"></i> {{ submission.original_filename or 'Download File' }}
-                    </a>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- GitHub Link -->
-            {% if submission.github_url %}
-            <div class="section">
-                <div class="section-title">
-                    <i class="fab fa-github"></i> GitHub Repository
-                </div>
-                <div class="section-content">
-                    <a href="{{ submission.github_url }}" target="_blank" class="file-link">
-                        <i class="fab fa-github"></i> {{ submission.github_url }}
-                    </a>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Plagiarism Analysis -->
-            <div class="section">
-                <div class="section-title">
-                    <i class="fas fa-shield-alt"></i> Plagiarism Analysis
-                </div>
-                <div class="section-content">
-                    <div class="plagiarism-indicator">
-                        <div class="plagiarism-score 
-                            {% if submission.plagiarism_score > 60 %}plagiarism-high
-                            {% elif submission.plagiarism_score > 30 %}plagiarism-mid
-                            {% else %}plagiarism-low{% endif %}">
-                            {{ "%.1f"|format(submission.plagiarism_score) }}%
-                        </div>
-                        <div class="plagiarism-bar">
-                            <div class="plagiarism-bar-fill" 
-                                 style="width: {{ submission.plagiarism_score }}%; 
-                                        background: {% if submission.plagiarism_score > 60 %}#dc2626{% elif submission.plagiarism_score > 30 %}#f59e0b{% else %}#059669{% endif %};">
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">
-                        {% if submission.plagiarism_score > 60 %}
-                            <i class="fas fa-exclamation-triangle"></i> High similarity detected - Please review carefully
-                        {% elif submission.plagiarism_score > 30 %}
-                            <i class="fas fa-info-circle"></i> Moderate similarity - Review flagged sections
-                        {% else %}
-                            <i class="fas fa-check-circle"></i> Low similarity - No concerns
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Auto Grade Suggestion -->
-            {% if auto_grade %}
-            <div class="auto-grade-box">
-                <div class="auto-grade-header">
-                    <span><i class="fas fa-robot"></i> AI Suggestion</span>
-                    <span class="auto-grade-score">{{ auto_grade }}%</span>
-                </div>
-                <div class="breakdown-list">
-                    {% if breakdown %}
-                        {% for key, value in breakdown.items() %}
-                            <div class="breakdown-item">
-                                <span>{{ key.replace('_', ' ').title() }}</span>
-                                <span>{{ value }}</span>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-                <button type="button" class="btn-use-auto" onclick="useAutoGrade()">
-                    <i class="fas fa-magic"></i> Use AI Suggestion
+        <div class="relative z-10">
+            <!-- Back Button -->
+            <div class="mb-4">
+                <button onclick="goBack()" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition">
+                    <i class="fas fa-arrow-left text-xs"></i> Back
                 </button>
             </div>
-            {% endif %}
 
-            <!-- Grade Form -->
-            <form method="POST" id="gradeForm">
-                <div class="section">
-                    <div class="section-title">
-                        <i class="fas fa-star"></i> Grade & Feedback
+            <!-- Grade Card -->
+            <div class="glass-card rounded-2xl border border-white/40 overflow-hidden shadow-xl">
+                <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 px-6 py-5">
+                    <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fas fa-graduation-cap text-emerald-300"></i> Grade Submission
+                    </h1>
+                    <p class="text-emerald-100 text-sm mt-1">{{ assignment.title }} - {{ assignment.course_code }}</p>
+                </div>
+
+                <div class="p-6">
+                    <!-- Student Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-xl">
+                        <div>
+                            <label class="text-xs text-gray-500">Student Name</label>
+                            <p class="text-sm font-semibold text-gray-800">{{ submission.student.name }}</p>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">Matric Number</label>
+                            <p class="text-sm font-semibold text-gray-800">{{ submission.student.matric }}</p>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">Submitted On</label>
+                            <p class="text-sm text-gray-700">{{ submission.submitted_at.strftime('%b %d, %Y %I:%M %p') }}</p>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">Plagiarism Score</label>
+                            <p class="text-sm font-semibold {% if submission.plagiarism_score > 30 %}text-red-600{% else %}text-green-600{% endif %}">
+                                {{ submission.plagiarism_score }}%
+                            </p>
+                        </div>
                     </div>
-                    <div class="section-content">
-                        <div class="grade-input-group">
-                            <input type="number" name="grade" id="gradeInput" class="grade-input" 
-                                   step="0.5" min="0" max="100" 
-                                   value="{{ submission.grade if submission.grade else '' }}"
-                                   placeholder="0">
-                            <span class="grade-max">/ 100</span>
+
+                    <!-- Submission Content -->
+                    <div class="mb-6">
+                        <label class="text-sm font-medium text-gray-700 mb-2 block">Submission Content</label>
+                        <div class="bg-gray-50 rounded-xl p-4 max-h-64 overflow-y-auto">
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ submission.content or 'No content provided. File submission attached.' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Grading Form -->
+                    <form method="POST" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Grade (out of {{ assignment.total_points }})</label>
+                            <div class="flex items-center gap-3">
+                                <input type="number" name="grade" step="0.5" 
+                                       value="{{ submission.grade if submission.grade is not none else '' }}"
+                                       class="w-32 px-4 py-2 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
+                                       placeholder="0">
+                                <span class="text-gray-500">/ {{ assignment.total_points }}</span>
+                            </div>
                         </div>
 
-                        <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">
-                            <i class="fas fa-comment"></i> Feedback
-                        </label>
-                        <textarea name="feedback" placeholder="Provide constructive feedback to the student...">{{ submission.feedback or '' }}</textarea>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Feedback</label>
+                            <textarea name="feedback" rows="4" 
+                                      class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none"
+                                      placeholder="Provide feedback to the student...">{{ submission.feedback or '' }}</textarea>
+                        </div>
 
-                        <input type="hidden" name="use_auto" id="useAutoInput" value="false">
-                    </div>
+                        <div class="flex gap-3 pt-4">
+                            <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition">
+                                <i class="fas fa-save mr-2"></i> Save Grade
+                            </button>
+                            <a href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}" 
+                               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2.5 rounded-xl transition text-center">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="action-buttons">
-                    <button type="submit" class="btn-primary" onclick="setAutoGrade(false)">
-                        <i class="fas fa-save"></i> Save Grade
-                    </button>
-                    <a href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}" class="btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Submissions
-                    </a>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-    function useAutoGrade() {
-        const autoGrade = {{ auto_grade }};
-        document.getElementById('gradeInput').value = autoGrade;
-        document.getElementById('useAutoInput').value = 'true';
-        
-        // Show notification
-        alert('AI suggested grade {{ auto_grade }}% has been applied. Click "Save Grade" to confirm.');
+<style>
+    .dashboard-bg {
+        background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        min-height: 100vh;
     }
     
-    function setAutoGrade(isAuto) {
-        document.getElementById('useAutoInput').value = isAuto;
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+</style>
+
+<script>
+    function goBack() {
+        if (document.referrer && document.referrer !== window.location.href) {
+            window.history.back();
+        } else {
+            window.location.href = "{{ url_for('lecturer_dashboard') }}";
+        }
     }
 </script>
 {% endblock %}

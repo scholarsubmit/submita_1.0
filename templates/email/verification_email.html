@@ -1,0 +1,208 @@
+<!-- templates/email/verification_email.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Verification Code - Submita</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 32px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .logo-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        .verified-badge {
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .content {
+            padding: 40px;
+        }
+        .greeting {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+        .code-box {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border: 2px solid #10b981;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin: 24px 0;
+        }
+        .verification-code {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #059669;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        .expiry-date {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 16px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .register-button {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 20px 0;
+            transition: background 0.3s;
+        }
+        .register-button:hover {
+            background: #059669;
+        }
+        .security-note {
+            background: #f0fdf4;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 13px;
+            color: #065f46;
+        }
+        .footer {
+            background: #f9fafb;
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+            margin: 20px 0;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .info-value {
+            color: #1f2937;
+        }
+        @media (max-width: 600px) {
+            .content {
+                padding: 24px;
+            }
+            .verification-code {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-icon">📚</div>
+            <div class="logo">Submita</div>
+            <div class="verified-badge">✓ Official Verification</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">Dear {{ full_name }},</div>
+            
+            <p>Your request to register as a <strong>Lecturer</strong> on the Submita platform has been reviewed and <strong style="color: #10b981;">approved</strong>.</p>
+            
+            <div class="code-box">
+                <div style="font-size: 14px; margin-bottom: 12px; color: #065f46;">Your Verification Code</div>
+                <div class="verification-code">{{ verification_code }}</div>
+                <div style="font-size: 12px; margin-top: 12px; color: #065f46;">Keep this code confidential</div>
+            </div>
+            
+            <div class="expiry-date">
+                <strong>⏰ Expiration Notice:</strong> This verification code will expire on <strong>{{ expires_at }}</strong>. 
+                Please complete your registration before this date.
+            </div>
+            
+            <!-- Lecturer Information -->
+            <div class="info-grid">
+                <span class="info-label">Staff ID:</span>
+                <span class="info-value">{{ staff_id }}</span>
+                <span class="info-label">Department:</span>
+                <span class="info-value">{{ department }}</span>
+                <span class="info-label">College:</span>
+                <span class="info-value">{{ college }}</span>
+            </div>
+            
+            <!-- Registration Link -->
+            <div style="text-align: center;">
+                <a href="{{ registration_link }}" class="register-button">
+                    🔐 Complete Registration →
+                </a>
+            </div>
+            
+            <!-- Security Notice -->
+            <div class="security-note">
+                <strong>🔒 Security Information:</strong>
+                <ul style="margin: 8px 0 0 20px; padding: 0;">
+                    <li>This code can only be used once</li>
+                    <li>Do not share this code with anyone</li>
+                    <li>Submita will never ask for your password via email</li>
+                    <li>If you didn't request this, please contact your administrator</li>
+                </ul>
+            </div>
+            
+            <p style="margin-top: 24px; font-size: 14px;">
+                <strong>Need help?</strong> Contact our support team at 
+                <a href="mailto:support@submita.com" style="color: #10b981;">support@submita.com</a>
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2024 Submita - University Assignment Management System</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+            <p style="margin-top: 8px;">
+                <a href="#" style="color: #6b7280; text-decoration: none;">Privacy Policy</a> | 
+                <a href="#" style="color: #6b7280; text-decoration: none;">Terms of Service</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

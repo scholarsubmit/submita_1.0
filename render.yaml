@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: submita
+    runtime: python
+    repo: https://github.com/YOUR_USERNAME/submita
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_SECURE
+        value: "True"
+      - key: BASE_URL
+        value: "https://submita.onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.11.0"

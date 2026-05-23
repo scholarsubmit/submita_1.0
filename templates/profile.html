@@ -1,315 +1,65 @@
+<!-- templates/profile.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<style>
-    .profile-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
-
-    .profile-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, #059669, #047857);
-        border-radius: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 3rem;
-        font-weight: 700;
-        color: white;
-    }
-
-    .profile-name {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1f2937;
-    }
-
-    body.dark-mode .profile-name {
-        color: #f3f4f6;
-    }
-
-    .profile-role {
-        display: inline-block;
-        padding: 0.25rem 1rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-top: 0.5rem;
-    }
-
-    .role-student {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .role-lecturer {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .role-admin {
-        background: #fce7f3;
-        color: #9d174d;
-    }
-
-    .profile-card {
-        background: white;
-        border-radius: 20px;
-        border: 1px solid #e5e7eb;
-        padding: 2rem;
-        margin-top: 1.5rem;
-    }
-
-    body.dark-mode .profile-card {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .info-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .info-label {
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #6b7280;
-        margin-bottom: 0.25rem;
-    }
-
-    .info-value {
-        font-size: 1rem;
-        color: #1f2937;
-        padding: 0.5rem;
-        background: #f9fafb;
-        border-radius: 8px;
-    }
-
-    body.dark-mode .info-value {
-        background: #111827;
-        color: #f3f4f6;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-        display: block;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #1f2937;
-    }
-
-    body.dark-mode .form-group label {
-        color: #f3f4f6;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        font-size: 0.9rem;
-        transition: all 0.2s;
-    }
-
-    body.dark-mode .form-control {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #059669;
-        box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
-    }
-
-    .btn-submit {
-        background: #059669;
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: 10px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 100%;
-    }
-
-    .btn-submit:hover {
-        background: #047857;
-        transform: translateY(-2px);
-    }
-
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #059669;
-        text-decoration: none;
-        margin-bottom: 1.5rem;
-    }
-
-    .back-link:hover {
-        text-decoration: underline;
-    }
-
-    .edit-toggle {
-        text-align: right;
-        margin-bottom: 1rem;
-    }
-
-    .btn-edit {
-        background: #3b82f6;
-        color: white;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.85rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .stat-box {
-        text-align: center;
-        padding: 1rem;
-        background: #f9fafb;
-        border-radius: 12px;
-    }
-
-    body.dark-mode .stat-box {
-        background: #111827;
-    }
-
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #059669;
-    }
-
-    .stat-label {
-        font-size: 0.7rem;
-        color: #6b7280;
-    }
-</style>
-
-<div class="profile-container">
-    <a href="{{ url_for('dashboard') }}" class="back-link">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
-    </a>
-
-    <div class="profile-header">
-        <div class="profile-avatar">
-            {{ current_user.name[0] if current_user.name else current_user.email[0]|upper }}
-        </div>
-        <div class="profile-name">{{ current_user.name or current_user.username or 'User' }}</div>
-        <div class="profile-role role-{{ current_user.role }}">
-            {{ current_user.role|upper }}
-        </div>
+<div class="max-w-4xl mx-auto px-4 py-6">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <button onclick="goBack()" class="back-btn inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition">
+            <i class="fas fa-arrow-left text-xs"></i> Back
+        </button>
     </div>
 
-    <div class="profile-card">
-        <div class="edit-toggle">
-            <button class="btn-edit" onclick="toggleEdit()">
-                <i class="fas fa-edit"></i> Edit Profile
-            </button>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <h1 class="text-xl font-bold text-gray-900">My Profile</h1>
+            <p class="text-sm text-gray-600 mt-1">View and manage your profile information</p>
         </div>
-
-        <!-- View Mode -->
-        <div id="viewMode">
-            <div class="info-group">
-                <div class="info-label">Full Name</div>
-                <div class="info-value">{{ current_user.name or 'Not set' }}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Email Address</div>
-                <div class="info-value">{{ current_user.email }}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Matric/Staff Number</div>
-                <div class="info-value">{{ current_user.matric or 'Not set' }}</div>
-            </div>
-            <div class="info-group">
-                <div class="info-label">Member Since</div>
-                <div class="info-value">{{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else 'N/A' }}</div>
-            </div>
-
-            {% if current_user.is_student() %}
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-number">{{ current_user.submissions|length }}</div>
-                    <div class="stat-label">Submissions</div>
+        <div class="p-6">
+            <!-- Profile content -->
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Full Name</label>
+                        <p class="text-gray-900">{{ current_user.name }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Email</label>
+                        <p class="text-gray-900">{{ current_user.email }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Matric/Staff ID</label>
+                        <p class="text-gray-900">{{ current_user.matric }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Role</label>
+                        <p class="text-gray-900">{{ current_user.role|capitalize }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Department</label>
+                        <p class="text-gray-900">{{ current_user.department or 'Not specified' }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">College</label>
+                        <p class="text-gray-900">{{ current_user.college or 'Not specified' }}</p>
+                    </div>
+                    {% if current_user.is_student() %}
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Level</label>
+                        <p class="text-gray-900">{{ current_user.level or 'Not specified' }}</p>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Member Since</label>
+                        <p class="text-gray-900">{{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Last Login</label>
+                        <p class="text-gray-900">{{ current_user.last_login.strftime('%B %d, %Y %H:%M') if current_user.last_login else 'Never' }}</p>
+                    </div>
                 </div>
-                <div class="stat-box">
-                    <div class="stat-number">{{ current_user.submissions|selectattr('grade', 'defined')|list|length }}</div>
-                    <div class="stat-label">Graded</div>
-                </div>
             </div>
-            {% elif current_user.is_lecturer() %}
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-number">{{ current_user.created_assignments|length }}</div>
-                    <div class="stat-label">Assignments Created</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">{{ current_user.created_assignments|sum(attribute='submissions')|list|length }}</div>
-                    <div class="stat-label">Total Submissions</div>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Edit Mode (Hidden by default) -->
-        <div id="editMode" style="display: none;">
-            <form method="POST">
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" class="form-control" id="name" name="name" value="{{ current_user.name or '' }}">
-                </div>
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
-                </div>
-                <button type="submit" class="btn-submit">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-                <button type="button" class="btn-submit" onclick="toggleEdit()" style="background: #6b7280; margin-top: 0.5rem;">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </form>
         </div>
     </div>
 </div>
-
-<script>
-    function toggleEdit() {
-        const viewMode = document.getElementById('viewMode');
-        const editMode = document.getElementById('editMode');
-        
-        if (viewMode.style.display === 'none') {
-            viewMode.style.display = 'block';
-            editMode.style.display = 'none';
-        } else {
-            viewMode.style.display = 'none';
-            editMode.style.display = 'block';
-        }
-    }
-</script>
 {% endblock %}

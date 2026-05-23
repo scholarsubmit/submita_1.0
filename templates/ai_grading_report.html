@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .grade-container { max-width: 1000px; margin: 2rem auto; padding: 1rem; }
+
+    .grade-card {
+        background: white;
+        border-radius: 28px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    body.dark-mode .grade-card { background: #1f2937; }
+
+    .grade-header {
+        background: linear-gradient(135deg, #059669, #047857);
+        padding: 2.5rem 2rem;
+        color: white;
+        text-align: center;
+    }
+
+    .score-circle {
+        width: 160px; height: 160px;
+        background: rgba(255,255,255,0.15);
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        margin: 1rem auto;
+    }
+    .score-number { font-size: 3.5rem; font-weight: 800; line-height: 1; }
+    .score-label  { font-size: 0.75rem; opacity: 0.8; margin-top: 4px; }
+
+    .section { padding: 1.5rem; border-bottom: 1px solid #e5e7eb; }
+    body.dark-mode .section { border-bottom-color: #374151; }
+
+    .feedback-item {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 12px;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+    }
+    .feedback-success { background: #d1fae5; color: #065f46; }
+    .feedback-warning { background: #fef3c7; color: #92400e; }
+    .feedback-info    { background: #dbeafe; color: #1e40af; }
+
+    body.dark-mode .feedback-success { background: #064e3b; color: #a7f3d0; }
+    body.dark-mode .feedback-warning { background: #78350f; color: #fde68a; }
+    body.dark-mode .feedback-info    { background: #1e3a5f; color: #bfdbfe; }
+
+    .breakdown-bar {
+        height: 8px; background: #e5e7eb; border-radius: 10px;
+        overflow: hidden; margin: 0.4rem 0;
+    }
+    body.dark-mode .breakdown-bar { background: #374151; }
+
+    .breakdown-fill {
+        height: 100%; border-radius: 10px;
+        background: linear-gradient(90deg, #059669, #34d399);
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .suggestion-card {
+        background: #eff6ff;
+        border-radius: 12px;
+        padding: 0.875rem 1rem;
+        margin: 0.5rem 0;
+        font-size: 0.875rem;
+        border-left: 3px solid #3b82f6;
+    }
+    body.dark-mode .suggestion-card { background: #1e3a5f; border-left-color: #60a5fa; color: #bfdbfe; }
+</style>
+
+<div class="grade-container">
+    <div class="grade-card">
+
+        <!-- Header -->
+        <div class="grade-header">
+            <h1 class="text-2xl font-bold mb-1">🤖 AI Grading Report</h1>
+            <p class="text-emerald-100 text-sm">
+                {{ assignment.title }} &mdash; {{ submission.student.name }}
+            </p>
+            <p class="text-emerald-200 text-xs mt-1">
+                Submitted: {{ submission.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}
+            </p>
+
+            <div class="score-circle">
+                <div class="score-number">{{ "%.0f"|format(score) }}</div>
+                <div class="score-label">/ 100</div>
+            </div>
+
+            {% if score >= 70 %}
+                <span class="inline-block px-4 py-2 bg-emerald-400/40 border border-emerald-300/50
+                             rounded-full text-sm font-medium">
+                    🌟 Excellent Performance
+                </span>
+            {% elif score >= 50 %}
+                <span class="inline-block px-4 py-2 bg-yellow-400/40 border border-yellow-300/50
+                             rounded-full text-sm font-medium">
+                    📘 Good Effort
+                </span>
+            {% else %}
+                <span class="inline-block px-4 py-2 bg-red-400/40 border border-red-300/50
+                             rounded-full text-sm font-medium">
+                    ⚠️ Needs Improvement
+                </span>
+            {% endif %}
+        </div>
+
+        <!-- AI Feedback -->
+        <div class="section">
+            <h3 class="font-semibold text-lg mb-4 text-gray-800 dark:text-gray-100">
+                📝 Detailed Feedback
+            </h3>
+            {% for fb in feedback %}
+            <div class="feedback-item
+                {% if '✅' in fb or '✓' in fb %}feedback-success
+                {% elif '💡' in fb or '📚' in fb or '🔍' in fb %}feedback-info
+                {% else %}feedback-warning{% endif %}">
+                <i class="fas
+                   {% if '✅' in fb or '✓' in fb %}fa-check-circle
+                   {% elif '💡' in fb %}fa-lightbulb
+                   {% else %}fa-exclamation-triangle{% endif %}
+                   mt-0.5 flex-shrink-0 text-sm"></i>
+                <span>{{ fb }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Score Breakdown -->
+        {% if breakdown %}
+        <div class="section">
+            <h3 class="font-semibold text-lg mb-4 text-gray-800 dark:text-gray-100">
+                📊 Score Breakdown
+            </h3>
+            {% set max_per_category = (100 / breakdown|length)|round(0, 'ceil')|int %}
+            {% for category, cat_score in breakdown.items() %}
+            <div class="mb-4">
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="font-medium text-gray-700 dark:text-gray-300">
+                        {{ category.replace('_', ' ').title() }}
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400">
+                        {{ cat_score }} / {{ max_per_category }}
+                    </span>
+                </div>
+                <div class="breakdown-bar">
+                    <div class="breakdown-fill"
+                         data-width="{{ [((cat_score / max_per_category) * 100), 100]|min if max_per_category > 0 else 0 }}"
+                         style="width: 0%">
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Improvement Suggestions -->
+        {% if suggestions %}
+        <div class="section">
+            <h3 class="font-semibold text-lg mb-4 text-gray-800 dark:text-gray-100">
+                💡 Improvement Suggestions
+            </h3>
+            {% for suggestion in suggestions %}
+            <div class="suggestion-card">
+                {{ suggestion }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="p-6 flex flex-wrap gap-3">
+            <a href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700
+                      text-white rounded-lg text-sm font-medium transition">
+                <i class="fas fa-arrow-left"></i> Back to Submissions
+            </a>
+            <a href="{{ url_for('grade_submission', submission_id=submission.id) }}"
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700
+                      text-white rounded-lg text-sm font-medium transition">
+                <i class="fas fa-pen"></i> Manual Grade
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Animate breakdown bars after load
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.breakdown-fill[data-width]').forEach(function (el) {
+            setTimeout(function () {
+                el.style.width = el.dataset.width + '%';
+            }, 300);
+        });
+    });
+</script>
+{% endblock %}

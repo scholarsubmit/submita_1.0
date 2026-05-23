@@ -1,0 +1,61 @@
+<!-- templates/verify_email_prompt.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4">
+    <div class="max-w-md mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-envelope-open-text text-emerald-600 text-3xl"></i>
+            </div>
+            
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h2>
+            <p class="text-gray-600 mb-4">
+                We've sent a verification email to <strong>{{ email }}</strong>
+            </p>
+            
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Please check your inbox and click the verification link to activate your account.
+                </p>
+            </div>
+            
+            <div class="space-y-3">
+                <a href="{{ url_for('login') }}" class="block w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition text-center">
+                    Go to Login
+                </a>
+                
+                <button onclick="resendEmail()" class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-xl transition">
+                    Resend Verification Email
+                </button>
+            </div>
+        </div>
+        
+        <div class="text-center mt-6">
+            <a href="{{ url_for('home') }}" class="text-sm text-gray-500 hover:text-gray-700">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function resendEmail() {
+    if (confirm('Resend verification email to {{ email }}?')) {
+        fetch('/resend-verification', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: '{{ email }}' })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+        })
+        .catch(error => {
+            alert('Error resending email. Please try again.');
+        });
+    }
+}
+</script>
+{% endblock %}

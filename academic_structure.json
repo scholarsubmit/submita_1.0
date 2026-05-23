@@ -1,0 +1,121 @@
+{
+    "Colleges": [
+        {
+            "College": "College of Agricultural Economics, Rural Sociology & Extension (CAERSE)",
+            "Departments": [
+                "Agribusiness and Management",
+                "Agricultural Economics",
+                "Agricultural Extension and Rural Sociology"
+            ]
+        },
+        {
+            "College": "College Of Animal Science & Animal Production (CASAP)",
+            "Departments": [
+                "Animal Breeding And Physiology",
+                "Animal Nutrition And Forage Science",
+                "Animal Production and Livestock Management"
+            ]
+        },
+        {
+            "College": "College Of Applied Food Science & Tourism (CAFST)",
+            "Departments": [
+                "Human Nutrition and Dietetics",
+                "Home Science/Hospitality Management & Tourism",
+                "Food Science and Technology"
+            ]
+        },
+        {
+            "College": "College Of Crop & Soil Sciences (CCSS)",
+            "Departments": [
+                "Agronomy",
+                "Plant Health Management",
+                "Soil Science and Meteorology",
+                "Water Resources Management and Agrometeorology"
+            ]
+        },
+        {
+            "College": "College Of Education (COED)",
+            "Departments": [
+                "Adult and Continuing Education",
+                "Agricultural/Home Science Education",
+                "Business Education",
+                "Economics Education",
+                "Education Management",
+                "Industrial Technology Education",
+                "Library and Information Science",
+                "Guidance and Counselling",
+                "Integrated Science Education"
+            ]
+        },
+        {
+            "College": "College Of Engineering & Engineering Technology (CEET)",
+            "Departments": [
+                "Agricultural and Bioresources Engineering",
+                "Civil Engineering",
+                "Chemical Engineering",
+                "Computer Engineering",
+                "Electrical and Electronics Engineering",
+                "Mechanical Engineering"
+            ]
+        },
+        {
+            "College": "College Of Management Science (COLMAS)",
+            "Departments": [
+                "Industrial Relations and Personnel Management",
+                "Human Resource Management"
+            ]
+        },
+        {
+            "College": "College Of Natural Resources & Environmental Management (CNREM)",
+            "Departments": [
+                "Environment Management and Toxicology",
+                "Fisheries and Aquatic Resources Management",
+                "Forestry and Environmental Management"
+            ]
+        },
+        {
+            "College": "College Of Natural Science (COLNAS)",
+            "Departments": [
+                "Biochemistry",
+                "Microbiology",
+                "Plant Science and Biotechnology",
+                "Zoology and Environmental Biology"
+            ]
+        },
+        {
+            "College": "College Of Physical & Applied Science (COLPAS)",
+            "Departments": [
+                "Chemistry",
+                "Computer Science",
+                "Geology",
+                "Mathematics",
+                "Physics",
+                "Statistics"
+            ]
+        },
+        {
+            "College": "College Of Veterinary Medicine (CVM)",
+            "Departments": [
+                "Theriogenology",
+                "Veterinary Anatomy",
+                "Veterinary Medicine",
+                "Veterinary Microbiology",
+                "Veterinary Public Health and Preventive Medicine",
+                "Veterinary Surgery and Radiology"
+            ]
+        },
+        {
+            "College": "School Of General Studies (SGS)",
+            "Departments": [
+                "English",
+                "French",
+                "German",
+                "History",
+                "Social Science",
+                "Physical and Health",
+                "Philosophy",
+                "Peace and Conflict"
+            ]
+        }
+    ]
+}

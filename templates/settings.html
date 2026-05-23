@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-5">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fas fa-cog text-emerald-300"></i> Account Settings
+            </h1>
+            <p class="text-emerald-100 text-sm mt-1">Manage your account preferences</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- Profile Information -->
+            <div class="border-b border-gray-200 pb-5">
+                <h3 class="font-semibold text-gray-800 mb-3">Profile Information</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Full Name</span>
+                        <span class="text-sm font-medium text-gray-900">{{ current_user.name }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Email Address</span>
+                        <span class="text-sm font-medium text-gray-900">{{ current_user.email }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Role</span>
+                        <span class="text-sm font-medium text-gray-900">{{ current_user.role|capitalize }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Member Since</span>
+                        <span class="text-sm font-medium text-gray-900">{{ current_user.created_at.strftime('%B %d, %Y') }}</span>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('profile') }}" class="text-emerald-600 hover:text-emerald-700 text-sm font-medium inline-flex items-center gap-1">
+                        <i class="fas fa-user-edit"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+
+            <!-- Email Notifications -->
+            <div class="border-b border-gray-200 pb-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Email Notifications</h3>
+                        <p class="text-sm text-gray-500">Receive assignment alerts and grade updates</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="emailNotifications" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Dark Mode -->
+            <div class="border-b border-gray-200 pb-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Dark Mode</h3>
+                        <p class="text-sm text-gray-500">Switch between light and dark theme</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="darkModeToggle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Timezone -->
+            <div class="border-b border-gray-200 pb-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Timezone</h3>
+                        <p class="text-sm text-gray-500">Select your preferred timezone</p>
+                    </div>
+                    <select id="timezoneSelect" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none">
+                        <option value="Africa/Lagos">West Africa Time (WAT)</option>
+                        <option value="Africa/Cairo">Eastern Africa Time (EAT)</option>
+                        <option value="Africa/Johannesburg">South Africa Standard Time</option>
+                        <option value="UTC">UTC</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Change Password Link -->
+            <div class="border-b border-gray-200 pb-5">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold text-gray-800">Security</h3>
+                        <p class="text-sm text-gray-500">Update your password regularly</p>
+                    </div>
+                    <a href="{{ url_for('change_password') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                        Change Password
+                    </a>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="bg-red-50 rounded-xl p-5 border border-red-200">
+                <h3 class="font-semibold text-red-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                </h3>
+                <p class="text-sm text-red-700 mb-4">Permanently delete your account and all associated data.</p>
+                <button onclick="showDeleteConfirm()" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg text-sm transition">
+                    Delete Account
+                </button>
+            </div>
+
+            <div class="pt-4">
+                <a href="{{ url_for('dashboard') }}" class="inline-flex items-center gap-2 text-emerald-600 hover:text-emerald-700 transition">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+        <div class="text-center mb-4">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-trash-alt text-red-600 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">Delete Account</h3>
+            <p class="text-sm text-gray-500 mt-2">This action cannot be undone. All your data will be permanently removed.</p>
+        </div>
+        <div class="bg-red-50 rounded-lg p-3 mb-4">
+            <p class="text-xs text-red-700 text-center">
+                <i class="fas fa-info-circle mr-1"></i>
+                This will delete all your assignments, submissions, and personal information.
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="hideDeleteConfirm()" class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition">
+                Cancel
+            </button>
+            <button onclick="requestAccountDeletion()" class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
+                Yes, Delete My Account
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', this.checked);
+        });
+        
+        if (localStorage.getItem('darkMode') === 'true') {
+            darkModeToggle.checked = true;
+            document.body.classList.add('dark-mode');
+        }
+    }
+    
+    // Email notifications
+    const emailNotifications = document.getElementById('emailNotifications');
+    if (emailNotifications) {
+        emailNotifications.addEventListener('change', function() {
+            fetch('/api/update-notification-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email_notifications: this.checked })
+            }).catch(console.error);
+        });
+    }
+    
+    // Timezone
+    const timezoneSelect = document.getElementById('timezoneSelect');
+    if (timezoneSelect) {
+        const savedTimezone = localStorage.getItem('timezone');
+        if (savedTimezone) timezoneSelect.value = savedTimezone;
+        
+        timezoneSelect.addEventListener('change', function() {
+            localStorage.setItem('timezone', this.value);
+            showToast('Timezone updated', 'Your timezone preference has been saved', 'success');
+        });
+    }
+    
+    // Delete account modal
+    function showDeleteConfirm() {
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function hideDeleteConfirm() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+    
+    function requestAccountDeletion() {
+        if (confirm('WARNING: This action cannot be undone. Are you absolutely sure you want to delete your account? Type "DELETE" to confirm.')) {
+            const confirmation = prompt('Type "DELETE" to confirm account deletion:');
+            if (confirmation === 'DELETE') {
+                fetch('/api/delete-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Your account has been scheduled for deletion. You will be logged out.');
+                        window.location.href = '/logout';
+                    } else {
+                        alert(data.message || 'Failed to delete account. Please contact support.');
+                    }
+                })
+                .catch(() => {
+                    alert('An error occurred. Please try again later.');
+                });
+            } else {
+                alert('Confirmation text did not match. Account deletion cancelled.');
+            }
+        }
+        hideDeleteConfirm();
+    }
+    
+    // Toast notification
+    function showToast(title, message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `fixed bottom-4 right-4 z-50 bg-white rounded-lg shadow-xl p-4 flex items-center gap-3 animate-slide-in`;
+        toast.innerHTML = `
+            <div class="w-8 h-8 rounded-full flex items-center justify-center ${type === 'success' ? 'bg-emerald-100' : 'bg-blue-100'}">
+                <i class="fas ${type === 'success' ? 'fa-check-circle text-emerald-600' : 'fa-info-circle text-blue-600'}"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-gray-900 text-sm">${title}</p>
+                <p class="text-xs text-gray-500">${message}</p>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+</script>
+
+<style>
+    @keyframes slide-in {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    .animate-slide-in {
+        animation: slide-in 0.3s ease-out;
+    }
+    
+    .dark-mode {
+        background-color: #1a1a2e;
+        color: #e0e0e0;
+    }
+    .dark-mode .bg-white { background-color: #16213e; }
+    .dark-mode .border-gray-200 { border-color: #2d3748; }
+    .dark-mode .text-gray-700, .dark-mode .text-gray-800, .dark-mode .text-gray-900 { color: #e0e0e0; }
+    .dark-mode .text-gray-500, .dark-mode .text-gray-600 { color: #a0aec0; }
+    .dark-mode .bg-gray-50 { background-color: #1a202c; }
+    .dark-mode .bg-gray-100 { background-color: #1f2937; }
+    .dark-mode .border-gray-300 { border-color: #374151; }
+</style>
+{% endblock %}

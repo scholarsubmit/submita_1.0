@@ -1,815 +1,599 @@
+{# FILE: templates/lecturer_dashboard.html
+   LOCATION: /templates/lecturer_dashboard.html
+   FIXES: REMOVED all aggressive authentication checks that cause redirects #}
+
 {% extends "base.html" %}
 
+{% block title %}Lecturer Dashboard — Submita{% endblock %}
+
+{% block extra_head %}
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================================================
+// LOGOUT SYSTEM ONLY - NO AUTHENTICATION CHECKS
+// ============================================================
+function handleLogout(e) {
+    if (e) e.preventDefault();
+    showLogoutModal();
+}
+
+function showLogoutModal() {
+    const modal = document.getElementById('lecturerLogoutModal');
+    const backdrop = document.getElementById('lecturerLogoutBackdrop');
+    const card = document.getElementById('lecturerLogoutCard');
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+
+    requestAnimationFrame(() => {
+        backdrop.classList.add('opacity-100');
+        card.classList.add('scale-100', 'opacity-100');
+        card.classList.remove('scale-95', 'opacity-0');
+    });
+}
+
+function hideLogoutModal() {
+    const modal = document.getElementById('lecturerLogoutModal');
+    const backdrop = document.getElementById('lecturerLogoutBackdrop');
+    const card = document.getElementById('lecturerLogoutCard');
+
+    backdrop.classList.remove('opacity-100');
+    card.classList.remove('scale-100', 'opacity-100');
+    card.classList.add('scale-95', 'opacity-0');
+
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }, 300);
+}
+
+function executeLogout() {
+    hideLogoutModal();
+    sessionStorage.clear();
+    localStorage.clear();
+
+    document.cookie.split(";").forEach(function(c) {
+        const cookieName = c.split('=')[0].trim();
+        document.cookie = cookieName + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
+        document.cookie = cookieName + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=" + window.location.hostname;
+    });
+
+    setTimeout(() => {
+        window.location.href = "{{ url_for('logout') }}";
+    }, 150);
+}
+
+// Keyboard support
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('lecturerLogoutModal');
+        if (modal && !modal.classList.contains('hidden')) {
+            hideLogoutModal();
+        }
+    }
+});
+
+document.addEventListener('click', (e) => {
+    const modal = document.getElementById('lecturerLogoutModal');
+    const backdrop = document.getElementById('lecturerLogoutBackdrop');
+    if (e.target === backdrop && modal && !modal.classList.contains('hidden')) {
+        hideLogoutModal();
+    }
+});
+</script>
+{% endblock %}
+
 {% block content %}
+<div class="dashboard-bg min-h-screen relative overflow-hidden">
+    <!-- Ambient Background -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-20 right-20 w-72 h-72 bg-emerald-200/10 rounded-full blur-3xl animate-float-1"></div>
+        <div class="absolute bottom-20 left-20 w-96 h-96 bg-blue-200/10 rounded-full blur-3xl animate-float-2"></div>
+        <div class="absolute top-1/2 left-1/2 w-64 h-64 bg-amber-200/10 rounded-full blur-3xl animate-float-3"></div>
+    </div>
+
+   <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+
+        <!-- Welcome Section -->
+        <div class="reveal mb-8" data-delay="0">
+            <div class="glass-card rounded-2xl p-6 border border-white/60 shadow-lg">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2.5">
+                            <i class="fas fa-chalkboard-user text-emerald-600 text-xl"></i>
+                            Lecturer Dashboard
+                        </h1>
+                        <p class="text-sm text-gray-500 mt-1.5">
+                            Welcome back, <span class="font-semibold text-gray-700">{{ current_user.name }}</span>!
+                        </p>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ current_user.department or 'Computer Science' }} Department</p>
+                    </div>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-sm rounded-full border border-gray-200/60 shadow-sm">
+                            <i class="fas fa-calendar-alt text-emerald-500 text-xs"></i>
+                            <span class="text-xs text-gray-600 font-medium" id="liveDate"></span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-sm rounded-full border border-gray-200/60 shadow-sm">
+                            <i class="fas fa-clock text-emerald-500 text-xs"></i>
+                            <span class="text-xs font-mono text-gray-600 font-medium" id="liveTime"></span>
+                            <span class="live-dot inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full ml-1"></span>
+                        </div>
+                        <a href="{{ url_for('create_assignment') }}" 
+                           class="btn-shine bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="fas fa-plus text-xs"></i> New Assignment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="stat-card glass-card rounded-xl p-5 border border-white/60 shadow-sm reveal" data-delay="50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Assignments</p>
+                        <p class="text-3xl font-bold text-gray-900 counter mt-1" data-target="{{ total_assignments if total_assignments is defined else 0 }}">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fas fa-tasks text-emerald-600 text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-xs text-gray-400">Active courses</p>
+                </div>
+            </div>
+
+            <div class="stat-card glass-card rounded-xl p-5 border border-white/60 shadow-sm reveal" data-delay="100">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Submissions</p>
+                        <p class="text-3xl font-bold text-gray-900 counter mt-1" data-target="{{ total_submissions if total_submissions is defined else 0 }}">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fas fa-paper-plane text-blue-600 text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-xs text-gray-400">From all students</p>
+                </div>
+            </div>
+
+            <div class="stat-card glass-card rounded-xl p-5 border border-white/60 shadow-sm reveal" data-delay="150">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Graded</p>
+                        <p class="text-3xl font-bold text-gray-900 counter mt-1" data-target="{{ total_graded if total_graded is defined else 0 }}">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fas fa-check-circle text-green-600 text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-xs text-gray-400">Completed reviews</p>
+                </div>
+            </div>
+
+            <div class="stat-card glass-card rounded-xl p-5 border border-white/60 shadow-sm reveal" data-delay="200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Pending Review</p>
+                        <p class="text-3xl font-bold text-gray-900 counter mt-1" data-target="{{ pending_grading if pending_grading is defined else 0 }}">0</p>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center shadow-sm">
+                        <i class="fas fa-clock text-amber-600 text-lg"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100">
+                    <p class="text-xs text-gray-400">Needs attention</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="reveal mb-8" data-delay="250">
+            <div class="glass-card rounded-xl p-5 border border-white/60 shadow-sm">
+                <h3 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                    <i class="fas fa-bolt text-emerald-500"></i> Quick Actions
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <a href="{{ url_for('create_assignment') }}" class="text-center p-3 rounded-xl bg-white/60 hover:bg-white border border-gray-100 hover:border-emerald-200 transition-all duration-300 group shadow-sm hover:shadow-md">
+                        <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <i class="fas fa-plus text-emerald-600"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-700">New Assignment</span>
+                    </a>
+                    <a href="#" class="text-center p-3 rounded-xl bg-white/60 hover:bg-white border border-gray-100 hover:border-purple-200 transition-all duration-300 group shadow-sm hover:shadow-md" 
+                       onclick="showComingSoon('Analytics'); return false;">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <i class="fas fa-chart-line text-purple-600"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-700">Analytics</span>
+                    </a>
+                    <a href="#" class="text-center p-3 rounded-xl bg-white/60 hover:bg-white border border-gray-100 hover:border-blue-200 transition-all duration-300 group shadow-sm hover:shadow-md" 
+                       onclick="showComingSoon('Students'); return false;">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <i class="fas fa-users text-blue-600"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-700">Students</span>
+                    </a>
+                    <a href="#" class="text-center p-3 rounded-xl bg-white/60 hover:bg-white border border-gray-100 hover:border-amber-200 transition-all duration-300 group shadow-sm hover:shadow-md" 
+                       onclick="showComingSoon('Submissions'); return false;">
+                        <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <i class="fas fa-inbox text-amber-600"></i>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-700">Submissions</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Assignments List -->
+            <div class="reveal" data-delay="300">
+                <div class="glass-card rounded-xl overflow-hidden border border-white/60 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50/80 to-white flex items-center justify-between">
+                        <h2 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <i class="fas fa-list-check text-emerald-600"></i> Your Assignments
+                            <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
+                                {{ assignments|length if assignments is defined else 0 }}
+                            </span>
+                        </h2>
+                        <a href="{{ url_for('create_assignment') }}" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1 transition-colors">
+                            <i class="fas fa-plus text-[10px]"></i> Create New
+                        </a>
+                    </div>
+
+                    {% if assignments and assignments|length > 0 %}
+                    <div class="divide-y divide-gray-100 max-h-[500px] overflow-y-auto custom-scrollbar">
+                        {% for assignment in assignments %}
+                        <div class="assignment-card p-4 hover:bg-white/80 transition-all duration-200">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="text-sm font-semibold text-gray-800 truncate">{{ assignment.title }}</h3>
+                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-mono">{{ assignment.course_code }}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">{{ assignment.course_title }}</p>
+                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-calendar-alt text-gray-400"></i>
+                                            {{ assignment.deadline.strftime('%b %d, %Y - %I:%M %p') }}
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-star text-amber-400"></i> {{ assignment.total_points }} pts
+                                        </span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fas fa-paper-plane text-blue-400"></i> 
+                                            {{ assignment.submission_count if assignment.submission_count is defined else 0 }} submissions
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 flex-shrink-0">
+                                    <a href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}" 
+                                       class="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-1.5">
+                                        <i class="fas fa-users text-[10px]"></i> Manage
+                                    </a>
+                                    <a href="{{ url_for('edit_assignment', assignment_id=assignment.id) }}" 
+                                       class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-1.5">
+                                        <i class="fas fa-edit text-[10px]"></i> Edit
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="p-8 text-center">
+                        <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                            <i class="fas fa-tasks text-emerald-500 text-2xl"></i>
+                        </div>
+                        <p class="text-sm text-gray-600 font-medium">No assignments yet</p>
+                        <p class="text-xs text-gray-400 mt-1">Create your first assignment to get started</p>
+                        <a href="{{ url_for('create_assignment') }}" 
+                           class="inline-flex items-center gap-2 mt-4 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm transition-all duration-200 shadow-md hover:shadow-lg">
+                            <i class="fas fa-plus"></i> Create Assignment
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Submissions -->
+            <div class="reveal" data-delay="350">
+                <div class="glass-card rounded-xl overflow-hidden border border-white/60 shadow-sm">
+                    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50/80 to-white flex items-center justify-between">
+                        <h2 class="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <i class="fas fa-clock text-blue-600"></i> Recent Submissions
+                            <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium">
+                                {{ recent_submissions|length if recent_submissions is defined else 0 }}
+                            </span>
+                        </h2>
+                        <span class="text-xs text-gray-400">Most recent</span>
+                    </div>
+
+                    {% if recent_submissions and recent_submissions|length > 0 %}
+                    <div class="divide-y divide-gray-100 max-h-[500px] overflow-y-auto custom-scrollbar">
+                        {% for submission in recent_submissions %}
+                        <div class="submission-item p-4 hover:bg-white/80 transition-all duration-200">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-gray-800 truncate">
+                                        {{ submission.assignment.title if submission.assignment else 'Unknown Assignment' }}
+                                    </h3>
+                                    <p class="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                                        <i class="fas fa-user-graduate text-gray-400 text-[10px]"></i>
+                                        {{ submission.student.name if submission.student else 'Unknown Student' }}
+                                    </p>
+                                    <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
+                                        <i class="fas fa-clock text-gray-400 text-[10px]"></i>
+                                        {{ submission.submitted_at.strftime('%b %d, %Y - %I:%M %p') }}
+                                    </p>
+                                </div>
+                                <div class="flex gap-2 flex-shrink-0">
+                                    {% if submission.grade is not none %}
+                                    <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+                                        {{ submission.grade }}%
+                                    </div>
+                                    {% else %}
+                                    <a href="{{ url_for('grade_submission', submission_id=submission.id) }}" 
+                                       class="bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 shadow-sm hover:shadow-md flex items-center gap-1.5">
+                                        <i class="fas fa-pen text-[10px]"></i> Grade
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="p-8 text-center">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
+                            <i class="fas fa-inbox text-gray-400 text-2xl"></i>
+                        </div>
+                        <p class="text-sm text-gray-500 font-medium">No submissions yet</p>
+                        <p class="text-xs text-gray-400 mt-1">Submissions will appear here once students submit their work</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="lecturerLogoutModal" class="fixed inset-0 z-[10001] hidden items-center justify-center">
+        <div id="lecturerLogoutBackdrop" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 opacity-0"></div>
+        <div id="lecturerLogoutCard" class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
+            <div class="h-1.5 w-full bg-gradient-to-r from-red-400 via-red-500 to-red-600"></div>
+            <div class="px-6 pt-6 pb-5 text-center">
+                <div class="relative w-16 h-16 mx-auto mb-4">
+                    <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-20" style="animation-duration: 2s;"></div>
+                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shadow-inner border border-red-100">
+                        <i class="fas fa-sign-out-alt text-red-500 text-xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1.5 tracking-tight">Sign Out?</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">Are you sure you want to end your session? You will need to log in again to access your dashboard.</p>
+            </div>
+            <div class="px-6 pb-6 flex gap-3">
+                <button onclick="hideLogoutModal()" type="button" 
+                        class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-200">
+                    <i class="fas fa-times mr-1.5 text-xs"></i> Cancel
+                </button>
+                <button onclick="executeLogout()" type="button" 
+                        class="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-red-500/25 hover:shadow-red-500/40 flex items-center justify-center gap-2 group">
+                    <i class="fas fa-sign-out-alt group-hover:translate-x-0.5 transition-transform duration-200"></i>
+                    <span>Sign Out</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coming Soon Toast -->
+    <div id="comingSoonToast" class="fixed bottom-6 right-6 z-[10002] transform translate-y-20 opacity-0 transition-all duration-300">
+        <div class="bg-gray-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+            <i class="fas fa-info-circle text-emerald-400"></i>
+            <div>
+                <p class="text-sm font-semibold" id="comingSoonTitle">Coming Soon</p>
+                <p class="text-xs text-gray-400">This feature is under development</p>
+            </div>
+            <button onclick="hideComingSoon()" class="ml-2 text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
-    /* ==================== PROFESSIONAL LECTURER DASHBOARD ==================== */
-    .dashboard-container {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 1.5rem;
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    @keyframes float1 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+    @keyframes float2 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+    @keyframes float3 { 0%, 100% { transform: translateX(0px); } 50% { transform: translateX(10px); } }
+    @keyframes livePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+    .dashboard-bg {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 25%, #ffffff 50%, #f8fafc 75%, #f0fdf4 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 20s ease infinite;
+        min-height: 100vh;
     }
 
-    /* Welcome Hero Section */
-    .hero-welcome {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        border-radius: 28px;
-        padding: 2rem 2rem;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
-    }
+    .animate-float-1 { animation: float1 8s ease-in-out infinite; }
+    .animate-float-2 { animation: float2 6s ease-in-out infinite 1s; }
+    .animate-float-3 { animation: float3 9s ease-in-out infinite 2s; }
 
-    .hero-welcome::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 300px;
-        height: 300px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 50%;
-    }
-
-    .hero-welcome::after {
-        content: '';
-        position: absolute;
-        bottom: -30%;
-        left: -5%;
-        width: 200px;
-        height: 200px;
-        background: rgba(255,255,255,0.08);
-        border-radius: 50%;
-    }
-
-    .hero-content {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .hero-text h1 {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 0.5rem;
-    }
-
-    .hero-text p {
-        color: rgba(255,255,255,0.9);
-        font-size: 0.95rem;
-    }
-
-    .lecturer-badge {
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(10px);
-        padding: 0.6rem 1.2rem;
-        border-radius: 40px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: white;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    /* Stats Grid */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.2rem;
-        margin-bottom: 2rem;
-    }
-
-    @media (max-width: 1024px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 640px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
 
     .stat-card {
-        background: white;
-        border-radius: 20px;
-        padding: 1.2rem;
-        border: 1px solid #e5e7eb;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        position: relative;
-        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 0;
+        animation: fadeInUp 0.5s ease forwards;
     }
-
-    body.dark-mode .stat-card {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
     .stat-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
-        border-color: #059669;
-    }
-
-    .stat-card.active {
-        border-color: #059669;
-        background: #f0fdf4;
-        box-shadow: 0 4px 15px rgba(5,150,105,0.15);
-    }
-
-    body.dark-mode .stat-card.active {
-        background: #064e3b;
-        border-color: #10b981;
-    }
-
-    .stat-icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #059669;
-        line-height: 1.2;
-    }
-
-    body.dark-mode .stat-value {
-        color: #10b981;
-    }
-
-    .stat-label {
-        font-size: 0.75rem;
-        color: #6b7280;
-        margin-top: 0.25rem;
-    }
-
-    /* Quick Actions */
-    .quick-actions {
-        margin-bottom: 2rem;
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .btn-create {
-        background: linear-gradient(135deg, #059669, #047857);
-        color: white;
-        border: none;
-        padding: 0.9rem 2rem;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        text-decoration: none;
-        box-shadow: 0 4px 15px rgba(5,150,105,0.3);
-    }
-
-    .btn-create:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(5,150,105,0.4);
-        gap: 1rem;
-    }
-
-    .btn-refresh {
-        background: white;
-        color: #059669;
-        border: 1px solid #e5e7eb;
-        padding: 0.9rem 1.5rem;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    body.dark-mode .btn-refresh {
-        background: #1f2937;
-        border-color: #374151;
-        color: #10b981;
-    }
-
-    .btn-refresh:hover {
-        background: #f0fdf4;
-        border-color: #059669;
-    }
-
-    /* Section Header */
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .section-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: #1f2937;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    body.dark-mode .section-title {
-        color: #f3f4f6;
-    }
-
-    /* Assignments Grid */
-    .assignments-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+        box-shadow: 0 20px 25px -12px rgba(16, 185, 129, 0.15);
     }
 
     .assignment-card {
-        background: white;
-        border-radius: 20px;
-        border: 1px solid #e5e7eb;
-        overflow: hidden;
-        transition: all 0.3s;
-        position: relative;
+        transition: all 0.3s ease;
     }
-
-    body.dark-mode .assignment-card {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
     .assignment-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 30px -12px rgba(0,0,0,0.15);
-        border-color: #059669;
-    }
-
-    .assignment-header {
-        padding: 1.2rem;
-        background: linear-gradient(135deg, #f9fafb, #ffffff);
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    body.dark-mode .assignment-header {
-        background: #111827;
-        border-color: #374151;
-    }
-
-    .assignment-header h3 {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #1f2937;
-    }
-
-    body.dark-mode .assignment-header h3 {
-        color: #f3f4f6;
-    }
-
-    .assignment-meta {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        font-size: 0.7rem;
-        color: #6b7280;
-    }
-
-    .assignment-body {
-        padding: 1rem 1.2rem;
-    }
-
-    .course-code {
-        display: inline-block;
-        background: #e0e7ff;
-        color: #3730a3;
-        padding: 0.2rem 0.7rem;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-    }
-
-    body.dark-mode .course-code {
-        background: #1e3a5f;
-        color: #93c5fd;
-    }
-
-    .deadline {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.75rem;
-        color: #6b7280;
-        margin-bottom: 0.75rem;
-    }
-
-    .deadline-urgent {
-        color: #dc2626;
-    }
-
-    .assignment-stats {
-        display: flex;
-        gap: 1rem;
-        padding-top: 0.75rem;
-        border-top: 1px solid #e5e7eb;
-        margin-top: 0.5rem;
-    }
-
-    body.dark-mode .assignment-stats {
-        border-color: #374151;
-    }
-
-    .stat-badge {
-        flex: 1;
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #059669;
-    }
-
-    .stat-label-small {
-        font-size: 0.65rem;
-        color: #6b7280;
-    }
-
-    .assignment-footer {
-        padding: 1rem 1.2rem;
-        display: flex;
-        gap: 0.75rem;
-        background: #f9fafb;
-        border-top: 1px solid #e5e7eb;
-    }
-
-    body.dark-mode .assignment-footer {
-        background: #111827;
-        border-color: #374151;
-    }
-
-    .btn-manage, .btn-view, .btn-edit {
-        flex: 1;
-        padding: 0.5rem;
-        border-radius: 10px;
-        font-size: 0.75rem;
-        font-weight: 500;
-        text-align: center;
-        text-decoration: none;
-        transition: all 0.2s;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-manage {
-        background: #059669;
-        color: white;
-    }
-
-    .btn-manage:hover {
-        background: #047857;
         transform: translateY(-2px);
+        box-shadow: 0 8px 16px -8px rgba(0, 0, 0, 0.1);
     }
 
-    .btn-view {
-        background: #3b82f6;
-        color: white;
+    .submission-item {
+        transition: all 0.3s ease;
+        opacity: 0;
+        animation: slideInRight 0.4s ease forwards;
     }
 
-    .btn-view:hover {
-        background: #2563eb;
-        transform: translateY(-2px);
+    .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-    .btn-edit {
-        background: #6b7280;
-        color: white;
-    }
+    .live-dot { animation: livePulse 2s ease-in-out infinite; }
 
-    .btn-edit:hover {
-        background: #4b5563;
-        transform: translateY(-2px);
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 0.2rem 0.6rem;
-        border-radius: 12px;
-        font-size: 0.65rem;
-        font-weight: 600;
-    }
-
-    .status-active {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .status-closed {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    /* Submissions Table */
-    .submissions-section {
-        margin-top: 2rem;
-    }
-
-    .search-bar {
-        background: white;
-        padding: 1rem;
-        border-radius: 16px;
-        border: 1px solid #e5e7eb;
-        margin-bottom: 1.5rem;
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    body.dark-mode .search-bar {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    .search-input-wrapper {
-        flex: 1;
+    .btn-shine {
         position: relative;
+        overflow: hidden;
     }
-
-    .search-input-wrapper i {
+    .btn-shine::after {
+        content: '';
         position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #9ca3af;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+        transform: rotate(30deg) translateX(-100%);
+        transition: transform 0.6s;
+    }
+    .btn-shine:hover::after {
+        transform: rotate(30deg) translateX(100%);
     }
 
-    .search-input-wrapper input {
-        width: 100%;
-        padding: 0.7rem 0.7rem 0.7rem 2.5rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 0.85rem;
-    }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
-    body.dark-mode .search-input-wrapper input {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .filter-chips {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-
-    .filter-chip {
-        padding: 0.5rem 1rem;
-        border-radius: 25px;
-        border: 1px solid #e5e7eb;
-        background: white;
-        cursor: pointer;
-        font-size: 0.8rem;
-        transition: all 0.2s;
-    }
-
-    body.dark-mode .filter-chip {
-        background: #374151;
-        border-color: #4b5563;
-        color: #f3f4f6;
-    }
-
-    .filter-chip.active {
-        background: #059669;
-        color: white;
-        border-color: #059669;
-    }
-
-    .submissions-table {
-        background: white;
-        border-radius: 20px;
-        border: 1px solid #e5e7eb;
-        overflow-x: auto;
-    }
-
-    body.dark-mode .submissions-table {
-        background: #1f2937;
-        border-color: #374151;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 1rem;
-        text-align: left;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    body.dark-mode th, body.dark-mode td {
-        border-color: #374151;
-    }
-
-    th {
-        background: #f9fafb;
-        font-weight: 600;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    body.dark-mode th {
-        background: #111827;
-    }
-
-    tr:hover {
-        background: #f9fafb;
-    }
-
-    body.dark-mode tr:hover {
-        background: #111827;
-    }
-
-    .btn-grade {
-        background: #059669;
-        color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 0.7rem;
-        transition: all 0.2s;
-        display: inline-block;
-    }
-
-    .btn-grade:hover {
-        background: #047857;
-        transform: translateY(-1px);
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: #6b7280;
-    }
-
-    @media (max-width: 768px) {
-        .dashboard-container {
-            padding: 1rem;
-        }
-        .assignments-grid {
-            grid-template-columns: 1fr;
-        }
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-        .hero-text h1 {
-            font-size: 1.3rem;
-        }
-    }
+    #lecturerLogoutBackdrop { transition: opacity 0.3s ease; }
+    #lecturerLogoutCard { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
 </style>
 
-<div class="dashboard-container">
-    <!-- Hero Welcome Section -->
-    <div class="hero-welcome">
-        <div class="hero-content">
-            <div class="hero-text">
-                <h1>Welcome back, {{ user.name }}! 👋</h1>
-                <p>Manage your assignments, grade submissions, and track student progress</p>
-            </div>
-            <div class="lecturer-badge">
-                <i class="fas fa-chalkboard-teacher"></i> Lecturer Portal
-            </div>
-        </div>
-    </div>
-
-    <!-- Stats Overview -->
-    <div class="stats-grid">
-        <div class="stat-card" onclick="window.location.href='{{ url_for('lecturer_assignments') }}'">
-            <div class="stat-icon">📚</div>
-            <div class="stat-value">{{ total_assignments }}</div>
-            <div class="stat-label">My Assignments</div>
-        </div>
-        <div class="stat-card" onclick="filterSubmissions('all')">
-            <div class="stat-icon">📝</div>
-            <div class="stat-value">{{ total_submissions }}</div>
-            <div class="stat-label">Total Submissions</div>
-        </div>
-        <div class="stat-card" onclick="filterSubmissions('pending')">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-value">{{ total_pending }}</div>
-            <div class="stat-label">Pending Grades</div>
-        </div>
-        <div class="stat-card" onclick="filterSubmissions('flagged')">
-            <div class="stat-icon">⚠️</div>
-            <div class="stat-value">{{ total_flagged }}</div>
-            <div class="stat-label">Flagged</div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-        <a href="{{ url_for('create_assignment') }}" class="btn-create">
-            <i class="fas fa-plus"></i> Create New Assignment
-            <i class="fas fa-arrow-right"></i>
-        </a>
-        <button class="btn-refresh" onclick="window.location.reload()">
-            <i class="fas fa-sync-alt"></i> Refresh
-        </button>
-    </div>
-
-    <!-- My Assignments Section -->
-    <div class="section-header">
-        <div class="section-title">
-            <i class="fas fa-tasks"></i> My Assignments
-        </div>
-    </div>
-
-    {% if assignments %}
-    <div class="assignments-grid">
-        {% for assignment in assignments %}
-        {% set is_active = assignment.deadline > now %}
-        <div class="assignment-card">
-            <div class="assignment-header">
-                <h3>{{ assignment.title }}</h3>
-                <div class="assignment-meta">
-                    <span><i class="fas fa-calendar"></i> {{ assignment.created_at.strftime('%b %d, %Y') }}</span>
-                    <span class="status-badge {% if is_active %}status-active{% else %}status-closed{% endif %}">
-                        {% if is_active %}Active{% else %}Closed{% endif %}
-                    </span>
-                </div>
-            </div>
-            <div class="assignment-body">
-                <span class="course-code">{{ assignment.course_code }}</span>
-                <div class="deadline {% if not is_active %}deadline-urgent{% endif %}">
-                    <i class="fas fa-clock"></i> Due: {{ assignment.deadline.strftime('%b %d, %Y at %H:%M') }}
-                </div>
-                <div class="assignment-stats">
-                    <div class="stat-badge">
-                        <div class="stat-number">{{ assignment.submission_count|default(0) }}</div>
-                        <div class="stat-label-small">Submissions</div>
-                    </div>
-                    <div class="stat-badge">
-                        <div class="stat-number">{{ assignment.graded_count|default(0) }}</div>
-                        <div class="stat-label-small">Graded</div>
-                    </div>
-                    <div class="stat-badge">
-                        <div class="stat-number">{{ assignment.pending_count|default(0) }}</div>
-                        <div class="stat-label-small">Pending</div>
-                    </div>
-                </div>
-            </div>
-            <div class="assignment-footer">
-                <a href="{{ url_for('manage_assignment', assignment_id=assignment.id) }}" class="btn-manage">
-                    <i class="fas fa-cog"></i> Manage
-                </a>
-                <a href="{{ url_for('lecturer_view_assignment', assignment_id=assignment.id) }}" class="btn-view">
-                    <i class="fas fa-eye"></i> View
-                </a>
-                <a href="{{ url_for('lecturer_edit_assignment', assignment_id=assignment.id) }}" class="btn-edit">
-                    <i class="fas fa-edit"></i> Edit
-                </a>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state">
-        <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-        <h3>No assignments yet</h3>
-        <p>Click "Create New Assignment" to get started</p>
-    </div>
-    {% endif %}
-
-    <!-- Submissions Section -->
-    {% if all_submissions %}
-    <div class="submissions-section">
-        <div class="section-header">
-            <div class="section-title">
-                <i class="fas fa-inbox"></i> Recent Submissions
-            </div>
-        </div>
-
-        <div class="search-bar">
-            <div class="search-input-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search by student name or matric...">
-            </div>
-            <div class="filter-chips">
-                <button class="filter-chip active" data-filter="all">All</button>
-                <button class="filter-chip" data-filter="pending">Pending</button>
-                <button class="filter-chip" data-filter="graded">Graded</button>
-                <button class="filter-chip" data-filter="flagged">Flagged</button>
-            </div>
-        </div>
-
-        <div class="submissions-table">
-            <table id="submissionsTable">
-                <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Assignment</th>
-                        <th>Submitted</th>
-                        <th>Plagiarism</th>
-                        <th>Status</th>
-                        <th>Grade</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for submission in all_submissions %}
-                    {% set status = 'graded' if submission.grade else ('flagged' if submission.plagiarism_score > 30 else 'pending') %}
-                    <tr data-status="{{ status }}" data-name="{{ submission.student.name }} {{ submission.student.matric }}">
-                        <td>
-                            <strong>{{ submission.student.name }}</strong><br>
-                            <small>{{ submission.student.matric }}</small>
-                        </td>
-                        <td>{{ submission.assignment.title }}</td>
-                        <td>{{ submission.submitted_at.strftime('%b %d, %H:%M') }}</td>
-                        <td>
-                            <span style="color: {% if submission.plagiarism_score > 60 %}#dc2626{% elif submission.plagiarism_score > 30 %}#f59e0b{% else %}#059669{% endif %}; font-weight: 600;">
-                                {{ "%.1f"|format(submission.plagiarism_score) }}%
-                            </span>
-                        </td>
-                        <td>
-                            <span class="status-badge" style="background: {% if status == 'graded' %}#d1fae5{% elif status == 'flagged' %}#fee2e2{% else %}#fed7aa{% endif %}; color: {% if status == 'graded' %}#065f46{% elif status == 'flagged' %}#991b1b{% else %}#9a3412{% endif %};">
-                                {% if status == 'graded' %}✓ Graded{% elif status == 'flagged' %}⚠️ Flagged{% else %}⏳ Pending{% endif %}
-                            </span>
-                        </td>
-                        <td>
-                            {% if submission.grade %}
-                            <strong style="color: #059669;">{{ "%.0f"|format(submission.grade) }}%</strong>
-                            {% else %}
-                            <span style="color: #9ca3af;">—</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="{{ url_for('grade_submission', submission_id=submission.id) }}" class="btn-grade">
-                                <i class="fas fa-star"></i> Grade
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% endif %}
-</div>
-
 <script>
-    // Filter functionality
-    const filterChips = document.querySelectorAll('.filter-chip');
-    const searchInput = document.getElementById('searchInput');
-    const rows = document.querySelectorAll('#submissionsTable tbody tr');
+    function startClock() {
+        const dateEl = document.getElementById('liveDate');
+        const timeEl = document.getElementById('liveTime');
 
-    function filterTable() {
-        const activeFilter = document.querySelector('.filter-chip.active').dataset.filter;
-        const searchTerm = searchInput?.value.toLowerCase() || '';
+        function update() {
+            const now = new Date();
+            if (dateEl) {
+                dateEl.textContent = now.toLocaleDateString('en-US', { 
+                    month: 'short', day: 'numeric', year: 'numeric' 
+                });
+            }
+            if (timeEl) {
+                timeEl.textContent = now.toLocaleTimeString('en-US', { 
+                    hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' 
+                });
+            }
+        }
+        update();
+        setInterval(update, 1000);
+    }
 
-        rows.forEach(row => {
-            const status = row.dataset.status;
-            const name = (row.dataset.name || '').toLowerCase();
-            
-            let statusMatch = activeFilter === 'all' || status === activeFilter;
-            let searchMatch = searchTerm === '' || name.includes(searchTerm);
-            
-            row.style.display = (statusMatch && searchMatch) ? '' : 'none';
+    function animateCounters() {
+        document.querySelectorAll('.counter').forEach(el => {
+            const target = parseInt(el.dataset.target) || 0;
+            if (target === 0) {
+                el.textContent = '0';
+                return;
+            }
+            let current = 0;
+            const duration = 1500;
+            const steps = 60;
+            const increment = target / steps;
+            const stepDuration = duration / steps;
+
+            const interval = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    el.textContent = target.toLocaleString();
+                    clearInterval(interval);
+                } else {
+                    el.textContent = Math.floor(current).toLocaleString();
+                }
+            }, stepDuration);
         });
     }
 
-    filterChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            filterChips.forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            filterTable();
-        });
+    function initRevealAnimations() {
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const delay = entry.target.dataset.delay || 0;
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, delay);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        reveals.forEach(el => observer.observe(el));
+    }
+
+    let comingSoonTimeout;
+    function showComingSoon(feature) {
+        const toast = document.getElementById('comingSoonToast');
+        const title = document.getElementById('comingSoonTitle');
+        title.textContent = feature + ' — Coming Soon';
+
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        clearTimeout(comingSoonTimeout);
+        comingSoonTimeout = setTimeout(hideComingSoon, 3000);
+    }
+
+    function hideComingSoon() {
+        const toast = document.getElementById('comingSoonToast');
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+    }
+
+    document.querySelectorAll('.submission-item').forEach((el, i) => {
+        el.style.animationDelay = `${i * 0.05}s`;
     });
 
-    if (searchInput) {
-        searchInput.addEventListener('input', filterTable);
-    }
-
-    function filterSubmissions(filter) {
-        const chip = Array.from(filterChips).find(c => c.dataset.filter === filter);
-        if (chip) chip.click();
-    }
+    window.addEventListener('load', () => {
+        startClock();
+        animateCounters();
+        initRevealAnimations();
+    });
 </script>
 {% endblock %}
