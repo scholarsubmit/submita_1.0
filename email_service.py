@@ -1,36 +1,28 @@
 # FILE: email_service.py
-# LOCATION: /email_service.py
-# FIXES: Switched to standard port 465 SSL compatibility, optimized context state handling, fixed inline f-string evaluations
-
 import threading
-import smtplib
 import os
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend  # Import the Resend SDK
 from flask import url_for, current_app
-from datetime import datetime
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
+# Initialize the Resend client with your environment variable
+resend.api_key = os.environ.get('RESEND_API_KEY')
+
 class EmailService:
-    """Handles all email operations asynchronously"""
+    """Handles all email operations asynchronously using Resend"""
     
-    # Email configuration from environment variables
-    SMTP_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    SMTP_PORT = int(os.environ.get('MAIL_PORT', 465)) # Default to 465 (SSL) for production stability
-    SENDER_EMAIL = os.environ.get('MAIL_USERNAME', 'scholarsubmit1@gmail.com')
-    SENDER_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
-    
+    # Change this to your Resend verified domain or 'onboarding@resend.dev' for testing
+    SENDER_EMAIL = "onboarding@resend.dev" 
+
     @staticmethod
     def send_email_async(recipient, subject, html_content, text_content=None):
-        """Send email in background thread safely maintaining Flask application state"""
-        if not EmailService.SENDER_PASSWORD:
-            print(f"Email not sent - SMTP password not configured. To: {recipient}, Subject: {subject}")
+        """Send email in a background thread safely maintaining Flask state"""
+        if not resend.api_key:
+            print(f"❌ Email not sent - RESEND_API_KEY missing from environment variables.")
             return False
             
-        # Capture the current application context so Flask doesn't drop it across threads
         try:
             app_context = current_app._get_current_object()
         except RuntimeError:
@@ -46,40 +38,28 @@ class EmailService:
     
     @staticmethod
     def _send_email(recipient, subject, html_content, text_content, app_context=None):
-        """Actual email sending function using secure SMTP network protocols"""
+        """Actual email dispatch using Resend's API wrapper"""
         
         def execute_send():
             try:
-                msg = MIMEMultipart('alternative')
-                msg['Subject'] = subject
-                msg['From'] = f"Submita <{EmailService.SENDER_EMAIL}>"
-                msg['To'] = recipient
+                # Structure the parameters for Resend's client API
+                params = {
+                    "from": f"Submita <{EmailService.SENDER_EMAIL}>",
+                    "to": [recipient],
+                    "subject": subject,
+                    "html": html_content
+                }
                 
                 if text_content:
-                    part_text = MIMEText(text_content, 'plain')
-                    msg.attach(part_text)
+                    params["text"] = text_content
                 
-                part_html = MIMEText(html_content, 'html')
-                msg.attach(part_html)
-                
-                # Use SMTP_SSL for Port 465 - sets up immediate implicit encryption
-                if EmailService.SMTP_PORT == 465:
-                    with smtplib.SMTP_SSL(EmailService.SMTP_SERVER, EmailService.SMTP_PORT, timeout=15) as server:
-                        server.login(EmailService.SENDER_EMAIL, EmailService.SENDER_PASSWORD)
-                        server.send_message(msg)
-                else:
-                    # Fallback configuration for explicit TLS (Port 587)
-                    with smtplib.SMTP(EmailService.SMTP_SERVER, EmailService.SMTP_PORT, timeout=15) as server:
-                        server.starttls()
-                        server.login(EmailService.SENDER_EMAIL, EmailService.SENDER_PASSWORD)
-                        server.send_message(msg)
-                        
-                print(f"✅ Email sent successfully to {recipient}")
+                # Send via Resend's secure infrastructure
+                email = resend.Emails.send(params)
+                print(f"✅ Resend email sent successfully to {recipient}. ID: {email.get('id')}")
                     
             except Exception as e:
-                print(f"❌ Email failed for {recipient}: {e}")
+                print(f"❌ Resend API call failed for {recipient}: {e}")
 
-        # Execute inside Flask context wrapper if context exists
         if app_context:
             with app_context.app_context():
                 execute_send()
