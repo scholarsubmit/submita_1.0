@@ -71,4 +71,4 @@ except Exception as e:
 print("\n" + "=" * 60)
 print("✅ Database reset complete!")
 print("=" * 60)
-print("\nNow run: python init_db_tables.py")
+print("\nNow run: python scripts/init_db_tables.py")
