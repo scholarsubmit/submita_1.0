@@ -1,8 +1,21 @@
-# utils/email_sender.py
+# FILE: utils/email_sender.py
+# LOCATION: /utils/email_sender.py
+# FIXES: Get BASE_URL from environment instead of hardcoding localhost
+
 from flask_mail import Message
 from flask import current_app, url_for
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+def get_base_url():
+    """Get BASE_URL from environment or fallback to localhost"""
+    base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+    # Remove trailing slash if present
+    return base_url.rstrip('/')
 
 def send_verification_email(lecturer_data, verification_code, expires_at, pdf_path):
     """
@@ -11,7 +24,9 @@ def send_verification_email(lecturer_data, verification_code, expires_at, pdf_pa
     try:
         from app import mail
         
-        registration_link = f"http://localhost:5000/register?code={verification_code}"
+        # Get BASE_URL from environment
+        base_url = get_base_url()
+        registration_link = f"{base_url}/register?code={verification_code}"
         
         # Professional HTML Email Template
         html_content = f"""
@@ -261,4 +276,121 @@ def send_verification_email(lecturer_data, verification_code, expires_at, pdf_pa
         
     except Exception as e:
         print(f"❌ Email sending error: {str(e)}")
+        return False
+
+
+def send_student_verification_email(student_email, student_name, verification_code):
+    """
+    Send verification email to student
+    """
+    try:
+        from app import mail
+        
+        base_url = get_base_url()
+        verification_link = f"{base_url}/verify?code={verification_code}&email={student_email}"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Verify Your Email - Submita</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: #10b981; padding: 20px; text-align: center; color: white; }}
+                .content {{ padding: 30px; }}
+                .button {{ background: #10b981; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; }}
+                .code {{ font-size: 24px; font-weight: bold; background: #f0fdf4; padding: 10px; text-align: center; letter-spacing: 5px; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>Welcome to Submita!</h2>
+                </div>
+                <div class="content">
+                    <p>Dear <strong>{student_name}</strong>,</p>
+                    <p>Thank you for registering with Submita. Please verify your email address to activate your account.</p>
+                    <div class="code">
+                        Your verification code: <strong>{verification_code}</strong>
+                    </div>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{verification_link}" class="button">Verify Email →</a>
+                    </div>
+                    <p>Or enter the code manually on the verification page.</p>
+                    <p>This code expires in 24 hours.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        msg = Message(
+            subject="Verify Your Submita Account",
+            recipients=[student_email],
+            html=html_content,
+            sender=current_app.config['MAIL_DEFAULT_SENDER']
+        )
+        
+        mail.send(msg)
+        return True
+        
+    except Exception as e:
+        print(f"❌ Student email error: {e}")
+        return False
+
+
+def send_grade_notification(student_email, student_name, assignment_title, grade, feedback=None):
+    """
+    Send grade notification to student
+    """
+    try:
+        from app import mail
+        
+        base_url = get_base_url()
+        dashboard_link = f"{base_url}/student-dashboard"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Assignment Graded - Submita</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; }}
+                .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #10b981, #059669); padding: 20px; text-align: center; color: white; }}
+                .grade {{ font-size: 48px; font-weight: bold; color: #10b981; text-align: center; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>Assignment Graded!</h2>
+                </div>
+                <div class="content">
+                    <p>Dear <strong>{student_name}</strong>,</p>
+                    <p>Your assignment "<strong>{assignment_title}</strong>" has been graded.</p>
+                    <div class="grade">{grade}%</div>
+                    {f'<p><strong>Feedback:</strong><br>{feedback}</p>' if feedback else ''}
+                    <a href="{dashboard_link}">View on Dashboard →</a>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        msg = Message(
+            subject=f"Grade Posted: {assignment_title}",
+            recipients=[student_email],
+            html=html_content,
+            sender=current_app.config['MAIL_DEFAULT_SENDER']
+        )
+        
+        mail.send(msg)
+        return True
+        
+    except Exception as e:
+        print(f"❌ Grade notification error: {e}")
         return False
