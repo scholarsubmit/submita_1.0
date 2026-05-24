@@ -1,68 +1,63 @@
-# FILE: email_service.py
-# LOCATION: /email_service.py
-# FIXES: Support both SMTP and Brevo HTTP modes via USE_SMTP flag
+# FILE: email_service.py - FIXED (No shutdown errors)
+# PURE GOOGLE SMTP - PORT 465 SSL
 
 import threading
 import os
 import smtplib
-import requests
+import ssl
+import time
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import url_for, current_app
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 
 class EmailService:
-    """Handles all email operations - supports SMTP and Brevo HTTP modes"""
+    """Handles all email operations using Google SMTP on port 465 (SSL)"""
     
-    # Mode selection (set USE_SMTP=true in .env to use SMTP, otherwise Brevo HTTP)
-    USE_SMTP = os.environ.get('USE_SMTP', 'false').lower() == 'true'
-    
-    # SMTP Configuration (original)
+    # Google SMTP Configuration - PORT 465 SSL
     SMTP_SERVER = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
-    SMTP_PORT = int(os.environ.get('MAIL_PORT', 587))
-    SMTP_USERNAME = os.environ.get('MAIL_USERNAME', 'scholarsubmit1@gmail.com').strip()
-    SMTP_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
+    SMTP_PORT = int(os.environ.get('MAIL_PORT', 465))
+    SMTP_USERNAME = os.environ.get('MAIL_USERNAME', '').strip()
+    SMTP_PASSWORD = os.environ.get('MAIL_PASSWORD', '').strip()
     
-    # Brevo HTTP Configuration
-    BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '').strip()
-    BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
-    
-    # Common configuration
-    SENDER_EMAIL = os.environ.get('MAIL_USERNAME', '').strip()
     SENDER_NAME = os.environ.get('MAIL_SENDER_NAME', 'Submita')
+    SENDER_EMAIL = SMTP_USERNAME
     
     @classmethod
     def is_configured(cls):
-        """Check if email service is properly configured based on selected mode"""
-        if cls.USE_SMTP:
-            return bool(cls.SMTP_USERNAME and cls.SMTP_PASSWORD)
-        else:
-            return bool(cls.BREVO_API_KEY and cls.SENDER_EMAIL)
+        """Check if email service is properly configured"""
+        configured = bool(cls.SMTP_USERNAME and cls.SMTP_PASSWORD)
+        if not configured:
+            print(f"❌ Email not configured!")
+            print(f"   MAIL_USERNAME: {'✓' if cls.SMTP_USERNAME else '✗'}")
+            print(f"   MAIL_PASSWORD: {'✓' if cls.SMTP_PASSWORD else '✗'}")
+        return configured
     
-    @classmethod
-    def get_mode(cls):
-        """Return current email mode as string"""
-        return "SMTP" if cls.USE_SMTP else "Brevo HTTP"
+    @staticmethod
+    def send_email_sync(recipient, subject, html_content, text_content=None):
+        """Send email synchronously (no threading issues)"""
+        
+        if not EmailService.is_configured():
+            print(f"❌ Email not sent - Missing Gmail configuration")
+            return False
+        
+        try:
+            EmailService._send_email_direct(recipient, subject, html_content, text_content)
+            return True
+        except Exception as e:
+            print(f"❌ Email failed: {e}")
+            return False
     
     @staticmethod
     def send_email_async(recipient, subject, html_content, text_content=None):
-        """Send email asynchronously using selected method"""
+        """Send email asynchronously (for web requests)"""
         
-        # Check configuration
         if not EmailService.is_configured():
-            print(f"❌ Email not sent - Missing configuration for {EmailService.get_mode()} mode")
-            print(f"   USE_SMTP: {EmailService.USE_SMTP}")
-            if EmailService.USE_SMTP:
-                print(f"   SMTP_USERNAME: {'✅' if EmailService.SMTP_USERNAME else '❌'}")
-                print(f"   SMTP_PASSWORD: {'✅' if EmailService.SMTP_PASSWORD else '❌'}")
-            else:
-                print(f"   BREVO_API_KEY: {'✅' if EmailService.BREVO_API_KEY else '❌'}")
-                print(f"   MAIL_USERNAME: {'✅' if EmailService.SENDER_EMAIL else '❌'}")
+            print(f"❌ Email not sent - Missing Gmail configuration")
             return False
         
         try:
@@ -70,190 +65,86 @@ class EmailService:
         except RuntimeError:
             app_context = None
         
+        # Use non-daemon thread
         thread = threading.Thread(
-            target=EmailService._send_email,
+            target=EmailService._send_email_with_context,
             args=(recipient, subject, html_content, text_content, app_context)
         )
-        thread.daemon = True
+        thread.daemon = False
         thread.start()
+        
         return True
     
     @staticmethod
-    def _send_email(recipient, subject, html_content, text_content, app_context=None):
-        """Send email using selected method"""
-        
-        def execute_send():
-            if EmailService.USE_SMTP:
-                EmailService._send_smtp(recipient, subject, html_content, text_content)
-            else:
-                EmailService._send_brevo(recipient, subject, html_content, text_content)
-        
+    def _send_email_with_context(recipient, subject, html_content, text_content, app_context):
+        """Send email with Flask context"""
         if app_context:
             with app_context.app_context():
-                execute_send()
+                EmailService._send_email_direct(recipient, subject, html_content, text_content)
         else:
-            execute_send()
+            EmailService._send_email_direct(recipient, subject, html_content, text_content)
     
     @staticmethod
-    def _send_smtp(recipient, subject, html_content, text_content):
-        """Send email using traditional SMTP"""
+    def _send_email_direct(recipient, subject, html_content, text_content):
+        """Direct email sending using Google SMTP with SSL on port 465"""
         try:
-            if not EmailService.SMTP_PASSWORD:
-                print(f"Cannot send email: SMTP password not configured")
-                return
+            print(f"\n📧 Gmail SSL: Sending to {recipient}")
+            print(f"   Server: {EmailService.SMTP_SERVER}:{EmailService.SMTP_PORT}")
             
+            # Create message
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
             msg['From'] = f"{EmailService.SENDER_NAME} <{EmailService.SMTP_USERNAME}>"
             msg['To'] = recipient
+            msg['Reply-To'] = EmailService.SMTP_USERNAME
             
             if text_content:
-                part_text = MIMEText(text_content, 'plain')
-                msg.attach(part_text)
+                msg.attach(MIMEText(text_content, 'plain'))
+            msg.attach(MIMEText(html_content, 'html'))
             
-            part_html = MIMEText(html_content, 'html')
-            msg.attach(part_html)
+            # Create SSL context and connect
+            context = ssl.create_default_context()
             
-            with smtplib.SMTP(EmailService.SMTP_SERVER, EmailService.SMTP_PORT) as server:
-                server.starttls()
+            print("   Connecting with SSL...")
+            with smtplib.SMTP_SSL(EmailService.SMTP_SERVER, EmailService.SMTP_PORT, context=context) as server:
+                print("   Connection established!")
+                print("   Logging in...")
                 server.login(EmailService.SMTP_USERNAME, EmailService.SMTP_PASSWORD)
+                print("   ✓ Login successful!")
+                print("   Sending message...")
                 server.send_message(msg)
-                print(f"✅ SMTP email sent to {recipient}")
-                
+                print("   ✓ Message sent!")
+            
+            print(f"✅ Email sent successfully to {recipient}")
+            return True
+            
+        except smtplib.SMTPAuthenticationError as e:
+            print(f"\n❌ AUTHENTICATION FAILED!")
+            print(f"   Error: {e}")
+            print("\n   SOLUTION: You MUST use an App Password from Google")
+            return False
+            
+        except smtplib.SMTPServerDisconnected as e:
+            print(f"\n❌ SERVER DISCONNECTED!")
+            print(f"   Error: {e}")
+            return False
+            
+        except TimeoutError as e:
+            print(f"\n❌ TIMEOUT ERROR!")
+            print(f"   Error: {e}")
+            return False
+            
         except Exception as e:
-            print(f"❌ SMTP email failed for {recipient}: {e}")
-    
-    @staticmethod
-    def _send_brevo(recipient, subject, html_content, text_content):
-        """Send email using Brevo HTTP API"""
-        try:
-            headers = {
-                "accept": "application/json",
-                "content-type": "application/json",
-                "api-key": EmailService.BREVO_API_KEY
-            }
-            
-            payload = {
-                "sender": {
-                    "name": EmailService.SENDER_NAME,
-                    "email": EmailService.SENDER_EMAIL
-                },
-                "to": [{"email": recipient}],
-                "subject": subject,
-                "htmlContent": html_content
-            }
-            
-            if text_content:
-                payload["textContent"] = text_content
-            
-            response = requests.post(
-                EmailService.BREVO_API_URL, 
-                json=payload, 
-                headers=headers, 
-                timeout=30
-            )
-            
-            if response.status_code in [200, 201, 202]:
-                data = response.json()
-                print(f"✅ Brevo email sent to {recipient}! Message ID: {data.get('messageId', 'unknown')}")
-            else:
-                print(f"❌ Brevo failed for {recipient}: {response.status_code}")
-                print(f"   Response: {response.text}")
-                
-        except requests.exceptions.Timeout:
-            print(f"❌ Brevo timeout for {recipient}")
-        except Exception as e:
-            print(f"❌ Brevo error for {recipient}: {str(e)}")
+            print(f"\n❌ ERROR: {e}")
+            return False
     
     # ==================== EMAIL TEMPLATES ====================
     
     @staticmethod
-    def send_verification_email(user_name, user_email, student_id, verification_code):
-        """Send account verification email"""
-        try:
-            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
-            verification_link = f"{base_url}/verify"
-        except:
-            verification_link = url_for('verify', _external=True)
-        
-        html_content = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <style>
-                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-                .header h1 {{ color: #fff; margin: 0; }}
-                .content {{ padding: 30px; background: #fff; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
-                .code {{ background: #f0fdf4; border: 2px dashed #059669; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0; }}
-                .code-value {{ font-size: 32px; font-weight: bold; color: #047857; letter-spacing: 5px; }}
-                .student-id {{ background: #f9fafb; padding: 15px; text-align: center; border-radius: 8px; margin: 15px 0; }}
-                .button {{ display: inline-block; background: #059669; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 8px; margin-top: 20px; }}
-                .footer {{ text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h1>Welcome to Submita!</h1>
-                </div>
-                <div class="content">
-                    <p>Hello <strong>{user_name}</strong>,</p>
-                    <p>Thank you for creating an account with Submita. Please use the verification code below to activate your account:</p>
-                    
-                    <div class="code">
-                        <p style="margin-bottom: 10px;">Your Verification Code</p>
-                        <div class="code-value">{verification_code}</div>
-                        <p style="margin-top: 10px; font-size: 12px;">This code expires in 24 hours</p>
-                    </div>
-                    
-                    <div class="student-id">
-                        <p><strong>Your Student ID:</strong> {student_id}</p>
-                        <p style="font-size: 12px; margin-top: 5px;">Keep this ID for future logins</p>
-                    </div>
-                    
-                    <div style="text-align: center;">
-                        <a href="{verification_link}" class="button">Verify Your Account</a>
-                    </div>
-                    
-                    <p style="margin-top: 20px;">Or enter the code manually on the verification page.</p>
-                    <p>If you didn't create this account, please ignore this email.</p>
-                </div>
-                <div class="footer">
-                    <p>&copy; 2026 Submita. All rights reserved.</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        """
-        
-        text_content = f"""
-        Welcome to Submita!
-        
-        Hello {user_name},
-        
-        Your verification code is: {verification_code}
-        Your Student ID is: {student_id}
-        
-        Verify your account at: {verification_link}
-        
-        This code expires in 24 hours.
-        
-        © 2026 Submita
-        """
-        
-        return EmailService.send_email_async(user_email, "Verify Your Submita Account", html_content, text_content)
-    
-    @staticmethod
     def send_lecturer_verification_email(lecturer_data, verification_code, expires_at):
         """Send lecturer verification code email"""
-        try:
-            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
-            registration_link = f"{base_url}/register"
-        except:
-            registration_link = url_for('register', _external=True)
+        base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+        registration_link = f"{base_url}/register"
         
         if len(verification_code) > 6:
             formatted_code = ' '.join([verification_code[i:i+3] for i in range(0, len(verification_code), 3)])
@@ -264,13 +155,15 @@ class EmailService:
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="UTF-8">
             <style>
                 body {{ font-family: Arial, sans-serif; }}
                 .container {{ max-width: 550px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 25px; text-align: center; color: white; }}
+                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 25px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }}
                 .code-box {{ background: #f0fdf4; border: 3px solid #059669; border-radius: 12px; padding: 25px; text-align: center; margin: 20px 0; }}
-                .code {{ font-size: 36px; font-weight: bold; color: #047857; font-family: monospace; }}
-                .warning {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }}
+                .code {{ font-size: 36px; font-weight: bold; color: #047857; font-family: monospace; letter-spacing: 5px; }}
+                .warning {{ background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 8px; }}
                 .button {{ background: #059669; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; }}
             </style>
         </head>
@@ -278,6 +171,7 @@ class EmailService:
             <div class="container">
                 <div class="header">
                     <h1>🔐 Lecturer Verification Code</h1>
+                    <p>Submita Assignment Platform</p>
                 </div>
                 <div class="content">
                     <p>Dear <strong>{lecturer_data['full_name']}</strong>,</p>
@@ -290,70 +184,96 @@ class EmailService:
                     </div>
                     
                     <div class="warning">
-                        <strong>⚠️ Security Notice:</strong>
-                        <p>• This code expires on <strong>{expires_at.strftime('%Y-%m-%d at %H:%M')}</strong></p>
-                        <p>• This code can only be used once</p>
-                        <p>• Never share this code with anyone</p>
+                        <strong>⚠️ Important Security Notice:</strong>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li>This code expires on <strong>{expires_at.strftime('%Y-%m-%d at %H:%M')}</strong></li>
+                            <li>This code can only be used once</li>
+                            <li>Never share this code with anyone</li>
+                        </ul>
                     </div>
                     
-                    <div style="text-align: center;">
+                    <div style="text-align: center; margin: 25px 0;">
                         <a href="{registration_link}" class="button">Complete Registration →</a>
                     </div>
+                    
+                    <p style="color: #666; font-size: 12px; text-align: center;">Staff ID: {lecturer_data.get('staff_id', 'N/A')}</p>
                 </div>
             </div>
         </body>
         </html>
         """
         
-        return EmailService.send_email_async(lecturer_data['email'], "🔐 Submita Lecturer Verification Code", html_content)
+        text_content = f"""
+        SUBMITA LECTURER VERIFICATION CODE
+        
+        Dear {lecturer_data['full_name']},
+        
+        Your Verification Code: {verification_code}
+        Staff ID: {lecturer_data.get('staff_id', 'N/A')}
+        
+        This code expires on: {expires_at.strftime('%Y-%m-%d at %H:%M')}
+        
+        Complete your registration at: {registration_link}
+        
+        Security Notes:
+        - This code can only be used once
+        - Never share this code with anyone
+        
+        © 2026 Submita
+        """
+        
+        print(f"\n📧 Sending lecturer verification email")
+        print(f"   To: {lecturer_data['email']}")
+        print(f"   Name: {lecturer_data['full_name']}")
+        print(f"   Code: {verification_code}")
+        
+        return EmailService.send_email_sync(lecturer_data['email'], "🔐 Submita Lecturer Verification Code", html_content, text_content)
     
     @staticmethod
-    def send_password_reset_email(user_email, reset_token):
-        """Send password reset email"""
-        try:
-            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
-            reset_link = f"{base_url}/reset-password?token={reset_token}"
-        except:
-            reset_link = url_for('reset_password', token=reset_token, _external=True)
+    def send_verification_email(user_name, user_email, student_id, verification_code):
+        """Send student verification email"""
+        base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+        verification_link = f"{base_url}/verify"
         
         html_content = f"""
         <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="UTF-8">
             <style>
                 body {{ font-family: Arial, sans-serif; }}
-                .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: #059669; padding: 20px; text-align: center; color: white; }}
-                .button {{ background: #059669; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; display: inline-block; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 30px; text-align: center; color: white; border-radius: 10px 10px 0 0; }}
+                .code {{ background: #f0fdf4; border: 2px dashed #059669; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0; }}
+                .code-value {{ font-size: 32px; font-weight: bold; color: #047857; letter-spacing: 5px; }}
             </style>
         </head>
         <body>
             <div class="container">
                 <div class="header">
-                    <h2>Password Reset Request</h2>
+                    <h1>Welcome to Submita!</h1>
                 </div>
                 <div class="content">
-                    <p>Click the button below to reset your password:</p>
-                    <div style="text-align: center;">
-                        <a href="{reset_link}" class="button">Reset Password</a>
+                    <p>Hello <strong>{user_name}</strong>,</p>
+                    <p>Your verification code is:</p>
+                    <div class="code">
+                        <div class="code-value">{verification_code}</div>
                     </div>
-                    <p>This link expires in 1 hour.</p>
+                    <p>Your Student ID: <strong>{student_id}</strong></p>
+                    <p><a href="{verification_link}">Verify your account here</a></p>
                 </div>
             </div>
         </body>
         </html>
         """
         
-        return EmailService.send_email_async(user_email, "Reset Your Submita Password", html_content)
+        return EmailService.send_email_sync(user_email, "Verify Your Submita Account", html_content)
     
     @staticmethod
     def send_grade_notification(student_email, student_name, assignment_title, grade, feedback=None):
         """Send grade notification email"""
-        try:
-            base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
-            dashboard_link = f"{base_url}/student-dashboard"
-        except:
-            dashboard_link = url_for('student_dashboard', _external=True)
+        base_url = os.environ.get('BASE_URL', 'http://localhost:5000')
+        dashboard_link = f"{base_url}/student-dashboard"
         
         html_content = f"""
         <!DOCTYPE html>
@@ -361,41 +281,53 @@ class EmailService:
         <head>
             <style>
                 body {{ font-family: Arial, sans-serif; }}
-                .container {{ max-width: 500px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #059669, #047857); padding: 20px; text-align: center; color: white; }}
                 .grade {{ font-size: 48px; font-weight: bold; color: #059669; text-align: center; margin: 20px 0; }}
             </style>
         </head>
         <body>
             <div class="container">
-                <div class="header">
-                    <h2>Assignment Graded!</h2>
-                </div>
-                <div class="content">
-                    <p>Hello <strong>{student_name}</strong>,</p>
-                    <p>Your assignment "<strong>{assignment_title}</strong>" has been graded.</p>
-                    <div class="grade">{grade}%</div>
-                    {f'<p><strong>Feedback:</strong><br>{feedback}</p>' if feedback else ''}
-                    <p><a href="{dashboard_link}">View on Dashboard →</a></p>
-                </div>
+                <h2>Assignment Graded!</h2>
+                <p>Hello <strong>{student_name}</strong>,</p>
+                <p>Your assignment "<strong>{assignment_title}</strong>" has been graded.</p>
+                <div class="grade">{grade}%</div>
+                {f'<p><strong>Feedback:</strong><br>{feedback}</p>' if feedback else ''}
+                <p><a href="{dashboard_link}">View Dashboard</a></p>
             </div>
         </body>
         </html>
         """
         
-        return EmailService.send_email_async(student_email, f"Grade Posted: {assignment_title}", html_content)
+        return EmailService.send_email_sync(student_email, f"Grade Posted: {assignment_title}", html_content)
 
 
 # Test function
-if __name__ == '__main__':
+def test_email_config():
+    print("\n" + "=" * 60)
+    print("📧 TESTING GOOGLE SMTP - PORT 465 SSL")
     print("=" * 60)
-    print("📧 EMAIL SERVICE TEST")
-    print("=" * 60)
-    print(f"Mode: {EmailService.get_mode()}")
-    print(f"Configured: {EmailService.is_configured()}")
-    print(f"Sender Email: {EmailService.SENDER_EMAIL if EmailService.SENDER_EMAIL else '❌'}")
+    print(f"Server: {EmailService.SMTP_SERVER}:{EmailService.SMTP_PORT}")
+    print(f"Username: {EmailService.SMTP_USERNAME}")
+    print(f"Password: {'✓ Set' if EmailService.SMTP_PASSWORD else '✗ Missing'}")
+    print(f"Sender Name: {EmailService.SENDER_NAME}")
     
-    if EmailService.USE_SMTP:
-        print(f"SMTP Server: {EmailService.SMTP_SERVER}:{EmailService.SMTP_PORT}")
-    else:
-        print(f"Brevo API: {'✅' if EmailService.BREVO_API_KEY else '❌'}")
+    if not EmailService.is_configured():
+        print("\n❌ Email not configured!")
+        return
+    
+    test_email = input("\n📧 Enter email address to send test: ").strip()
+    if test_email:
+        result = EmailService.send_email_sync(
+            test_email,
+            "Submita - SMTP Test (Port 465 SSL)",
+            "<h1 style='color:#059669'>✅ Test Successful!</h1><p>Your Google SMTP configuration on port 465 SSL is working correctly.</p><p>You can now send lecturer verification codes.</p>",
+            "Test Successful! Your Google SMTP configuration on port 465 SSL is working correctly."
+        )
+        if result:
+            print(f"\n✅ Test email sent successfully to {test_email}")
+            print("\n📬 Check your inbox/spam folder for the test email.")
+        else:
+            print(f"\n❌ Test email failed to send.")
+
+
+if __name__ == '__main__':
+    test_email_config()

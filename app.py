@@ -1,6 +1,6 @@
 # FILE: app.py
 # LOCATION: /app.py
-# FIXES: Complete missing routes, fix duplicate route definitions, add missing route handlers
+# FIXES: Removed duplicate Flask app definition, fixed duplicate route, added missing functions
 
 from flask import Flask, render_template, redirect, url_for, request, flash, jsonify, session, make_response
 from flask_sqlalchemy import SQLAlchemy
@@ -80,10 +80,7 @@ if DATABASE_URL:
 # ==================== PRODUCTION CONFIGURATION ====================
 IS_PRODUCTION = os.environ.get('RENDER', False) or os.environ.get('PRODUCTION', False)
 
-# Create Flask app
-app = Flask(__name__, static_folder='static', static_url_path='/static', template_folder='templates')
-
-# Create Flask app
+# Create Flask app (SINGLE DEFINITION - REMOVED DUPLICATE)
 app = Flask(__name__, static_folder='static', static_url_path='/static', template_folder='templates')
 
 # ==================== DATABASE CONFIGURATION (SINGLE SOURCE OF TRUTH) ====================
@@ -1108,13 +1105,6 @@ def manage_assignment(assignment_id):
                          pending_count=pending_count,
                          average_grade=average_grade)
 
-# Alias for underscore version
-@app.route('/assignment/manage/<int:assignment_id>')
-@lecturer_required
-def manage_assignment_alias(assignment_id):
-    """Alias for manage_assignment"""
-    return manage_assignment(assignment_id)
-
 # ==================== GRADE SUBMISSION ROUTE ====================
 @app.route('/grade/<int:submission_id>', methods=['GET', 'POST'])
 @lecturer_required
@@ -1162,13 +1152,6 @@ def grade_submission(submission_id):
     return render_template('grade_submission.html',
                          submission=submission,
                          assignment=assignment)
-
-# Alias for underscore version
-@app.route('/grade/<int:submission_id>')
-@lecturer_required
-def grade_submission_alias(submission_id):
-    """Alias for grade_submission"""
-    return grade_submission(submission_id)
 
 # ==================== AI GRADE REPORT ROUTE ====================
 @app.route('/ai-grade/<int:submission_id>')
@@ -1806,11 +1789,6 @@ def lecturer_dashboard():
         return redirect(url_for('dashboard'))
 
 # ==================== STUDENT DASHBOARD ====================
-# FILE: app.py (Section: STUDENT DASHBOARD)
-# LOCATION: Around line 1200-1250
-# FIXES: Pass all required variables to student dashboard template
-
-# ==================== STUDENT DASHBOARD ====================
 @app.route('/student-dashboard')
 @login_required
 def student_dashboard():
@@ -1969,9 +1947,6 @@ def internal_error(error):
     return render_template('errors/500.html'), 500
 
 # ==================== BEFORE REQUEST ====================
-# FILE: app.py (Replace the entire before_request function)
-# LOCATION: Around line 1400
-
 @app.before_request
 def before_request():
     # List of public routes that don't require authentication
@@ -2032,10 +2007,6 @@ def create_default_admin():
                 print("Student created: STU001 / Student123!")
         except Exception as e:
             print(f"Error creating default users: {e}")
-
-# FILE: app.py (Last section - Run App)
-# LOCATION: End of app.py file
-# FIXES: Change host from '127.0.0.1' to '0.0.0.0' for LAN access
 
 # ==================== RUN APP ====================
 if __name__ == '__main__':
