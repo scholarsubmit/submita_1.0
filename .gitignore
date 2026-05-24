@@ -1,95 +1,96 @@
-# Python
+# ==================== Python ====================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
 venv/
+env/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+env.bak/
+venv.bak/
+pythonenv*
 
-# Database
+# ==================== Flask ====================
+instance/                          # ← This ignores the entire instance folder (database)
+.webassets-cache
+.env.local
+.env.dev
+.flaskenv
+
+# ==================== Database ====================
 *.db
 *.sqlite
 *.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+migrations/                        # ← Ignore migrations folder
+alembic/
 
-# Uploads
-uploads/
-submissions/
-assignments/
+# ==================== Uploads / User Files ====================
+uploads/                           # ← Ignores all uploaded files
+uploads/assignments/
+uploads/submissions/
+static/uploads/
+media/
+*.pdf
+*.doc
+*.docx
+*.zip
+*.mp4                             # ← Ignore demo video (too large for Git)
+*.mov
 
-# Environment
-.env
-.env.local
-.env.*.local
-
-# IDE
+# ==================== IDE / Editor ====================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.sublime-*
+.project
+.pydevproject
+.settings/
 
-# Logs
+# ==================== Logs ====================
 *.log
 logs/
+error.log
+access.log
 
-# Flask
-instance/
-.webassets-cache
-
-# Testing
+# ==================== Testing ====================
 .pytest_cache/
 .coverage
 htmlcov/
+.tox/
+*.cover
+.hypothesis/
 
-# Render
-.rendercv/_ _ p y c a c h e _ _ / 
- 
- * . d b 
- 
- u p l o a d s / 
- 
- . e n v 
- 
- _ _ p y c a c h e _ _ / 
- 
- * . d b 
- 
- u p l o a d s / 
- 
- . e n v 
- 
- _ _ p y c a c h e _ _ / 
- 
- * . d b 
- 
- u p l o a d s / 
- 
- . e n v 
- 
- _ _ p y c a c h e _ _ / 
- 
- * . d b 
- 
- u p l o a d s / 
- 
- . e n v 
- 
- 
+# ==================== Environment Variables ====================
+.env                              # ← CRITICAL: Don't commit secrets
+.env.production
+.env.local
+.env.*.local
+
+# ==================== OS ====================
+Thumbs.db
+Desktop.ini
+.directory
+
+# ==================== Project Specific ====================
+*.pid
+*.seed
+*.pid.lock
+celerybeat-schedule
+celerybeat.pid
+debug/
+temp/
+
+# ==================== Secret Keys / Certificates ====================
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+private/
