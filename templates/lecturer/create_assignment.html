@@ -1,508 +1,209 @@
-<!-- templates/create_assignment.html -->
+<!-- templates/lecturer/create_assignment.html -->
 {% extends "base.html" %}
 
 {% block content %}
 <div class="dashboard-bg min-h-screen py-8">
     <div class="max-w-5xl mx-auto px-4">
-        <!-- Decorative elements -->
-        <div class="fixed top-20 left-10 w-64 h-64 bg-emerald-200/20 rounded-full blur-3xl float-1 pointer-events-none"></div>
-        <div class="fixed bottom-20 right-10 w-80 h-80 bg-blue-200/20 rounded-full blur-3xl float-2 pointer-events-none"></div>
-
-        <div class="relative z-10">
-            <!-- Back Button -->
-            <div class="mb-4">
-                <button onclick="goBack()" class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/70 backdrop-blur-sm hover:bg-gray-100 text-gray-700 rounded-lg text-sm transition">
-                    <i class="fas fa-arrow-left text-xs"></i> Back
-                </button>
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-5">
+                <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-plus-circle text-emerald-300"></i> Create New Assignment
+                </h1>
+                <p class="text-emerald-100 text-sm mt-1">Target specific levels, departments, and semesters</p>
             </div>
 
-            <!-- Form Card -->
-            <div class="glass-card rounded-2xl border border-white/40 overflow-hidden shadow-xl">
-                <div class="bg-gradient-to-r from-emerald-700 to-emerald-800 px-6 py-5">
-                    <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                        <i class="fas fa-plus-circle text-emerald-300"></i> Create New Assignment
-                    </h1>
-                    <p class="text-emerald-100 text-sm mt-1">Target specific students with secure assignment delivery</p>
+            <form method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
+                
+                <!-- Basic Information -->
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-emerald-600"></i> Basic Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Assignment Title *</label>
+                            <input type="text" name="title" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Course Code *</label>
+                            <input type="text" name="course_code" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Course Title *</label>
+                            <input type="text" name="course_title" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+                        </div>
+                    </div>
                 </div>
 
-                <form method="POST" action="{{ url_for('create_assignment') }}" enctype="multipart/form-data" class="p-6 space-y-6" id="assignmentForm">
+                <!-- TARGETING SECTION - NEW -->
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-bullseye text-emerald-600"></i> Target Audience
+                    </h2>
                     
-                    <!-- Basic Information Section -->
-                    <div class="border-b border-gray-200 pb-4">
-                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-info-circle text-emerald-600"></i> Basic Information
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Assignment Title <span class="text-red-500">*</span></label>
-                                <input type="text" name="title" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" placeholder="e.g., Data Structures Assignment 2">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Course Code <span class="text-red-500">*</span></label>
-                                <input type="text" name="course_code" id="courseCode" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" placeholder="e.g., CSC 301">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Course Title <span class="text-red-500">*</span></label>
-                                <input type="text" name="course_title" id="courseTitle" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition" placeholder="e.g., Data Structures and Algorithms">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Questions & Instructions -->
-                    <div class="border-b border-gray-200 pb-4">
-                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-file-alt text-emerald-600"></i> Assignment Content
-                        </h2>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Questions/Description <span class="text-red-500">*</span></label>
-                            <textarea name="questions" rows="6" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none" placeholder="Describe the assignment requirements, questions, or instructions in detail..."></textarea>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Additional Instructions (Optional)</label>
-                            <textarea name="instructions" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none" placeholder="Formatting guidelines, resources, submission requirements..."></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Targeting Section -->
-                    <div class="border-b border-gray-200 pb-4">
-                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-target text-emerald-600"></i> Targeting - Who can see this assignment?
-                        </h2>
-                        <p class="text-sm text-gray-500 mb-4">Select the specific students who should have access to this assignment</p>
-                        
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <!-- Level Selection -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-layer-group text-emerald-600 mr-1"></i> Target Levels
-                            </label>
-                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" id="levelCheckboxes">
-                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
-                                    <input type="checkbox" name="levels" value="100" class="w-4 h-4 text-emerald-600 rounded">
-                                    <span class="text-sm font-medium">100 Level</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
-                                    <input type="checkbox" name="levels" value="200" class="w-4 h-4 text-emerald-600 rounded">
-                                    <span class="text-sm font-medium">200 Level</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
-                                    <input type="checkbox" name="levels" value="300" class="w-4 h-4 text-emerald-600 rounded">
-                                    <span class="text-sm font-medium">300 Level</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
-                                    <input type="checkbox" name="levels" value="400" class="w-4 h-4 text-emerald-600 rounded">
-                                    <span class="text-sm font-medium">400 Level</span>
-                                </label>
-                                <label class="flex items-center gap-2 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition level-option">
-                                    <input type="checkbox" name="levels" value="500" class="w-4 h-4 text-emerald-600 rounded">
-                                    <span class="text-sm font-medium">500 Level</span>
-                                </label>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-2">Select the academic levels that should see this assignment</p>
-                        </div>
-
-                        <!-- College Selection -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-university text-emerald-600 mr-1"></i> Target Colleges
-                            </label>
-                            <div class="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-xl" id="collegeCheckboxes">
-                                {% if colleges %}
-                                    {% for college in colleges %}
-                                    <label class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-emerald-50 transition">
-                                        <input type="checkbox" name="colleges" value="{{ college.id }}" class="w-4 h-4 text-emerald-600 rounded">
-                                        <span class="text-sm">{{ college.name }}</span>
-                                    </label>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="text-center py-4 text-gray-500">
-                                        <i class="fas fa-building"></i> No colleges available
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <p class="text-xs text-gray-400 mt-2">Select specific colleges (leave empty for all colleges)</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Target Level *</label>
+                            <select name="target_level" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                <option value="">Select Level</option>
+                                <option value="100">100 Level</option>
+                                <option value="200">200 Level</option>
+                                <option value="300">300 Level</option>
+                                <option value="400">400 Level</option>
+                                <option value="500">500 Level</option>
+                                <option value="600">600 Level</option>
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1">Only students at this level will see this assignment</p>
                         </div>
 
                         <!-- Department Selection -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-building text-emerald-600 mr-1"></i> Target Departments
-                            </label>
-                            <div class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto p-2 border border-gray-200 rounded-xl" id="departmentCheckboxes">
-                                {% if departments %}
-                                    {% for dept in departments %}
-                                    <label class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-emerald-50 transition">
-                                        <input type="checkbox" name="departments" value="{{ dept.id }}" class="w-4 h-4 text-emerald-600 rounded">
-                                        <span class="text-sm">{{ dept.name }} ({{ dept.code }})</span>
-                                    </label>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="text-center py-4 text-gray-500">
-                                        <i class="fas fa-book"></i> No departments available
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <p class="text-xs text-gray-400 mt-2">Select specific departments (leave empty for all departments)</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Target Department *</label>
+                            <select name="target_department_id" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                <option value="">Select Department</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1">Only students in this department will see this assignment</p>
                         </div>
 
-                        <!-- Quick Select Buttons -->
-                        <div class="mt-4 flex flex-wrap gap-2">
-                            <button type="button" onclick="selectAllLevels()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Select All Levels</button>
-                            <button type="button" onclick="deselectAllLevels()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Deselect All Levels</button>
-                            <button type="button" onclick="selectAllColleges()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Select All Colleges</button>
-                            <button type="button" onclick="deselectAllColleges()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Deselect All Colleges</button>
-                            <button type="button" onclick="selectAllDepartments()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Select All Departments</button>
-                            <button type="button" onclick="deselectAllDepartments()" class="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Deselect All Departments</button>
+                        <!-- College Selection (optional) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Target College (Optional)</label>
+                            <select name="target_college_id" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                <option value="">All Colleges</option>
+                                {% for college in colleges %}
+                                <option value="{{ college.id }}">{{ college.name }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                    </div>
 
-                    <!-- Semester & Academic Calendar -->
-                    <div class="border-b border-gray-200 pb-4">
-                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-calendar-alt text-emerald-600"></i> Academic Calendar
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Academic Year</label>
-                                <select name="academic_year" id="academicYear" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
-                                    <option value="">Select Academic Year</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
-                                <select name="semester" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
-                                    <option value="">Select Semester</option>
-                                    <option value="First">First Semester</option>
-                                    <option value="Second">Second Semester</option>
-                                    <option value="Summer">Summer Semester</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
-                                <input type="datetime-local" name="deadline" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
-                            </div>
+                        <!-- Course Selection (optional) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Specific Course (Optional)</label>
+                            <select name="target_course_id" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                <option value="">All Courses</option>
+                                {% for course in courses %}
+                                <option value="{{ course.id }}">{{ course.code }} - {{ course.title }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                    </div>
-
-                    <!-- Security & Submission Rules -->
-                    <div class="border-b border-gray-200 pb-4">
-                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-shield-alt text-emerald-600"></i> Security & Submission Rules
-                        </h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Late Submission Penalty (% per day)</label>
-                                <div class="flex items-center gap-3">
-                                    <input type="range" name="late_penalty" min="0" max="50" value="10" step="5" class="flex-1" id="penaltySlider">
-                                    <span id="penaltyValue" class="text-sm font-semibold text-emerald-600 w-12">10%</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Max File Size (MB)</label>
-                                <select name="max_file_size" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
-                                    <option value="5">5 MB</option>
-                                    <option value="10" selected>10 MB</option>
-                                    <option value="20">20 MB</option>
-                                    <option value="50">50 MB</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Allowed File Types</label>
-                                <select name="allowed_types" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
-                                    <option value="pdf,doc,docx">PDF, DOC, DOCX</option>
-                                    <option value="pdf,doc,docx,ppt,pptx">Office Documents</option>
-                                    <option value="pdf,zip,rar">PDF + Archives</option>
-                                    <option value="pdf,py,java,cpp">Code Files + PDF</option>
-                                    <option value="*">All File Types</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Plagiarism Alert Threshold</label>
-                                <select name="plagiarism_threshold" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
-                                    <option value="20">20% (Strict)</option>
-                                    <option value="30" selected>30% (Moderate)</option>
-                                    <option value="40">40% (Lenient)</option>
-                                    <option value="50">50% (Very Lenient)</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Attachment Upload -->
-                    <div class="border-b border-gray-200 pb-4">
-                        <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <i class="fas fa-paperclip text-emerald-600"></i> Attachment (Optional)
-                        </h2>
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-emerald-400 transition cursor-pointer" id="dropZone">
-                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                            <p class="text-sm text-gray-500">Drag & drop or click to upload</p>
-                            <p class="text-xs text-gray-400 mt-1">PDF, DOC, DOCX, ZIP (Max 10MB)</p>
-                            <input type="file" name="attachment" id="fileInput" class="hidden" accept=".pdf,.doc,.docx,.zip">
-                            <button type="button" onclick="document.getElementById('fileInput').click()" class="mt-3 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">Choose File</button>
-                        </div>
-                        <div id="fileInfo" class="hidden mt-3 p-3 bg-emerald-50 rounded-lg">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-file-pdf text-emerald-600"></i>
-                                    <span id="fileName" class="text-sm text-gray-700"></span>
-                                </div>
-                                <button type="button" onclick="clearFile()" class="text-red-500 hover:text-red-700 text-sm">Remove</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Publish Options -->
-                    <div class="pt-2">
-                        <div class="flex items-center gap-4 p-4 bg-amber-50 rounded-xl">
-                            <input type="checkbox" name="save_draft" id="saveDraft" class="w-5 h-5 text-emerald-600 rounded">
-                            <div>
-                                <label for="saveDraft" class="font-medium text-gray-700 cursor-pointer">Save as Draft</label>
-                                <p class="text-xs text-gray-500">Students won't see the assignment until you publish it</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex gap-4 pt-4">
-                        <button type="submit" name="action" value="publish" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition btn-shine">
-                            <i class="fas fa-paper-plane mr-2"></i> Publish Assignment
-                        </button>
-                        <button type="submit" name="action" value="draft" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition">
-                            <i class="fas fa-save mr-2"></i> Save as Draft
-                        </button>
-                        <a href="{{ url_for('lecturer_dashboard') }}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition text-center">
-                            Cancel
-                        </a>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Security Tips -->
-            <div class="mt-6 bg-blue-50/80 backdrop-blur-sm rounded-xl p-4 border border-blue-200">
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-shield-alt text-blue-600 text-lg mt-0.5"></i>
-                    <div class="text-sm text-blue-800">
-                        <strong class="block mb-1">Security & Best Practices</strong>
-                        <ul class="space-y-1 text-xs">
-                            <li>✓ Students will only see assignments matching their level, department, and college</li>
-                            <li>✓ Late submissions automatically incur penalties based on your settings</li>
-                            <li>✓ Plagiarism detection runs automatically on all submissions</li>
-                            <li>✓ All submissions are timestamped for verification</li>
-                            <li>✓ You can lock assignments after the deadline to prevent late submissions</li>
-                        </ul>
                     </div>
                 </div>
-            </div>
+
+                <!-- ACADEMIC CALENDAR SECTION -->
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-emerald-600"></i> Academic Calendar
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Academic Year *</label>
+                            <select name="target_academic_year" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                <option value="">Select Academic Year</option>
+                                <option value="2023/2024">2023/2024</option>
+                                <option value="2024/2025">2024/2025</option>
+                                <option value="2025/2026">2025/2026</option>
+                                <option value="2026/2027">2026/2027</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Semester *</label>
+                            <select name="target_semester" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white">
+                                <option value="">Select Semester</option>
+                                <option value="First">First Semester</option>
+                                <option value="Second">Second Semester</option>
+                                <option value="Summer">Summer Semester</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Deadline *</label>
+                            <input type="datetime-local" name="deadline" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment Content -->
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-file-alt text-emerald-600"></i> Assignment Content
+                    </h2>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Questions/Description *</label>
+                        <textarea name="questions" rows="6" required class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none" placeholder="Describe the assignment requirements..."></textarea>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Additional Instructions (Optional)</label>
+                        <textarea name="instructions" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none" placeholder="Formatting guidelines, resources..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Attachment -->
+                <div class="border-b border-gray-200 pb-4">
+                    <h2 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-paperclip text-emerald-600"></i> Attachment (Optional)
+                    </h2>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-emerald-400 transition cursor-pointer" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500">Drag & drop or click to upload</p>
+                        <input type="file" name="attachment" id="fileInput" class="hidden">
+                        <button type="button" onclick="document.getElementById('fileInput').click()" class="mt-3 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition">Choose File</button>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" name="action" value="publish" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition">
+                        <i class="fas fa-paper-plane mr-2"></i> Publish Assignment
+                    </button>
+                    <button type="submit" name="action" value="draft" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition">
+                        <i class="fas fa-save mr-2"></i> Save as Draft
+                    </button>
+                    <a href="{{ url_for('lecturer_dashboard') }}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold py-3 rounded-xl transition text-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Make sure these fields exist in your form -->
-<input type="text" name="title" required>
-<input type="text" name="course_code" required>
-<input type="text" name="course_title" required>
-<input type="datetime-local" name="deadline" required>
-<textarea name="questions" required></textarea>
-<!-- Levels checkboxes with name="levels" -->
-<input type="checkbox" name="levels" value="100">
-
-<style>
-    @keyframes gradientShift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-    
-    .dashboard-bg {
-        background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc);
-        background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
-        min-height: 100vh;
-    }
-    
-    .glass-card {
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.6);
-    }
-    
-    .btn-shine {
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .btn-shine::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
-        transform: rotate(30deg) translateX(-100%);
-        transition: transform 0.6s;
-    }
-    
-    .btn-shine:hover::after {
-        transform: rotate(30deg) translateX(100%);
-    }
-    
-    .level-option {
-        transition: all 0.2s ease;
-    }
-    
-    .level-option:hover {
-        transform: translateY(-2px);
-    }
-    
-    #dropZone {
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-    
-    #dropZone.dragover {
-        background: #f0fdf4;
-        border-color: #10b981;
-    }
-</style>
-
 <script>
-    // Generate progressive academic years
-    function generateAcademicYears() {
-        const currentYear = new Date().getFullYear();
-        const startYear = currentYear - 10;
-        const endYear = currentYear + 5;
-        const yearSelect = document.getElementById('academicYear');
-        
-        if (!yearSelect) return;
-        
-        while (yearSelect.options.length > 1) {
-            yearSelect.remove(1);
-        }
-        
-        for (let year = startYear; year <= endYear; year++) {
-            const nextYear = year + 1;
-            const option = document.createElement('option');
-            option.value = `${year}/${nextYear}`;
-            option.textContent = `${year}/${nextYear} Academic Year`;
-            
-            if (year === currentYear) {
-                option.selected = true;
-            }
-            
-            yearSelect.appendChild(option);
-        }
-    }
-    
-    // Quick select functions
-    function selectAllLevels() {
-        document.querySelectorAll('input[name="levels"]').forEach(cb => cb.checked = true);
-    }
-    
-    function deselectAllLevels() {
-        document.querySelectorAll('input[name="levels"]').forEach(cb => cb.checked = false);
-    }
-    
-    function selectAllColleges() {
-        document.querySelectorAll('input[name="colleges"]').forEach(cb => cb.checked = true);
-    }
-    
-    function deselectAllColleges() {
-        document.querySelectorAll('input[name="colleges"]').forEach(cb => cb.checked = false);
-    }
-    
-    function selectAllDepartments() {
-        document.querySelectorAll('input[name="departments"]').forEach(cb => cb.checked = true);
-    }
-    
-    function deselectAllDepartments() {
-        document.querySelectorAll('input[name="departments"]').forEach(cb => cb.checked = false);
-    }
-    
-    // Populate academic years on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        generateAcademicYears();
-    });
-    
-    // Penalty slider
-    const slider = document.getElementById('penaltySlider');
-    const penaltyValue = document.getElementById('penaltyValue');
-    if (slider) {
-        slider.addEventListener('input', function() {
-            penaltyValue.textContent = this.value + '%';
-        });
-    }
-    
     // File upload handling
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
-    const fileInfo = document.getElementById('fileInfo');
-    const fileName = document.getElementById('fileName');
     
     if (dropZone) {
         dropZone.addEventListener('click', () => fileInput?.click());
-        
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
-            dropZone.classList.add('dragover');
+            dropZone.classList.add('border-emerald-400', 'bg-emerald-50');
         });
-        
         dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
+            dropZone.classList.remove('border-emerald-400', 'bg-emerald-50');
         });
-        
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            dropZone.classList.remove('dragover');
+            dropZone.classList.remove('border-emerald-400', 'bg-emerald-50');
             const file = e.dataTransfer.files[0];
-            if (file) handleFile(file);
+            if (file) {
+                fileInput.files = e.dataTransfer.files;
+                dropZone.innerHTML = `<div class="text-emerald-600"><i class="fas fa-file"></i> ${file.name}</div>`;
+            }
         });
     }
     
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) handleFile(e.target.files[0]);
-        });
-    }
-    
-    function handleFile(file) {
-        if (fileName) fileName.textContent = file.name;
-        if (fileInfo) fileInfo.classList.remove('hidden');
-        if (dropZone) dropZone.classList.add('opacity-50');
-    }
-    
-    function clearFile() {
-        if (fileInfo) fileInfo.classList.add('hidden');
-        if (fileInput) fileInput.value = '';
-        if (dropZone) dropZone.classList.remove('opacity-50');
-    }
-    
-    // Level validation - at least one level required
-    function validateLevels() {
-        const levelCheckboxes = document.querySelectorAll('input[name="levels"]');
-        let checked = false;
-        levelCheckboxes.forEach(cb => { if (cb.checked) checked = true; });
-        if (!checked) {
-            alert('Please select at least one academic level');
-            return false;
-        }
-        return true;
-    }
-    
-    // Form validation
-    const form = document.getElementById('assignmentForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            if (!validateLevels()) {
-                e.preventDefault();
+            if (e.target.files[0]) {
+                dropZone.innerHTML = `<div class="text-emerald-600"><i class="fas fa-file"></i> ${e.target.files[0].name}</div>`;
             }
         });
-    }
-    
-    function goBack() {
-        if (document.referrer && document.referrer !== window.location.href) {
-            window.history.back();
-        } else {
-            window.location.href = '/lecturer-dashboard';
-        }
     }
 </script>
 {% endblock %}

@@ -10,13 +10,16 @@ ENV/
 env.bak/
 venv.bak/
 pythonenv*
+.venv/
 
 # ==================== Flask ====================
-instance/                          # ← This ignores the entire instance folder (database)
+instance/
 .webassets-cache
 .env.local
 .env.dev
 .flaskenv
+session/
+.DS_Store
 
 # ==================== Database ====================
 *.db
@@ -25,11 +28,12 @@ instance/                          # ← This ignores the entire instance folder
 *.db-journal
 *.db-wal
 *.db-shm
-migrations/                        # ← Ignore migrations folder
+migrations/
 alembic/
+*.sql
 
 # ==================== Uploads / User Files ====================
-uploads/                           # ← Ignores all uploaded files
+uploads/
 uploads/assignments/
 uploads/submissions/
 static/uploads/
@@ -38,8 +42,11 @@ media/
 *.doc
 *.docx
 *.zip
-*.mp4                             # ← Ignore demo video (too large for Git)
+*.rar
+*.mp4
 *.mov
+*.avi
+*.mkv
 
 # ==================== IDE / Editor ====================
 .vscode/
@@ -52,12 +59,14 @@ media/
 .project
 .pydevproject
 .settings/
+*.code-workspace
 
 # ==================== Logs ====================
 *.log
 logs/
 error.log
 access.log
+*.pid
 
 # ==================== Testing ====================
 .pytest_cache/
@@ -66,17 +75,20 @@ htmlcov/
 .tox/
 *.cover
 .hypothesis/
+.tox/
 
 # ==================== Environment Variables ====================
-.env                              # ← CRITICAL: Don't commit secrets
+.env
 .env.production
 .env.local
 .env.*.local
+.env.backup
 
 # ==================== OS ====================
 Thumbs.db
 Desktop.ini
 .directory
+._*
 
 # ==================== Project Specific ====================
 *.pid
@@ -86,6 +98,9 @@ celerybeat-schedule
 celerybeat.pid
 debug/
 temp/
+*.pyc
+*.pyo
+*.pyd
 
 # ==================== Secret Keys / Certificates ====================
 *.pem
@@ -94,3 +109,17 @@ temp/
 *.p12
 secrets/
 private/
+*.p8
+
+# ==================== Reports ====================
+coverage/
+coverage.xml
+*.report
+htmlcov/
+.tox/
+
+# ==================== Backup Files ====================
+*.backup
+*.bak
+*.old
+*.orig

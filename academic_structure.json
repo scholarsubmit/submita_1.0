@@ -1,121 +1,429 @@
 {
-    "Colleges": [
+  "Universities": [
+    {
+      "name": "Michael Okpara University of Agriculture Umudike (MOUAU)",
+      "code": "MOUAU",
+      "colleges": [
         {
-            "College": "College of Agricultural Economics, Rural Sociology & Extension (CAERSE)",
-            "Departments": [
-                "Agribusiness and Management",
-                "Agricultural Economics",
-                "Agricultural Extension and Rural Sociology"
-            ]
+          "id": 1,
+          "name": "College of Natural Sciences",
+          "code": "CNS",
+          "departments": [
+            {
+              "id": 1,
+              "name": "Computer Science",
+              "code": "CSC",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {
+                "100": [
+                  {"code": "CSC101", "title": "Introduction to Computer Science", "credits": 3, "semester": "First"},
+                  {"code": "CSC102", "title": "Problem Solving with Computers", "credits": 3, "semester": "Second"},
+                  {"code": "MTH101", "title": "General Mathematics I", "credits": 3, "semester": "First"},
+                  {"code": "MTH102", "title": "General Mathematics II", "credits": 3, "semester": "Second"}
+                ],
+                "200": [
+                  {"code": "CSC201", "title": "Data Structures", "credits": 3, "semester": "First"},
+                  {"code": "CSC202", "title": "Object-Oriented Programming", "credits": 3, "semester": "Second"}
+                ]
+              }
+            },
+            {
+              "id": 2,
+              "name": "Mathematics",
+              "code": "MTH",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {
+                "100": [
+                  {"code": "MTH101", "title": "General Mathematics I", "credits": 3, "semester": "First"},
+                  {"code": "MTH102", "title": "General Mathematics II", "credits": 3, "semester": "Second"}
+                ],
+                "200": [
+                  {"code": "MTH201", "title": "Linear Algebra", "credits": 3, "semester": "First"},
+                  {"code": "MTH202", "title": "Calculus II", "credits": 3, "semester": "Second"}
+                ]
+              }
+            },
+            {
+              "id": 3,
+              "name": "Physics",
+              "code": "PHY",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 4,
+              "name": "Chemistry",
+              "code": "CHM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 5,
+              "name": "Microbiology",
+              "code": "MCB",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 6,
+              "name": "Biochemistry",
+              "code": "BCH",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 7,
+              "name": "Plant Science and Biotechnology",
+              "code": "PSB",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 8,
+              "name": "Zoology and Environmental Biology",
+              "code": "ZEB",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 9,
+              "name": "Statistics",
+              "code": "STA",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
         },
         {
-            "College": "College Of Animal Science & Animal Production (CASAP)",
-            "Departments": [
-                "Animal Breeding And Physiology",
-                "Animal Nutrition And Forage Science",
-                "Animal Production and Livestock Management"
-            ]
+          "id": 2,
+          "name": "College of Engineering and Engineering Technology",
+          "code": "CEET",
+          "departments": [
+            {
+              "id": 10,
+              "name": "Agricultural and Bioresources Engineering",
+              "code": "AGE",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            },
+            {
+              "id": 11,
+              "name": "Civil Engineering",
+              "code": "CVE",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            },
+            {
+              "id": 12,
+              "name": "Electrical and Electronics Engineering",
+              "code": "EEE",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            },
+            {
+              "id": 13,
+              "name": "Mechanical Engineering",
+              "code": "MEE",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            },
+            {
+              "id": 14,
+              "name": "Chemical Engineering",
+              "code": "CHE",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            },
+            {
+              "id": 15,
+              "name": "Computer Engineering",
+              "code": "CEN",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            }
+          ]
         },
         {
-            "College": "College Of Applied Food Science & Tourism (CAFST)",
-            "Departments": [
-                "Human Nutrition and Dietetics",
-                "Home Science/Hospitality Management & Tourism",
-                "Food Science and Technology"
-            ]
+          "id": 3,
+          "name": "College of Management Sciences",
+          "code": "CMS",
+          "departments": [
+            {
+              "id": 16,
+              "name": "Accounting",
+              "code": "ACC",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 17,
+              "name": "Business Administration",
+              "code": "BUS",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 18,
+              "name": "Economics",
+              "code": "ECO",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 19,
+              "name": "Entrepreneurial Studies",
+              "code": "ENT",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
         },
         {
-            "College": "College Of Crop & Soil Sciences (CCSS)",
-            "Departments": [
-                "Agronomy",
-                "Plant Health Management",
-                "Soil Science and Meteorology",
-                "Water Resources Management and Agrometeorology"
-            ]
+          "id": 4,
+          "name": "College of Agricultural and Food Sciences",
+          "code": "CAFS",
+          "departments": [
+            {
+              "id": 20,
+              "name": "Agronomy",
+              "code": "AGR",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 21,
+              "name": "Animal Science",
+              "code": "ANS",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 22,
+              "name": "Food Science and Technology",
+              "code": "FST",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 23,
+              "name": "Fisheries and Aquatic Resources Management",
+              "code": "FAR",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 24,
+              "name": "Forestry and Environmental Management",
+              "code": "FEM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 25,
+              "name": "Soil Science and Meteorology",
+              "code": "SSM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
         },
         {
-            "College": "College Of Education (COED)",
-            "Departments": [
-                "Adult and Continuing Education",
-                "Agricultural/Home Science Education",
-                "Business Education",
-                "Economics Education",
-                "Education Management",
-                "Industrial Technology Education",
-                "Library and Information Science",
-                "Guidance and Counselling",
-                "Integrated Science Education"
-            ]
+          "id": 5,
+          "name": "College of Veterinary Medicine",
+          "code": "CVM",
+          "departments": [
+            {
+              "id": 26,
+              "name": "Veterinary Medicine",
+              "code": "VET",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 27,
+              "name": "Veterinary Anatomy",
+              "code": "VAN",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 28,
+              "name": "Veterinary Physiology and Biochemistry",
+              "code": "VPB",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 29,
+              "name": "Veterinary Microbiology",
+              "code": "VMB",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 30,
+              "name": "Veterinary Pathology",
+              "code": "VPA",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 31,
+              "name": "Veterinary Public Health and Preventive Medicine",
+              "code": "VPH",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 32,
+              "name": "Veterinary Medicine and Surgery",
+              "code": "VMS",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 33,
+              "name": "Theriogenology",
+              "code": "THE",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            }
+          ]
         },
         {
-            "College": "College Of Engineering & Engineering Technology (CEET)",
-            "Departments": [
-                "Agricultural and Bioresources Engineering",
-                "Civil Engineering",
-                "Chemical Engineering",
-                "Computer Engineering",
-                "Electrical and Electronics Engineering",
-                "Mechanical Engineering"
-            ]
+          "id": 6,
+          "name": "College of Education and Humanities",
+          "code": "CEH",
+          "departments": [
+            {
+              "id": 34,
+              "name": "Adult and Continuing Education",
+              "code": "ACE",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 35,
+              "name": "English",
+              "code": "ENG",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 36,
+              "name": "History",
+              "code": "HIS",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 37,
+              "name": "Philosophy",
+              "code": "PHI",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 38,
+              "name": "Religious Studies",
+              "code": "RLS",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 39,
+              "name": "French",
+              "code": "FRE",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 40,
+              "name": "German",
+              "code": "GER",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
         },
         {
-            "College": "College Of Management Science (COLMAS)",
-            "Departments": [
-                "Industrial Relations and Personnel Management",
-                "Human Resource Management"
-            ]
+          "id": 7,
+          "name": "College of Social and Management Sciences",
+          "code": "CSMS",
+          "departments": [
+            {
+              "id": 41,
+              "name": "Economics",
+              "code": "ECO",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 42,
+              "name": "Political Science",
+              "code": "POL",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 43,
+              "name": "Sociology",
+              "code": "SOC",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 44,
+              "name": "Psychology",
+              "code": "PSY",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 45,
+              "name": "Mass Communication",
+              "code": "MAC",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 46,
+              "name": "Library and Information Science",
+              "code": "LIS",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
         },
         {
-            "College": "College Of Natural Resources & Environmental Management (CNREM)",
-            "Departments": [
-                "Environment Management and Toxicology",
-                "Fisheries and Aquatic Resources Management",
-                "Forestry and Environmental Management"
-            ]
-        },
-        {
-            "College": "College Of Natural Science (COLNAS)",
-            "Departments": [
-                "Biochemistry",
-                "Microbiology",
-                "Plant Science and Biotechnology",
-                "Zoology and Environmental Biology"
-            ]
-        },
-        {
-            "College": "College Of Physical & Applied Science (COLPAS)",
-            "Departments": [
-                "Chemistry",
-                "Computer Science",
-                "Geology",
-                "Mathematics",
-                "Physics",
-                "Statistics"
-            ]
-        },
-        {
-            "College": "College Of Veterinary Medicine (CVM)",
-            "Departments": [
-                "Theriogenology",
-                "Veterinary Anatomy",
-                "Veterinary Medicine",
-                "Veterinary Microbiology",
-                "Veterinary Public Health and Preventive Medicine",
-                "Veterinary Surgery and Radiology"
-            ]
-        },
-        {
-            "College": "School Of General Studies (SGS)",
-            "Departments": [
-                "English",
-                "French",
-                "German",
-                "History",
-                "Social Science",
-                "Physical and Health",
-                "Philosophy",
-                "Peace and Conflict"
-            ]
+          "id": 8,
+          "name": "College of Physical and Applied Sciences",
+          "code": "CPAS",
+          "departments": [
+            {
+              "id": 47,
+              "name": "Geology",
+              "code": "GEL",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 48,
+              "name": "Environmental Management and Toxicology",
+              "code": "EMT",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 49,
+              "name": "Water Resources Management and Agrometeorology",
+              "code": "WRM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
         }
-    ]
+      ]
+    }
+  ]
 }

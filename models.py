@@ -1,5 +1,5 @@
 # FILE: models.py
-# FIXES: Added overlaps parameters to fix relationship conflicts, added indexes
+# COMPLETE VERSION with all tables for progression system
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -26,7 +26,7 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default=UserRole.STUDENT)
     department = db.Column(db.String(100), default='Computer Science')
     college = db.Column(db.String(100), default='College of Natural Sciences')
-    level = db.Column(db.String(10))
+    level = db.Column(db.String(10))  # Original level at registration
     created_at = db.Column(db.DateTime, default=datetime.now)
     last_login = db.Column(db.DateTime)
     account_active = db.Column(db.Boolean, default=True)
@@ -39,6 +39,17 @@ class User(UserMixin, db.Model):
     token_expires_at = db.Column(db.DateTime)
     registration_number = db.Column(db.Integer)
     
+    # ===== NEW: Academic Progression Fields =====
+    current_level = db.Column(db.String(10), default='100')  # Track current level
+    enrollment_year = db.Column(db.String(20))  # e.g., "2024/2025"
+    expected_graduation_year = db.Column(db.String(20))
+    program_duration = db.Column(db.Integer, default=4)
+    academic_standing = db.Column(db.String(20), default='good')  # good, probation, warning
+    cgpa = db.Column(db.Float, default=0.0)
+    total_credits_earned = db.Column(db.Integer, default=0)
+    total_credits_attempted = db.Column(db.Integer, default=0)
+    auto_promotion_enabled = db.Column(db.Boolean, default=True)
+    
     # Foreign keys
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
     college_id = db.Column(db.Integer, db.ForeignKey('colleges.id'), nullable=True)
@@ -48,22 +59,21 @@ class User(UserMixin, db.Model):
     created_assignments = db.relationship('Assignment', backref='creator', lazy='select', foreign_keys='Assignment.created_by')
     verification_codes = db.relationship('VerificationCode', backref='user', lazy='select')
     activity_logs = db.relationship('ActivityLog', backref='user', lazy='select')
+    created_verification_codes = db.relationship('LecturerVerification', foreign_keys='LecturerVerification.created_by', backref='code_creator', lazy='select')
     
-    # Lecturer verification relationships
-    created_verification_codes = db.relationship(
-        'LecturerVerification',
-        foreign_keys='LecturerVerification.created_by',
-        backref='code_creator',
-        lazy='select'
-    )
+    # New relationships for progression
+    academic_progress = db.relationship('StudentAcademicProgress', backref='user', lazy='select', cascade='all, delete-orphan')
+    carry_over_courses = db.relationship('CarryOverCourse', backref='student', lazy='select', cascade='all, delete-orphan')
+    promotion_requests = db.relationship('LevelPromotionRequest', backref='student', lazy='select', cascade='all, delete-orphan')
     
-    # Indexes for faster queries
     __table_args__ = (
         db.Index('idx_users_email', 'email'),
         db.Index('idx_users_matric', 'matric'),
         db.Index('idx_users_role', 'role'),
         db.Index('idx_users_created_at', 'created_at'),
         db.Index('idx_users_student_id', 'student_id'),
+        db.Index('idx_users_current_level', 'current_level'),
+        db.Index('idx_users_department_id', 'department_id'),
         db.Index('idx_users_role_verified', 'role', 'verified'),
     )
     
@@ -83,15 +93,12 @@ class User(UserMixin, db.Model):
         return False
     
     def is_admin(self):
-        """Check if user is admin - safe access without session"""
         return self.role == UserRole.ADMIN
     
     def is_lecturer(self):
-        """Check if user is lecturer - safe access without session"""
         return self.role == UserRole.LECTURER
     
     def is_student(self):
-        """Check if user is student - safe access without session"""
         return self.role == UserRole.STUDENT
     
     def __repr__(self):
@@ -136,6 +143,7 @@ class Department(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
     
     courses = db.relationship('Course', backref='department_ref', lazy='select', cascade='all, delete-orphan')
+    users = db.relationship('User', backref='department_ref', lazy='select')
     
     __table_args__ = (
         db.Index('idx_departments_name', 'name'),
@@ -167,15 +175,9 @@ class Course(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
     
-    # Fixed: Added overlaps parameter to resolve conflict
-    enrollments = db.relationship(
-        'StudentEnrollment', 
-        backref='course_ref', 
-        lazy='select', 
-        cascade='all, delete-orphan',
-        overlaps="enrolled_students,course"  # FIX: Added overlaps
-    )
+    enrollments = db.relationship('StudentEnrollment', backref='course_ref', lazy='select', cascade='all, delete-orphan', overlaps="enrolled_students,course")
     assignments = db.relationship('Assignment', backref='course_ref', lazy='select')
+    carry_over_students = db.relationship('CarryOverCourse', backref='course', lazy='select')
     
     __table_args__ = (
         db.Index('idx_courses_code', 'code'),
@@ -204,14 +206,8 @@ class StudentEnrollment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
     
-    # Fixed: Added overlaps parameter to resolve conflict
     student = db.relationship('User', foreign_keys=[student_id], backref='enrollments')
-    course = db.relationship(
-        'Course', 
-        foreign_keys=[course_id], 
-        backref='enrolled_students',
-        overlaps="enrollments,course_ref"  # FIX: Added overlaps
-    )
+    course = db.relationship('Course', foreign_keys=[course_id], backref='enrolled_students', overlaps="enrollments,course_ref")
     
     __table_args__ = (
         db.UniqueConstraint('student_id', 'course_id', 'academic_year', 'semester', name='unique_enrollment'),
@@ -244,6 +240,128 @@ class Semester(db.Model):
         return f"<Semester {self.name}>"
 
 
+class AcademicSession(db.Model):
+    """Track academic sessions and semesters - NEW TABLE"""
+    __tablename__ = 'academic_sessions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)  # e.g., "2024/2025"
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
+    is_current = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    
+    student_progress = db.relationship('StudentAcademicProgress', backref='academic_session', lazy='select')
+    promotion_requests = db.relationship('LevelPromotionRequest', backref='academic_session', lazy='select')
+    
+    __table_args__ = (
+        db.Index('idx_academic_sessions_current', 'is_current'),
+        db.Index('idx_academic_sessions_name', 'name'),
+    )
+
+
+class StudentAcademicProgress(db.Model):
+    """Track student's academic progression through levels - NEW TABLE"""
+    __tablename__ = 'student_academic_progress'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    current_level = db.Column(db.String(10), nullable=False)
+    starting_level = db.Column(db.String(10), nullable=False)
+    academic_session_id = db.Column(db.Integer, db.ForeignKey('academic_sessions.id'), nullable=False)
+    
+    last_promotion_date = db.Column(db.DateTime)
+    next_promotion_date = db.Column(db.DateTime)
+    promotion_status = db.Column(db.String(20), default='active')
+    
+    cumulative_gpa = db.Column(db.Float, default=0.0)
+    total_credits_earned = db.Column(db.Integer, default=0)
+    total_credits_attempted = db.Column(db.Integer, default=0)
+    
+    academic_standing = db.Column(db.String(20), default='good')
+    
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    __table_args__ = (
+        db.Index('idx_progress_student', 'student_id'),
+        db.Index('idx_progress_current_level', 'current_level'),
+        db.Index('idx_progress_session', 'academic_session_id'),
+        db.UniqueConstraint('student_id', 'academic_session_id', name='unique_student_session'),
+    )
+
+
+class CarryOverCourse(db.Model):
+    """Track courses that students failed and need to retake - NEW TABLE"""
+    __tablename__ = 'carry_over_courses'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    assignment_id = db.Column(db.Integer, db.ForeignKey('assignments.id'), nullable=True)
+    
+    original_grade = db.Column(db.Float)
+    original_semester = db.Column(db.String(20))
+    original_academic_year = db.Column(db.String(20))
+    
+    status = db.Column(db.String(20), default='pending')  # pending, registered, completed, passed, failed
+    retake_count = db.Column(db.Integer, default=1)
+    
+    current_semester = db.Column(db.String(20))
+    current_academic_year = db.Column(db.String(20))
+    
+    new_grade = db.Column(db.Float)
+    new_grade_date = db.Column(db.DateTime)
+    
+    lecturer_notes = db.Column(db.Text)
+    admin_notes = db.Column(db.Text)
+    
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    assignment = db.relationship('Assignment', foreign_keys=[assignment_id], backref='carry_over_assignments')
+    
+    __table_args__ = (
+        db.Index('idx_carry_over_student', 'student_id'),
+        db.Index('idx_carry_over_course', 'course_id'),
+        db.Index('idx_carry_over_status', 'status'),
+        db.UniqueConstraint('student_id', 'course_id', 'original_academic_year', name='unique_carry_over'),
+    )
+
+
+class LevelPromotionRequest(db.Model):
+    """Track promotion requests from students - NEW TABLE"""
+    __tablename__ = 'level_promotion_requests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    from_level = db.Column(db.String(10), nullable=False)
+    to_level = db.Column(db.String(10), nullable=False)
+    academic_session_id = db.Column(db.Integer, db.ForeignKey('academic_sessions.id'), nullable=False)
+    
+    request_date = db.Column(db.DateTime, default=datetime.now)
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected, auto_promoted
+    
+    reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    reviewed_at = db.Column(db.DateTime)
+    reviewer_notes = db.Column(db.Text)
+    
+    eligible_for_promotion = db.Column(db.Boolean, default=False)
+    promotion_reason = db.Column(db.Text)
+    
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.now)
+    
+    reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='reviewed_promotions')
+    
+    __table_args__ = (
+        db.Index('idx_promotion_student', 'student_id'),
+        db.Index('idx_promotion_status', 'status'),
+        db.Index('idx_promotion_session', 'academic_session_id'),
+    )
+
+
 class Assignment(db.Model):
     __tablename__ = 'assignments'
     
@@ -260,12 +378,12 @@ class Assignment(db.Model):
     attachment_filename = db.Column(db.String(200))
     attachment_type = db.Column(db.String(50))
     
-    # Targeting fields
-    target_levels = db.Column(db.String(100), default='all')
-    target_departments = db.Column(db.String(500))
-    target_colleges = db.Column(db.String(500))
-    target_semester = db.Column(db.String(50))
-    target_academic_year = db.Column(db.String(20))
+    # ===== UPDATED: Better targeting fields =====
+    target_level = db.Column(db.String(10), nullable=False, default='100')
+    target_department_id = db.Column(db.Integer, db.ForeignKey('departments.id'), nullable=True)
+    target_semester = db.Column(db.String(20), nullable=False, default='First')
+    target_academic_year = db.Column(db.String(20), nullable=False)
+    target_course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
     
     # Security fields
     is_published = db.Column(db.Boolean, default=False)
@@ -285,14 +403,18 @@ class Assignment(db.Model):
     
     # Relationships
     submissions = db.relationship('Submission', backref='assignment', lazy='select', cascade='all, delete-orphan')
+    target_department = db.relationship('Department', foreign_keys=[target_department_id])
+    target_course = db.relationship('Course', foreign_keys=[target_course_id])
     
     __table_args__ = (
         db.Index('idx_assignments_created_by', 'created_by'),
         db.Index('idx_assignments_deadline', 'deadline'),
         db.Index('idx_assignments_is_published', 'is_published'),
         db.Index('idx_assignments_created_at', 'created_at'),
-        db.Index('idx_assignments_course', 'course_code'),
-        db.Index('idx_assignments_lecturer_published', 'created_by', 'is_published'),
+        db.Index('idx_assignments_target_level', 'target_level'),
+        db.Index('idx_assignments_target_department', 'target_department_id'),
+        db.Index('idx_assignments_target_semester', 'target_semester'),
+        db.Index('idx_assignments_target_academic_year', 'target_academic_year'),
     )
 
 
@@ -318,11 +440,9 @@ class Submission(db.Model):
     resubmission_count = db.Column(db.Integer, default=0)
     last_resubmitted_at = db.Column(db.DateTime)
     
-    # Late submission tracking
     is_late = db.Column(db.Boolean, default=False)
     late_penalty_applied = db.Column(db.Float, default=0.0)
     
-    # Security
     ip_address = db.Column(db.String(50))
     user_agent = db.Column(db.String(500))
     
@@ -333,6 +453,7 @@ class Submission(db.Model):
         db.Index('idx_submissions_grade', 'grade'),
         db.Index('idx_submissions_is_draft', 'is_draft'),
         db.Index('idx_submissions_assignment_student', 'assignment_id', 'student_id'),
+        db.Index('idx_submissions_plagiarism_score', 'plagiarism_score'),
     )
 
 
@@ -391,18 +512,15 @@ class LecturerVerification(db.Model):
     used_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     used_at = db.Column(db.DateTime)
     
-    # Email tracking
     email_sent = db.Column(db.Boolean, default=False)
     email_sent_at = db.Column(db.DateTime)
     email_opens = db.Column(db.Integer, default=0)
     last_opened_at = db.Column(db.DateTime)
     
-    # Security fields
     ip_address = db.Column(db.String(50))
     user_agent = db.Column(db.String(500))
     security_token = db.Column(db.String(100), unique=True)
     
-    # Rate limiting
     verification_attempts = db.Column(db.Integer, default=0)
     last_verification_attempt = db.Column(db.DateTime)
     
@@ -438,7 +556,6 @@ class LecturerRegistrationRequest(db.Model):
     reviewed_at = db.Column(db.DateTime)
     reviewed_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     
-    # Relationships
     requester = db.relationship('User', foreign_keys=[user_id], backref='lecturer_requests')
     reviewer = db.relationship('User', foreign_keys=[reviewed_by], backref='reviewed_requests')
     
@@ -450,12 +567,10 @@ class LecturerRegistrationRequest(db.Model):
 
 
 def get_current_semester():
-    """Get the current active semester"""
     return Semester.query.filter_by(is_current=True, is_active=True).first()
 
 
 def is_student_enrolled(student_id, course_id, academic_year, semester):
-    """Check if a student is enrolled in a specific course"""
     enrollment = StudentEnrollment.query.filter_by(
         student_id=student_id,
         course_id=course_id,
