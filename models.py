@@ -205,9 +205,29 @@ class Course(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
     
-    enrollments = db.relationship('StudentEnrollment', backref='course_ref', lazy='select', cascade='all, delete-orphan', overlaps="enrolled_students,course")
-    assignments = db.relationship('Assignment', backref='course_ref', lazy='select')
-    carry_over_students = db.relationship('CarryOverCourse', backref='course', lazy='select')
+    # FIXED: Added foreign_keys parameter
+    enrollments = db.relationship(
+        'StudentEnrollment', 
+        foreign_keys='StudentEnrollment.course_id',
+        backref='course_ref', 
+        lazy='select', 
+        cascade='all, delete-orphan'
+    )
+    
+    # FIXED: Added foreign_keys parameter
+    assignments = db.relationship(
+        'Assignment', 
+        foreign_keys='Assignment.course_id',  # ← THIS FIXES THE ERROR
+        backref='course_ref', 
+        lazy='select'
+    )
+    
+    carry_over_students = db.relationship(
+        'CarryOverCourse', 
+        foreign_keys='CarryOverCourse.course_id',
+        backref='course', 
+        lazy='select'
+    )
     
     __table_args__ = (
         db.Index('idx_courses_code', 'code'),
@@ -220,7 +240,7 @@ class Course(db.Model):
     def __repr__(self):
         return f"<Course {self.code} - {self.title}>"
 
-
+        
 class StudentEnrollment(db.Model):
     __tablename__ = 'student_enrollments'
     
