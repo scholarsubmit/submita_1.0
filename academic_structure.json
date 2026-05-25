@@ -6,11 +6,53 @@
       "colleges": [
         {
           "id": 1,
-          "name": "College of Natural Sciences",
-          "code": "CNS",
+          "name": "College of Natural Sciences (COLNAS)",
+          "code": "COLNAS",
           "departments": [
             {
               "id": 1,
+              "name": "Biochemistry",
+              "code": "BCH",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 2,
+              "name": "Microbiology",
+              "code": "MCB",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 3,
+              "name": "Plant Science and Biotechnology",
+              "code": "PSB",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 4,
+              "name": "Zoology and Environmental Biology",
+              "code": "ZEB",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "College of Physical & Applied Sciences (COLPAS)",
+          "code": "COLPAS",
+          "departments": [
+            {
+              "id": 5,
+              "name": "Chemistry",
+              "code": "CHM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 6,
               "name": "Computer Science",
               "code": "CSC",
               "levels": ["100", "200", "300", "400"],
@@ -23,70 +65,46 @@
                 ],
                 "200": [
                   {"code": "CSC201", "title": "Data Structures", "credits": 3, "semester": "First"},
-                  {"code": "CSC202", "title": "Object-Oriented Programming", "credits": 3, "semester": "Second"}
+                  {"code": "CSC202", "title": "Object-Oriented Programming", "credits": 3, "semester": "Second"},
+                  {"code": "CSC203", "title": "Discrete Mathematics", "credits": 3, "semester": "First"},
+                  {"code": "CSC204", "title": "Digital Logic Design", "credits": 3, "semester": "Second"}
+                ],
+                "300": [
+                  {"code": "CSC301", "title": "Algorithms and Complexity", "credits": 3, "semester": "First"},
+                  {"code": "CSC302", "title": "Software Engineering", "credits": 3, "semester": "Second"},
+                  {"code": "CSC303", "title": "Operating Systems", "credits": 3, "semester": "First"},
+                  {"code": "CSC304", "title": "Computer Networks", "credits": 3, "semester": "Second"}
+                ],
+                "400": [
+                  {"code": "CSC401", "title": "Project", "credits": 6, "semester": "Both"},
+                  {"code": "CSC402", "title": "Advanced Database Systems", "credits": 3, "semester": "First"},
+                  {"code": "CSC403", "title": "Cyber Security", "credits": 3, "semester": "Second"}
                 ]
               }
             },
             {
-              "id": 2,
+              "id": 7,
+              "name": "Geology",
+              "code": "GEL",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 8,
               "name": "Mathematics",
               "code": "MTH",
               "levels": ["100", "200", "300", "400"],
-              "courses": {
-                "100": [
-                  {"code": "MTH101", "title": "General Mathematics I", "credits": 3, "semester": "First"},
-                  {"code": "MTH102", "title": "General Mathematics II", "credits": 3, "semester": "Second"}
-                ],
-                "200": [
-                  {"code": "MTH201", "title": "Linear Algebra", "credits": 3, "semester": "First"},
-                  {"code": "MTH202", "title": "Calculus II", "credits": 3, "semester": "Second"}
-                ]
-              }
+              "courses": {}
             },
             {
-              "id": 3,
+              "id": 9,
               "name": "Physics",
               "code": "PHY",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 4,
-              "name": "Chemistry",
-              "code": "CHM",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 5,
-              "name": "Microbiology",
-              "code": "MCB",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 6,
-              "name": "Biochemistry",
-              "code": "BCH",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 7,
-              "name": "Plant Science and Biotechnology",
-              "code": "PSB",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 8,
-              "name": "Zoology and Environmental Biology",
-              "code": "ZEB",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 9,
+              "id": 10,
               "name": "Statistics",
               "code": "STA",
               "levels": ["100", "200", "300", "400"],
@@ -95,133 +113,70 @@
           ]
         },
         {
-          "id": 2,
-          "name": "College of Engineering and Engineering Technology",
+          "id": 3,
+          "name": "College of Engineering & Engineering Technology (CEET)",
           "code": "CEET",
           "departments": [
             {
-              "id": 10,
+              "id": 11,
               "name": "Agricultural and Bioresources Engineering",
               "code": "AGE",
               "levels": ["100", "200", "300", "400", "500"],
               "courses": {}
             },
             {
-              "id": 11,
+              "id": 12,
               "name": "Civil Engineering",
               "code": "CVE",
               "levels": ["100", "200", "300", "400", "500"],
               "courses": {}
             },
             {
-              "id": 12,
-              "name": "Electrical and Electronics Engineering",
-              "code": "EEE",
-              "levels": ["100", "200", "300", "400", "500"],
-              "courses": {}
-            },
-            {
               "id": 13,
-              "name": "Mechanical Engineering",
-              "code": "MEE",
-              "levels": ["100", "200", "300", "400", "500"],
-              "courses": {}
-            },
-            {
-              "id": 14,
               "name": "Chemical Engineering",
               "code": "CHE",
               "levels": ["100", "200", "300", "400", "500"],
               "courses": {}
             },
             {
-              "id": 15,
+              "id": 14,
               "name": "Computer Engineering",
               "code": "CEN",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            },
+            {
+              "id": 15,
+              "name": "Electrical and Electronics Engineering",
+              "code": "EEE",
+              "levels": ["100", "200", "300", "400", "500"],
+              "courses": {}
+            },
+            {
+              "id": 16,
+              "name": "Mechanical Engineering",
+              "code": "MEE",
               "levels": ["100", "200", "300", "400", "500"],
               "courses": {}
             }
           ]
         },
         {
-          "id": 3,
-          "name": "College of Management Sciences",
-          "code": "CMS",
+          "id": 4,
+          "name": "College of Management Science (COLMAS)",
+          "code": "COLMAS",
           "departments": [
             {
-              "id": 16,
-              "name": "Accounting",
-              "code": "ACC",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
               "id": 17,
-              "name": "Business Administration",
-              "code": "BUS",
+              "name": "Industrial Relations and Personnel Management",
+              "code": "IRP",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
               "id": 18,
-              "name": "Economics",
-              "code": "ECO",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 19,
-              "name": "Entrepreneurial Studies",
-              "code": "ENT",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            }
-          ]
-        },
-        {
-          "id": 4,
-          "name": "College of Agricultural and Food Sciences",
-          "code": "CAFS",
-          "departments": [
-            {
-              "id": 20,
-              "name": "Agronomy",
-              "code": "AGR",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 21,
-              "name": "Animal Science",
-              "code": "ANS",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 22,
-              "name": "Food Science and Technology",
-              "code": "FST",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 23,
-              "name": "Fisheries and Aquatic Resources Management",
-              "code": "FAR",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 24,
-              "name": "Forestry and Environmental Management",
-              "code": "FEM",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 25,
-              "name": "Soil Science and Meteorology",
-              "code": "SSM",
+              "name": "Human Resource Management",
+              "code": "HRM",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             }
@@ -229,118 +184,55 @@
         },
         {
           "id": 5,
-          "name": "College of Veterinary Medicine",
-          "code": "CVM",
+          "name": "College of Agricultural Economics, Rural Sociology & Extension (CAERSE)",
+          "code": "CAERSE",
           "departments": [
             {
-              "id": 26,
-              "name": "Veterinary Medicine",
-              "code": "VET",
-              "levels": ["100", "200", "300", "400", "500", "600"],
+              "id": 19,
+              "name": "Agribusiness and Management",
+              "code": "ABM",
+              "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 27,
-              "name": "Veterinary Anatomy",
-              "code": "VAN",
-              "levels": ["100", "200", "300", "400", "500", "600"],
+              "id": 20,
+              "name": "Agricultural Economics",
+              "code": "AEC",
+              "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 28,
-              "name": "Veterinary Physiology and Biochemistry",
-              "code": "VPB",
-              "levels": ["100", "200", "300", "400", "500", "600"],
-              "courses": {}
-            },
-            {
-              "id": 29,
-              "name": "Veterinary Microbiology",
-              "code": "VMB",
-              "levels": ["100", "200", "300", "400", "500", "600"],
-              "courses": {}
-            },
-            {
-              "id": 30,
-              "name": "Veterinary Pathology",
-              "code": "VPA",
-              "levels": ["100", "200", "300", "400", "500", "600"],
-              "courses": {}
-            },
-            {
-              "id": 31,
-              "name": "Veterinary Public Health and Preventive Medicine",
-              "code": "VPH",
-              "levels": ["100", "200", "300", "400", "500", "600"],
-              "courses": {}
-            },
-            {
-              "id": 32,
-              "name": "Veterinary Medicine and Surgery",
-              "code": "VMS",
-              "levels": ["100", "200", "300", "400", "500", "600"],
-              "courses": {}
-            },
-            {
-              "id": 33,
-              "name": "Theriogenology",
-              "code": "THE",
-              "levels": ["100", "200", "300", "400", "500", "600"],
+              "id": 21,
+              "name": "Agricultural Extension and Rural Sociology",
+              "code": "AEX",
+              "levels": ["100", "200", "300", "400"],
               "courses": {}
             }
           ]
         },
         {
           "id": 6,
-          "name": "College of Education and Humanities",
-          "code": "CEH",
+          "name": "College of Animal Science & Animal Production (CASAP)",
+          "code": "CASAP",
           "departments": [
             {
-              "id": 34,
-              "name": "Adult and Continuing Education",
-              "code": "ACE",
+              "id": 22,
+              "name": "Animal Breeding And Physiology",
+              "code": "ABP",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 35,
-              "name": "English",
-              "code": "ENG",
+              "id": 23,
+              "name": "Animal Nutrition And Forage Science",
+              "code": "ANF",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 36,
-              "name": "History",
-              "code": "HIS",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 37,
-              "name": "Philosophy",
-              "code": "PHI",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 38,
-              "name": "Religious Studies",
-              "code": "RLS",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 39,
-              "name": "French",
-              "code": "FRE",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 40,
-              "name": "German",
-              "code": "GER",
+              "id": 24,
+              "name": "Animal Production and Livestock Management",
+              "code": "APL",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             }
@@ -348,48 +240,27 @@
         },
         {
           "id": 7,
-          "name": "College of Social and Management Sciences",
-          "code": "CSMS",
+          "name": "College of Applied Food Science & Tourism (CAFST)",
+          "code": "CAFST",
           "departments": [
             {
-              "id": 41,
-              "name": "Economics",
-              "code": "ECO",
+              "id": 25,
+              "name": "Human Nutrition and Dietetics",
+              "code": "HND",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 42,
-              "name": "Political Science",
-              "code": "POL",
+              "id": 26,
+              "name": "Home Science/Hospitality Management & Tourism",
+              "code": "HSM",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 43,
-              "name": "Sociology",
-              "code": "SOC",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 44,
-              "name": "Psychology",
-              "code": "PSY",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 45,
-              "name": "Mass Communication",
-              "code": "MAC",
-              "levels": ["100", "200", "300", "400"],
-              "courses": {}
-            },
-            {
-              "id": 46,
-              "name": "Library and Information Science",
-              "code": "LIS",
+              "id": 27,
+              "name": "Food Science and Technology",
+              "code": "FST",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             }
@@ -397,28 +268,245 @@
         },
         {
           "id": 8,
-          "name": "College of Physical and Applied Sciences",
-          "code": "CPAS",
+          "name": "College of Crop & Soil Sciences (CCSS)",
+          "code": "CCSS",
           "departments": [
             {
-              "id": 47,
-              "name": "Geology",
-              "code": "GEL",
+              "id": 28,
+              "name": "Agronomy",
+              "code": "AGR",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 48,
-              "name": "Environmental Management and Toxicology",
+              "id": 29,
+              "name": "Plant Health Management",
+              "code": "PHM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 30,
+              "name": "Soil Science and Meteorology",
+              "code": "SSM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 31,
+              "name": "Water Resources Management and Agrometeorology",
+              "code": "WRM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "College of Education (COED)",
+          "code": "COED",
+          "departments": [
+            {
+              "id": 32,
+              "name": "Adult and Continuing Education",
+              "code": "ACE",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 33,
+              "name": "Agricultural/Home Science Education",
+              "code": "AHE",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 34,
+              "name": "Business Education",
+              "code": "BED",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 35,
+              "name": "Economics Education",
+              "code": "ECD",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 36,
+              "name": "Education Management",
+              "code": "EDM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 37,
+              "name": "Industrial Technology Education",
+              "code": "ITE",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 38,
+              "name": "Library and Information Science",
+              "code": "LIS",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 39,
+              "name": "Guidance and Counselling",
+              "code": "GAC",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 40,
+              "name": "Integrated Science Education",
+              "code": "ISE",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "College of Natural Resources & Environmental Management (CNREM)",
+          "code": "CNREM",
+          "departments": [
+            {
+              "id": 41,
+              "name": "Environment Management and Toxicology",
               "code": "EMT",
               "levels": ["100", "200", "300", "400"],
               "courses": {}
             },
             {
-              "id": 49,
-              "name": "Water Resources Management and Agrometeorology",
-              "code": "WRM",
+              "id": 42,
+              "name": "Fisheries and Aquatic Resources Management",
+              "code": "FAR",
               "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            },
+            {
+              "id": 43,
+              "name": "Forestry and Environmental Management",
+              "code": "FEM",
+              "levels": ["100", "200", "300", "400"],
+              "courses": {}
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "name": "College of Veterinary Medicine (CVM)",
+          "code": "CVM",
+          "departments": [
+            {
+              "id": 44,
+              "name": "Theriogenology",
+              "code": "THE",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 45,
+              "name": "Veterinary Anatomy",
+              "code": "VAN",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 46,
+              "name": "Veterinary Medicine",
+              "code": "VET",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 47,
+              "name": "Veterinary Microbiology",
+              "code": "VMB",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 48,
+              "name": "Veterinary Public Health and Preventive Medicine",
+              "code": "VPH",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            },
+            {
+              "id": 49,
+              "name": "Veterinary Surgery and Radiology",
+              "code": "VSR",
+              "levels": ["100", "200", "300", "400", "500", "600"],
+              "courses": {}
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "name": "School of General Studies (SGS)",
+          "code": "SGS",
+          "departments": [
+            {
+              "id": 50,
+              "name": "English",
+              "code": "ENG",
+              "levels": ["100", "200"],
+              "courses": {}
+            },
+            {
+              "id": 51,
+              "name": "French",
+              "code": "FRE",
+              "levels": ["100", "200"],
+              "courses": {}
+            },
+            {
+              "id": 52,
+              "name": "German",
+              "code": "GER",
+              "levels": ["100", "200"],
+              "courses": {}
+            },
+            {
+              "id": 53,
+              "name": "History",
+              "code": "HIS",
+              "levels": ["100", "200"],
+              "courses": {}
+            },
+            {
+              "id": 54,
+              "name": "Social Science",
+              "code": "SSC",
+              "levels": ["100", "200"],
+              "courses": {}
+            },
+            {
+              "id": 55,
+              "name": "Physical and Health",
+              "code": "PHE",
+              "levels": ["100", "200"],
+              "courses": {}
+            },
+            {
+              "id": 56,
+              "name": "Philosophy",
+              "code": "PHI",
+              "levels": ["100", "200"],
+              "courses": {}
+            },
+            {
+              "id": 57,
+              "name": "Peace and Conflict",
+              "code": "PAC",
+              "levels": ["100", "200"],
               "courses": {}
             }
           ]
