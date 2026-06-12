@@ -17,8 +17,7 @@
             box-sizing: border-box;
         }
 
-        html,
-        body {
+        html, body {
             min-height: 100vh;
             height: auto;
             overflow-x: hidden;
@@ -31,96 +30,39 @@
         }
 
         @keyframes spin-slow {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         @keyframes gradientShift {
-
-            0%,
-            100% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(5deg);
-            }
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            10%,
-            30%,
-            50%,
-            70%,
-            90% {
-                transform: translateX(-5px);
-            }
-
-            20%,
-            40%,
-            60%,
-            80% {
-                transform: translateX(5px);
-            }
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
         }
 
         @keyframes fade-in {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .login-bg {
@@ -301,6 +243,10 @@
             border-radius: 3px;
         }
 
+        .terms-scroll::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
+
         .toast {
             transform: translateX(120%);
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -327,32 +273,30 @@
             background-size: 16px;
         }
 
+        select:disabled {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
         @media (max-width: 640px) {
             .glass-card {
                 border-radius: 1rem;
                 margin: 0 0.5rem;
             }
-
             .role-card h3 {
                 font-size: 0.875rem;
             }
-
             .role-card p {
                 font-size: 0.7rem;
             }
-
             .step-label {
                 font-size: 8px;
             }
-
-            button,
-            .role-card {
+            button, .role-card {
                 min-height: 44px;
             }
-
-            input,
-            select,
-            textarea {
+            input, select, textarea {
                 font-size: 16px !important;
             }
         }
@@ -362,17 +306,12 @@
 <body class="login-bg min-h-screen overflow-y-auto">
 
     <!-- Global Loading Overlay -->
-    <div id="globalLoadingOverlay"
-        class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[9999] hidden items-center justify-center flex-col">
+    <div id="globalLoadingOverlay" class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[9999] hidden items-center justify-center flex-col">
         <div class="text-center">
             <div class="relative w-24 h-24 mx-auto mb-6">
                 <div class="absolute inset-0 border-4 border-emerald-200 rounded-full"></div>
-                <div
-                    class="absolute inset-0 border-4 border-emerald-600 rounded-full border-t-transparent animate-spin">
-                </div>
-                <div
-                    class="absolute inset-2 border-4 border-emerald-300 rounded-full border-b-transparent animate-spin-slow">
-                </div>
+                <div class="absolute inset-0 border-4 border-emerald-600 rounded-full border-t-transparent animate-spin"></div>
+                <div class="absolute inset-2 border-4 border-emerald-300 rounded-full border-b-transparent animate-spin-slow"></div>
                 <div class="absolute inset-0 flex items-center justify-center">
                     <i class="fas fa-paper-plane text-emerald-600 text-2xl animate-bounce"></i>
                 </div>
@@ -392,8 +331,7 @@
     <div class="blob bottom-0 right-0 w-80 h-80 bg-teal-300 rounded-full" style="animation-delay: -4s;"></div>
 
     <!-- Toast -->
-    <div id="toast"
-        class="toast fixed top-4 right-4 z-50 bg-white border border-red-200 shadow-xl rounded-xl p-4 flex items-center gap-3 max-w-sm">
+    <div id="toast" class="toast fixed top-4 right-4 z-50 bg-white border border-red-200 shadow-xl rounded-xl p-4 flex items-center gap-3 max-w-sm">
         <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
             <i class="fa-solid fa-exclamation text-red-500 text-xs"></i>
         </div>
@@ -408,8 +346,7 @@
         <!-- Left Side - Branding -->
         <div class="hidden lg:block lg:col-span-2 reveal sticky top-10" id="leftPanel">
             <a href="{{ url_for('home') }}" class="inline-flex items-center gap-3 mb-8 group">
-                <div
-                    class="w-11 h-11 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:shadow-emerald-300 group-hover:scale-105 transition-all duration-300">
+                <div class="w-11 h-11 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:shadow-emerald-300 group-hover:scale-105 transition-all duration-300">
                     <i class="fa-solid fa-paper-plane text-white text-sm"></i>
                 </div>
                 <span class="text-2xl font-bold text-gray-900 tracking-tight">Submita</span>
@@ -418,12 +355,10 @@
             <h1 class="text-4xl font-extrabold text-gray-900 leading-tight mb-4">
                 Join <span class="text-emerald-600" id="typewriter"></span><span class="typing-cursor">|</span>
             </h1>
-            <p class="text-sm text-gray-500 mb-8 leading-relaxed">Create your secure account and start managing
-                assignments with confidence.</p>
+            <p class="text-sm text-gray-500 mb-8 leading-relaxed">Create your secure account and start managing assignments with confidence.</p>
 
             <div class="space-y-3">
-                <div
-                    class="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center">
                         <i class="fa-solid fa-bolt text-emerald-600 text-sm"></i>
                     </div>
@@ -432,8 +367,7 @@
                         <p class="text-[11px] text-gray-500">Submit in seconds, track in real-time</p>
                     </div>
                 </div>
-                <div
-                    class="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center">
                         <i class="fa-solid fa-shield-halved text-blue-600 text-sm"></i>
                     </div>
@@ -442,8 +376,7 @@
                         <p class="text-[11px] text-gray-500">End-to-end encryption & role-based access</p>
                     </div>
                 </div>
-                <div
-                    class="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/60 shadow-sm hover:shadow-md transition-shadow">
                     <div class="w-9 h-9 bg-amber-100 rounded-lg flex items-center justify-center">
                         <i class="fa-solid fa-bell text-amber-600 text-sm"></i>
                     </div>
@@ -456,15 +389,9 @@
 
             <div class="mt-8 flex items-center gap-3">
                 <div class="flex -space-x-2">
-                    <div
-                        class="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-emerald-700 text-[10px] font-bold">
-                        MO</div>
-                    <div
-                        class="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-blue-700 text-[10px] font-bold">
-                        UN</div>
-                    <div
-                        class="w-8 h-8 rounded-full bg-amber-200 border-2 border-white flex items-center justify-center text-amber-700 text-[10px] font-bold">
-                        FU</div>
+                    <div class="w-8 h-8 rounded-full bg-emerald-200 border-2 border-white flex items-center justify-center text-emerald-700 text-[10px] font-bold">MO</div>
+                    <div class="w-8 h-8 rounded-full bg-blue-200 border-2 border-white flex items-center justify-center text-blue-700 text-[10px] font-bold">UN</div>
+                    <div class="w-8 h-8 rounded-full bg-amber-200 border-2 border-white flex items-center justify-center text-amber-700 text-[10px] font-bold">FU</div>
                 </div>
                 <div class="text-xs text-gray-500">
                     <span class="font-bold text-gray-800" id="userCount">10,247</span> users
@@ -480,42 +407,32 @@
                 <!-- Role Selection -->
                 <div id="roleSelection" class="p-8">
                     <div class="text-center mb-8">
-                        <div
-                            class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
                             <i class="fa-solid fa-user-plus text-emerald-600 text-2xl"></i>
                         </div>
                         <h2 class="text-2xl font-extrabold text-gray-900">Choose Your Role</h2>
-                        <p class="text-xs text-gray-500 mt-2">Select how you'll use Submita. This determines your access
-                            level.</p>
+                        <p class="text-xs text-gray-500 mt-2">Select how you'll use Submita. This determines your access level.</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="role-card rounded-2xl p-6 border-2 border-gray-200 text-center bg-white/50"
-                            data-role="student" onclick="selectRole('student')">
-                            <div
-                                class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <div class="role-card rounded-2xl p-6 border-2 border-gray-200 text-center bg-white/50" data-role="student" onclick="selectRole('student')">
+                            <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
                                 <i class="fa-solid fa-graduation-cap text-emerald-600 text-xl"></i>
                             </div>
                             <h3 class="font-extrabold text-gray-900 text-base">Student</h3>
-                            <p class="text-xs text-gray-500 mt-2 leading-relaxed">Submit assignments, track grades, and
-                                receive deadline alerts.</p>
-                            <div
-                                class="mt-4 flex items-center justify-center gap-2 text-[10px] text-emerald-600 font-semibold bg-emerald-50 rounded-lg py-1.5 px-3">
+                            <p class="text-xs text-gray-500 mt-2 leading-relaxed">Submit assignments, track grades, and receive deadline alerts.</p>
+                            <div class="mt-4 flex items-center justify-center gap-2 text-[10px] text-emerald-600 font-semibold bg-emerald-50 rounded-lg py-1.5 px-3">
                                 <i class="fa-solid fa-id-card"></i>
                                 Requires Matric Number
                             </div>
                         </div>
-                        <div class="role-card rounded-2xl p-6 border-2 border-gray-200 text-center bg-white/50"
-                            data-role="lecturer" onclick="selectRole('lecturer')">
-                            <div
-                                class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <div class="role-card rounded-2xl p-6 border-2 border-gray-200 text-center bg-white/50" data-role="lecturer" onclick="selectRole('lecturer')">
+                            <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
                                 <i class="fa-solid fa-chalkboard-user text-emerald-600 text-xl"></i>
                             </div>
                             <h3 class="font-extrabold text-gray-900 text-base">Lecturer</h3>
-                            <p class="text-xs text-gray-500 mt-2 leading-relaxed">Create assignments, grade submissions,
-                                and manage courses.</p>
-                            <div
-                                class="mt-4 flex items-center justify-center gap-2 text-[10px] text-emerald-600 font-semibold bg-emerald-50 rounded-lg py-1.5 px-3">
+                            <p class="text-xs text-gray-500 mt-2 leading-relaxed">Create assignments, grade submissions, and manage courses.</p>
+                            <div class="mt-4 flex items-center justify-center gap-2 text-[10px] text-emerald-600 font-semibold bg-emerald-50 rounded-lg py-1.5 px-3">
                                 <i class="fa-solid fa-id-badge"></i>
                                 Requires Staff ID + Verification
                             </div>
@@ -523,54 +440,38 @@
                     </div>
 
                     <div class="mt-8 text-center">
-                        <a href="{{ url_for('login') }}"
-                            class="text-xs text-gray-500 hover:text-emerald-600 transition font-medium">
+                        <a href="{{ url_for('login') }}" class="text-xs text-gray-500 hover:text-emerald-600 transition font-medium">
                             Already have an account? <span class="font-bold">Sign in</span>
                         </a>
                     </div>
                 </div>
 
                 <!-- Verification Modal for Lecturers -->
-                <div id="verificationOverlay"
-                    class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center p-4"
-                    style="display: none;">
-                    <div
-                        class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl modal-content border border-emerald-100">
+                <div id="verificationOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center p-4" style="display: none;">
+                    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl modal-content border border-emerald-100">
                         <div class="text-center mb-6">
-                            <div
-                                class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="fa-solid fa-shield-halved text-emerald-600 text-2xl"></i>
                             </div>
                             <h3 class="text-lg font-extrabold text-gray-900">Lecturer Verification</h3>
-                            <p class="text-xs text-gray-500 mt-2">Enter the verification code provided by your
-                                department admin to proceed.</p>
+                            <p class="text-xs text-gray-500 mt-2">Enter the verification code provided by your department admin to proceed.</p>
                         </div>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Verification
-                                    Code</label>
-                                <input type="text" id="verificationCodeInput"
-                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-center text-lg font-mono tracking-[0.2em] uppercase focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition bg-gray-50/50"
-                                    placeholder="XXXX-XXXX-XXXX" maxlength="25" autocomplete="off">
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">Verification Code</label>
+                                <input type="text" id="verificationCodeInput" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-center text-lg font-mono tracking-[0.2em] uppercase focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition bg-gray-50/50" placeholder="XXXX-XXXX-XXXX" maxlength="25" autocomplete="off">
                             </div>
-                            <p class="text-[11px] text-red-500 text-center hidden flex items-center justify-center gap-1"
-                                id="verifyError">
+                            <p class="text-[11px] text-red-500 text-center hidden flex items-center justify-center gap-1" id="verifyError">
                                 <i class="fa-solid fa-triangle-exclamation text-[9px]"></i>
                                 <span id="verifyErrorText">Invalid code</span>
                             </p>
                         </div>
                         <div class="flex gap-3 mt-6">
-                            <button onclick="closeVerification()"
-                                class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition btn-press">Back</button>
-                            <button onclick="verifyCode()" id="verifyBtn"
-                                class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition btn-press shadow-lg shadow-emerald-200">
-                                Verify & Continue
-                            </button>
+                            <button onclick="closeVerification()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition btn-press">Back</button>
+                            <button onclick="verifyCode()" id="verifyBtn" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition btn-press shadow-lg shadow-emerald-200">Verify & Continue</button>
                         </div>
                         <p class="text-[10px] text-gray-400 text-center mt-4">
-                            Don't have a code? <a href="#" onclick="openWhatsApp(event)"
-                                class="text-emerald-600 font-semibold hover:underline transition-all inline-flex items-center gap-1">Request
-                                via WhatsApp <i class="fab fa-whatsapp text-sm"></i></a>
+                            Don't have a code? <a href="#" onclick="openWhatsApp(event)" class="text-emerald-600 font-semibold hover:underline transition-all inline-flex items-center gap-1">Request via WhatsApp <i class="fab fa-whatsapp text-sm"></i></a>
                         </p>
                     </div>
                 </div>
@@ -584,11 +485,9 @@
                                     <i class="fa-solid fa-graduation-cap text-emerald-200"></i>
                                     Student Registration
                                 </h2>
-                                <p class="text-emerald-100 text-xs mt-1 font-medium">Step <span id="stepNum">1</span> of
-                                    <span id="totalSteps">5</span></p>
+                                <p class="text-emerald-100 text-xs mt-1 font-medium">Step <span id="stepNum">1</span> of <span id="totalSteps">5</span></p>
                             </div>
-                            <button onclick="backToRoles()"
-                                class="text-emerald-100 hover:text-white text-xs transition font-medium flex items-center gap-1 bg-emerald-700/50 hover:bg-emerald-700 px-3 py-1.5 rounded-lg">
+                            <button onclick="backToRoles()" class="text-emerald-100 hover:text-white text-xs transition font-medium flex items-center gap-1 bg-emerald-700/50 hover:bg-emerald-700 px-3 py-1.5 rounded-lg">
                                 <i class="fa-solid fa-arrow-left"></i> Change Role
                             </button>
                         </div>
@@ -597,38 +496,28 @@
                     <!-- Progress -->
                     <div class="px-8 pt-6 pb-2">
                         <div class="flex items-center justify-between mb-1">
-                            <span
-                                class="step-label active text-[10px] font-bold uppercase tracking-wider text-emerald-700"
-                                data-step="1">Identity</span>
-                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400"
-                                data-step="2">Academic</span>
-                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400"
-                                data-step="3">Security</span>
-                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400"
-                                data-step="4">Review</span>
-                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400"
-                                data-step="5">Submit</span>
+                            <span class="step-label active text-[10px] font-bold uppercase tracking-wider text-emerald-700" data-step="1">Identity</span>
+                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400" data-step="2">Academic</span>
+                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400" data-step="3">Security</span>
+                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400" data-step="4">Review</span>
+                            <span class="step-label text-[10px] font-bold uppercase tracking-wider text-gray-400" data-step="5">Submit</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="step-dot bg-emerald-500" data-step="1"></div>
                             <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                <div id="progressBar" class="step-track h-full bg-emerald-500 rounded-full"
-                                    style="width: 0%"></div>
+                                <div id="progressBar" class="step-track h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
                             </div>
                             <div class="step-dot bg-gray-200" data-step="2"></div>
                             <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                <div id="progressBar2" class="step-track h-full bg-emerald-500 rounded-full"
-                                    style="width: 0%"></div>
+                                <div id="progressBar2" class="step-track h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
                             </div>
                             <div class="step-dot bg-gray-200" data-step="3"></div>
                             <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                <div id="progressBar3" class="step-track h-full bg-emerald-500 rounded-full"
-                                    style="width: 0%"></div>
+                                <div id="progressBar3" class="step-track h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
                             </div>
                             <div class="step-dot bg-gray-200" data-step="4"></div>
                             <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                <div id="progressBar4" class="step-track h-full bg-emerald-500 rounded-full"
-                                    style="width: 0%"></div>
+                                <div id="progressBar4" class="step-track h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
                             </div>
                             <div class="step-dot bg-gray-200" data-step="5"></div>
                         </div>
@@ -643,11 +532,9 @@
                             <i class="fas fa-spinner fa-spin text-emerald-500"></i>
                             <span class="text-emerald-600">Checking availability...</span>
                         </div>
-                        <div id="emailExistsWarning"
-                            class="text-[11px] mt-1 hidden items-center gap-1 text-amber-600 bg-amber-50 p-2 rounded-lg">
+                        <div id="emailExistsWarning" class="text-[11px] mt-1 hidden items-center gap-1 text-amber-600 bg-amber-50 p-2 rounded-lg">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <span>This email is already registered. <a href="{{ url_for('login') }}"
-                                    class="underline font-bold">Login here</a></span>
+                            <span>This email is already registered. <a href="{{ url_for('login') }}" class="underline font-bold">Login here</a></span>
                         </div>
 
                         <!-- ID availability status -->
@@ -655,11 +542,9 @@
                             <i class="fas fa-spinner fa-spin text-emerald-500"></i>
                             <span class="text-emerald-600">Checking availability...</span>
                         </div>
-                        <div id="idExistsWarning"
-                            class="text-[11px] mt-1 hidden items-center gap-1 text-amber-600 bg-amber-50 p-2 rounded-lg">
+                        <div id="idExistsWarning" class="text-[11px] mt-1 hidden items-center gap-1 text-amber-600 bg-amber-50 p-2 rounded-lg">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <span>This ID is already registered. <a href="{{ url_for('login') }}"
-                                    class="underline font-bold">Login here</a></span>
+                            <span>This ID is already registered. <a href="{{ url_for('login') }}" class="underline font-bold">Login here</a></span>
                         </div>
 
                         <!-- STEP 1: Identity Information -->
@@ -667,71 +552,48 @@
                             <div class="bg-emerald-50/50 rounded-xl p-4 mb-5 border border-emerald-100">
                                 <p class="text-xs text-emerald-800 font-semibold flex items-center gap-2">
                                     <i class="fa-solid fa-circle-info text-emerald-500"></i>
-                                    <span id="identityHint">Students must use their official university matric
-                                        number</span>
+                                    <span id="identityHint">Students must use their official university matric number</span>
                                 </p>
                             </div>
 
                             <div class="space-y-4">
                                 <div class="input-group">
-                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Full
-                                        Name *</label>
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Full Name *</label>
                                     <div class="relative">
-                                        <i
-                                            class="fa-solid fa-user input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
-                                        <input type="text" name="regName" id="regName" required
-                                            class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60"
-                                            placeholder="John Chukwuemeka Doe" oninput="validateName(this)">
+                                        <i class="fa-solid fa-user input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <input type="text" name="regName" id="regName" required class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60" placeholder="John Chukwuemeka Doe" oninput="validateName(this)">
                                     </div>
-                                    <p class="text-[11px] text-red-500 mt-1 hidden flex items-center gap-1"
-                                        id="nameError">
-                                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Enter your full name
-                                        (3+ characters)
+                                    <p class="text-[11px] text-red-500 mt-1 hidden flex items-center gap-1" id="nameError">
+                                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Enter your full name (3+ characters)
                                     </p>
                                 </div>
 
                                 <div class="input-group">
-                                    <label
-                                        class="input-label block text-xs font-semibold text-gray-700 mb-1.5">University
-                                        Email *</label>
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">University Email *</label>
                                     <div class="relative">
-                                        <i
-                                            class="fa-solid fa-envelope input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
-                                        <input type="email" name="regEmail" id="regEmail" required
-                                            class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60"
-                                            placeholder="you@university.edu.ng" oninput="validateEmailInput(this)">
+                                        <i class="fa-solid fa-envelope input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <input type="email" name="regEmail" id="regEmail" required class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60" placeholder="you@university.edu.ng" oninput="validateEmailInput(this)">
                                     </div>
-                                    <p class="text-[11px] text-red-500 mt-1 hidden flex items-center gap-1"
-                                        id="emailError">
-                                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Enter a valid
-                                        university email
+                                    <p class="text-[11px] text-red-500 mt-1 hidden flex items-center gap-1" id="emailError">
+                                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> Enter a valid university email
                                     </p>
-                                    <div class="text-[11px] mt-1 hidden items-center gap-1 text-emerald-600"
-                                        id="emailAvailableMsg">
+                                    <div class="text-[11px] mt-1 hidden items-center gap-1 text-emerald-600" id="emailAvailableMsg">
                                         <i class="fas fa-check-circle text-[10px]"></i>
                                         <span>Email is available</span>
                                     </div>
                                 </div>
 
                                 <div class="input-group" id="matricGroup">
-                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5"
-                                        id="idLabel">Matric Number *</label>
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5" id="idLabel">Matric Number *</label>
                                     <div class="relative">
-                                        <i class="fa-solid fa-id-card input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"
-                                            id="idIcon"></i>
-                                        <input type="text" name="regId" id="regId" required
-                                            class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 uppercase"
-                                            placeholder="U2023/12345" oninput="validateIdInput(this)">
+                                        <i class="fa-solid fa-id-card input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs" id="idIcon"></i>
+                                        <input type="text" name="regId" id="regId" required class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 uppercase" placeholder="U2023/12345" oninput="validateIdInput(this)">
                                     </div>
-                                    <p class="text-[11px] text-red-500 mt-1 hidden flex items-center gap-1"
-                                        id="idError">
-                                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> <span
-                                            id="idErrorText">Enter a valid matric number</span>
+                                    <p class="text-[11px] text-red-500 mt-1 hidden flex items-center gap-1" id="idError">
+                                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i> <span id="idErrorText">Enter a valid matric number</span>
                                     </p>
-                                    <p class="text-[11px] text-gray-400 mt-1" id="idHint">Format: U2023/12345 (as shown
-                                        on your ID card)</p>
-                                    <div class="text-[11px] mt-1 hidden items-center gap-1 text-emerald-600"
-                                        id="idAvailableMsg">
+                                    <p class="text-[11px] text-gray-400 mt-1" id="idHint">Format: U2023/12345 (as shown on your ID card)</p>
+                                    <div class="text-[11px] mt-1 hidden items-center gap-1 text-emerald-600" id="idAvailableMsg">
                                         <i class="fas fa-check-circle text-[10px]"></i>
                                         <span>ID is available</span>
                                     </div>
@@ -739,73 +601,62 @@
                             </div>
                         </div>
 
-                        <!-- STEP 2: Academic Information -->
+                        <!-- STEP 2: Academic Information - DYNAMIC DROPDOWNS -->
                         <div class="form-step" data-step="2">
                             <div class="space-y-4">
+                                <!-- College Dropdown -->
                                 <div class="input-group">
-                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">College
-                                        *</label>
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">College *</label>
                                     <div class="relative">
-                                        <i
-                                            class="fa-solid fa-building-columns input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
-                                        <select name="college" id="collegeSelect" required onchange="loadDepartments()"
-                                            class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 appearance-none">
-                                            <option value="">Select College</option>
-                                            {% for college in academic_structure %}
-                                            <option value="{{ college.College }}">{{ college.College }}</option>
+                                        <i class="fa-solid fa-building-columns input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <select name="college_id" id="collegeSelect" required onchange="loadDepartments()" class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 appearance-none">
+                                            <option value="">-- Select College --</option>
+                                            {% for college in colleges %}
+                                            <option value="{{ college.id }}">{{ college.name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <i
-                                            class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
+                                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
                                     </div>
                                 </div>
 
-                                <!-- Department selection with IDs -->
+                                <!-- Department Dropdown (Dynamic) -->
                                 <div class="input-group">
-                                    <label
-                                        class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Department
-                                        *</label>
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Department *</label>
                                     <div class="relative">
-                                        <i
-                                            class="fa-solid fa-building-columns input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                                        <select name="department_id" id="departmentSelect" required
-                                            class="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 bg-white/60">
-                                            <option value="">Select Department</option>
-                                            {% for dept in departments %}
-                                            <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
-                                            {% endfor %}
+                                        <i class="fa-solid fa-building-columns input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        <select name="department_id" id="departmentSelect" required class="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-50 bg-white/60" disabled>
+                                            <option value="">-- First Select College --</option>
                                         </select>
                                     </div>
                                 </div>
 
+                                <!-- Level Dropdown (Dynamic) -->
                                 <div class="input-group" id="studentLevelGroup">
-                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Academic
-                                        Level *</label>
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Academic Level *</label>
                                     <div class="relative">
-                                        <i
-                                            class="fa-solid fa-layer-group input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
-                                        <select name="level" id="levelSelect" required
-                                            class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 appearance-none">
-                                            <option value="">Select Level</option>
-                                            <option value="100">100 Level</option>
-                                            <option value="200">200 Level</option>
-                                            <option value="300">300 Level</option>
-                                            <option value="400">400 Level</option>
-                                            <option value="500">500 Level</option>
+                                        <i class="fa-solid fa-layer-group input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <select name="level" id="levelSelect" required class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 appearance-none" disabled>
+                                            <option value="">-- First Select Department --</option>
                                         </select>
-                                        <i
-                                            class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
+                                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Lecturer Verification (Hidden by default) -->
+                                <div class="input-group hidden" id="lecturerVerificationGroup">
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Verification Code *</label>
+                                    <div class="relative">
+                                        <i class="fa-solid fa-shield-alt input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <input type="text" id="lecturerVerificationCode" class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 uppercase" placeholder="Enter verification code">
+                                        <p class="text-xs text-gray-400 mt-1">Enter the verification code sent to your email</p>
                                     </div>
                                 </div>
 
                                 <div class="input-group hidden" id="lecturerTitleGroup">
-                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Academic
-                                        Title *</label>
+                                    <label class="input-label block text-xs font-semibold text-gray-700 mb-1.5">Academic Title *</label>
                                     <div class="relative">
-                                        <i
-                                            class="fa-solid fa-user-tie input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
-                                        <select name="lecturer_title" id="lecturerTitle"
-                                            class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 appearance-none">
+                                        <i class="fa-solid fa-user-tie input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <select name="lecturer_title" id="lecturerTitle" class="form-input w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60 appearance-none">
                                             <option value="">Select Title</option>
                                             <option value="Graduate Assistant">Graduate Assistant</option>
                                             <option value="Assistant Lecturer">Assistant Lecturer</option>
@@ -815,8 +666,7 @@
                                             <option value="Associate Professor">Associate Professor</option>
                                             <option value="Professor">Professor</option>
                                         </select>
-                                        <i
-                                            class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
+                                        <i class="fa-solid fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px] pointer-events-none"></i>
                                     </div>
                                 </div>
                             </div>
@@ -826,69 +676,35 @@
                         <div class="form-step" data-step="3">
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Create Password
-                                        *</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Create Password *</label>
                                     <div class="relative input-group">
-                                        <i
-                                            class="fa-solid fa-lock input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
-                                        <input type="password" name="regPassword" id="regPassword" required
-                                            class="form-input w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60"
-                                            placeholder="••••••••"
-                                            oninput="checkStrength(this.value); updateStepValidation();">
-                                        <button type="button" onclick="togglePass('regPassword', 'eye1')"
-                                            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition btn-press p-1">
+                                        <i class="fa-solid fa-lock input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <input type="password" name="regPassword" id="regPassword" required autocomplete="new-password" class="form-input w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60" placeholder="••••••••" oninput="checkStrength(this.value); updateStepValidation();">
+                                        <button type="button" onclick="togglePass('regPassword', 'eye1')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition btn-press p-1">
                                             <i class="fa-solid fa-eye text-xs" id="eye1"></i>
                                         </button>
                                     </div>
                                     <div class="mt-3 flex gap-1.5">
-                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                            <div id="bar1"
-                                                class="h-full bg-gray-200 transition-all duration-300 rounded-full">
-                                            </div>
-                                        </div>
-                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                            <div id="bar2"
-                                                class="h-full bg-gray-200 transition-all duration-300 rounded-full">
-                                            </div>
-                                        </div>
-                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                            <div id="bar3"
-                                                class="h-full bg-gray-200 transition-all duration-300 rounded-full">
-                                            </div>
-                                        </div>
-                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden">
-                                            <div id="bar4"
-                                                class="h-full bg-gray-200 transition-all duration-300 rounded-full">
-                                            </div>
-                                        </div>
+                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden"><div id="bar1" class="h-full bg-gray-200 transition-all duration-300 rounded-full"></div></div>
+                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden"><div id="bar2" class="h-full bg-gray-200 transition-all duration-300 rounded-full"></div></div>
+                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden"><div id="bar3" class="h-full bg-gray-200 transition-all duration-300 rounded-full"></div></div>
+                                        <div class="flex-1 h-1 bg-gray-200 rounded-full overflow-hidden"><div id="bar4" class="h-full bg-gray-200 transition-all duration-300 rounded-full"></div></div>
                                     </div>
                                     <p class="text-[10px] mt-1.5 font-medium" id="strengthLabel">Enter password</p>
                                     <div class="mt-3 grid grid-cols-2 gap-2">
-                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5"
-                                            id="checkLen"><i class="fa-regular fa-circle text-[8px]"></i> 8+ characters
-                                        </p>
-                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5"
-                                            id="checkUpper"><i class="fa-regular fa-circle text-[8px]"></i> Uppercase
-                                            letter</p>
-                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5"
-                                            id="checkNum"><i class="fa-regular fa-circle text-[8px]"></i> Number</p>
-                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5"
-                                            id="checkSpecial"><i class="fa-regular fa-circle text-[8px]"></i> Special
-                                            character (!@#$)</p>
+                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5" id="checkLen"><i class="fa-regular fa-circle text-[8px]"></i> 8+ characters</p>
+                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5" id="checkUpper"><i class="fa-regular fa-circle text-[8px]"></i> Uppercase letter</p>
+                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5" id="checkNum"><i class="fa-regular fa-circle text-[8px]"></i> Number</p>
+                                        <p class="check-item text-[10px] text-gray-400 flex items-center gap-1.5" id="checkSpecial"><i class="fa-regular fa-circle text-[8px]"></i> Special character (!@#$)</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Confirm Password
-                                        *</label>
+                                    <label class="block text-xs font-semibold text-gray-700 mb-1.5">Confirm Password *</label>
                                     <div class="relative input-group">
-                                        <i
-                                            class="fa-solid fa-lock input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
-                                        <input type="password" id="confirmPass" required
-                                            class="form-input w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60"
-                                            placeholder="••••••••" oninput="checkMatch(); updateStepValidation();">
-                                        <button type="button" onclick="togglePass('confirmPass', 'eye2')"
-                                            class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition btn-press p-1">
+                                        <i class="fa-solid fa-lock input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs"></i>
+                                        <input type="password" id="confirmPass" required autocomplete="new-password" class="form-input w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 bg-white/60" placeholder="••••••••" oninput="checkMatch(); updateStepValidation();">
+                                        <button type="button" onclick="togglePass('confirmPass', 'eye2')" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-600 transition btn-press p-1">
                                             <i class="fa-solid fa-eye text-xs" id="eye2"></i>
                                         </button>
                                     </div>
@@ -907,64 +723,110 @@
                                 <div class="space-y-3" id="reviewList"></div>
                             </div>
                             <p class="text-xs text-gray-500 leading-relaxed">
-                                Please verify that all details are correct. Once submitted, some information can only be
-                                changed by contacting the administrator.
+                                Please verify that all details are correct. Once submitted, some information can only be changed by contacting the administrator.
                             </p>
                         </div>
 
-                        <!-- STEP 5: Terms & Submit -->
+                        <!-- STEP 5: Terms & Submit - FIXED SCROLLABLE -->
                         <div class="form-step" data-step="5">
-                            <div
-                                class="bg-gray-50 rounded-xl p-4 h-48 overflow-y-auto terms-scroll text-xs text-gray-600 leading-relaxed mb-4 border border-gray-100">
-                                <h4 class="font-bold text-gray-900 mb-3 text-sm">Terms & Conditions</h4>
-                                <p class="mb-2">By creating an account, you agree to the following terms:</p>
-                                <ol class="list-decimal list-inside space-y-2 ml-1">
-                                    <li><strong>Original Work:</strong> All submitted work must be original. Plagiarism
-                                        is strictly prohibited.</li>
-                                    <li><strong>Deadlines:</strong> Submit assignments before stated deadlines. Late
-                                        submissions may incur penalties.</li>
-                                    <li><strong>Conduct:</strong> Maintain respectful and professional communication
-                                        with all users.</li>
-                                    <li><strong>Data Usage:</strong> Your personal data is protected and used solely for
-                                        academic purposes.</li>
-                                    <li><strong>Account Security:</strong> You are responsible for maintaining the
-                                        confidentiality of your password.</li>
-                                    <li><strong>Suspension:</strong> The platform reserves the right to suspend accounts
-                                        for violations.</li>
-                                </ol>
-                            </div>
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <div class="relative mt-0.5">
-                                    <input type="checkbox" id="acceptTerms" class="peer sr-only"
-                                        onchange="toggleSubmit()">
-                                    <div
-                                        class="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all flex items-center justify-center">
-                                        <i
-                                            class="fa-solid fa-check text-white text-[10px] opacity-0 peer-checked:opacity-100"></i>
+                            <!-- Scrollable Terms Container -->
+                            <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200 terms-scroll" 
+                                 style="height: 320px; overflow-y: auto;">
+                                <div class="space-y-3 text-sm text-gray-700">
+                                    <h4 class="font-bold text-gray-900 text-base mb-3 sticky top-0 bg-gray-50 py-2">Terms & Conditions</h4>
+                                    
+                                    <p class="text-xs text-gray-500 italic mb-3">Last updated: January 2026</p>
+                                    
+                                    <div class="space-y-4">
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">1. Original Work</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">All work submitted through Submita must be original. Plagiarism, copying, or unauthorized collaboration is strictly prohibited. All submissions are automatically checked for plagiarism.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">2. Submission Deadlines</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">Students must submit assignments before the stated deadlines. Late submissions will incur penalties as specified by the lecturer. Extensions must be requested before the deadline.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">3. Academic Integrity</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">Users agree to maintain high standards of academic integrity. Violations may result in assignment rejection, grade penalties, or account suspension.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">4. Data Privacy</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">Your personal data is protected and used solely for academic purposes within Michael Okpara University of Agriculture Umudike (MOUAU). We do not share your data with third parties.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">5. Account Security</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">You are responsible for maintaining the confidentiality of your password. Notify administrators immediately of any unauthorized access.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">6. Acceptable Use</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">The platform is for academic purposes only. Harassment, spam, or misuse will result in immediate account termination.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">7. Account Suspension</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">Submita reserves the right to suspend accounts for violations of these terms, academic dishonesty, or inappropriate conduct.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">8. Modifications</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">Submita may update these terms at any time. Continued use of the platform constitutes acceptance of modified terms.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">9. Disclaimer</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">Submita is provided "as is" without warranties. We are not responsible for technical issues, data loss, or submission failures beyond our control.</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h5 class="font-semibold text-gray-800 mb-2">10. Governing Law</h5>
+                                            <p class="text-xs text-gray-600 leading-relaxed">These terms are governed by the laws of Nigeria and the policies of Michael Okpara University of Agriculture, Umudike (MOUAU).</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border-t border-gray-200 pt-3 mt-3">
+                                        <p class="text-xs text-gray-500">By checking the box below, you acknowledge that you have read, understood, and agree to be bound by these Terms & Conditions.</p>
                                     </div>
                                 </div>
-                                <span
-                                    class="text-xs text-gray-600 group-hover:text-gray-800 transition leading-relaxed">
-                                    I have read and agree to the <span class="font-semibold text-gray-800">Terms &
-                                        Conditions</span>
+                            </div>
+                            
+                            <!-- Terms Checkbox -->
+                            <label class="flex items-start gap-3 cursor-pointer group p-3 bg-emerald-50 rounded-xl border border-emerald-200 hover:bg-emerald-100 transition">
+                                <div class="relative mt-0.5">
+                                    <input type="checkbox" id="acceptTerms" class="peer sr-only" onchange="toggleSubmit()">
+                                    <div class="w-5 h-5 border-2 border-gray-300 rounded peer-checked:bg-emerald-500 peer-checked:border-emerald-500 transition-all flex items-center justify-center">
+                                        <i class="fa-solid fa-check text-white text-[10px] opacity-0 peer-checked:opacity-100"></i>
+                                    </div>
+                                </div>
+                                <span class="text-sm text-gray-700 group-hover:text-gray-900 transition leading-relaxed">
+                                    I have read and agree to the <span class="font-semibold text-emerald-600">Terms & Conditions</span>
                                 </span>
                             </label>
+                            
+                            <!-- Warning message if not accepted -->
+                            <p id="termsWarning" class="text-xs text-red-500 hidden mt-2 items-center gap-1">
+                                <i class="fas fa-exclamation-circle"></i> You must accept the Terms &amp; Conditions to submit
+                            </p>
                         </div>
 
                         <!-- Navigation Buttons -->
-                        <div class="flex gap-3 pt-2">
-                            <button type="button" id="prevBtn" onclick="changeStep(-1)"
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" id="prevBtn" onclick="changeStep(-1)" 
                                 class="hidden px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition btn-press flex items-center gap-2">
                                 <i class="fa-solid fa-arrow-left"></i> Back
                             </button>
-                            <button type="button" id="nextBtn" onclick="changeStep(1)"
+                            <button type="button" id="nextBtn" onclick="changeStep(1)" 
                                 class="flex-1 btn-shine bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-sm font-bold transition shadow-lg shadow-emerald-200 btn-press flex items-center justify-center gap-2">
                                 Continue <i class="fa-solid fa-arrow-right"></i>
                             </button>
-                            <button type="submit" id="submitBtn" disabled
+                            <button type="submit" id="submitBtn" disabled 
                                 class="flex-1 btn-shine bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-xl text-sm font-bold transition shadow-lg shadow-emerald-200 btn-press hidden items-center justify-center gap-2">
-                                <span id="btnText" class="btn-text">Create Account</span>
-                                <i class="fa-solid fa-circle-notch fa-spin text-xs hidden" id="btnSpinner"></i>
+                                <i class="fas fa-check-circle mr-2"></i> Create Account
                             </button>
                         </div>
                     </form>
@@ -972,8 +834,7 @@
             </div>
 
             <div class="text-center mt-5">
-                <a href="{{ url_for('home') }}"
-                    class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors group font-medium">
+                <a href="{{ url_for('home') }}" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 transition-colors group font-medium">
                     <i class="fa-solid fa-arrow-left text-[10px] group-hover:-translate-x-1 transition-transform"></i>
                     Back to Homepage
                 </a>
@@ -1017,8 +878,6 @@
         let currentStep = 1;
         let selectedRole = 'student';
         const totalSteps = 5;
-        const academicStructure = {{ academic_structure | tojson | safe }};
-
         let checkTimeout = null;
         let isEmailValid = false;
         let isMatricValid = false;
@@ -1086,9 +945,11 @@
 
             if (prevBtn) prevBtn.classList.toggle('hidden', currentStep === 1);
 
+            // On step 5, show submit button, hide next button
             if (currentStep === totalSteps) {
                 if (nextBtn) nextBtn.classList.add('hidden');
                 if (submitBtn) submitBtn.classList.remove('hidden');
+                toggleSubmit();
             } else {
                 if (nextBtn) nextBtn.classList.remove('hidden');
                 if (submitBtn) submitBtn.classList.add('hidden');
@@ -1096,64 +957,201 @@
         }
 
         function changeStep(direction) {
-            if (direction === 1 && !validateStep(currentStep)) return;
-
+            // Validate current step before moving forward
+            if (direction === 1 && !validateStep(currentStep)) {
+                return;
+            }
+            
+            // Special check for Step 1 email/ID availability — ONLY on step 1
             if (direction === 1 && currentStep === 1) {
                 if (!isEmailAvailable || !isMatricAvailable) {
                     showToast('Registration Error', 'Email or ID already exists. Please use different credentials.');
                     return;
                 }
             }
-
+            
+            // Step 4 (Review) — always allow proceeding to Terms & Conditions (step 5)
+            // No terms check here; terms are on step 5 itself
+            
+            // Update current step
             currentStep += direction;
-
+            
+            // Ensure step stays within bounds
+            if (currentStep < 1) currentStep = 1;
+            if (currentStep > totalSteps) currentStep = totalSteps;
+            
+            // Update form steps visibility
             formSteps.forEach(step => {
                 step.classList.remove('active-step');
-                if (parseInt(step.dataset.step) === currentStep) step.classList.add('active-step');
+                if (parseInt(step.dataset.step) === currentStep) {
+                    step.classList.add('active-step');
+                }
             });
-
+            
+            // Update progress indicators
             updateProgressIndicators();
-            if (currentStep === 4) populateReview();
-
+            
+            // Populate review on step 4
+            if (currentStep === 4) {
+                populateReview();
+            }
+            
+            // Update validation for the new step
+            updateStepValidation();
+            
+            // Scroll to top of form
             const formTop = document.getElementById('registrationForm');
-            if (formTop) formTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (formTop) {
+                formTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function validateStep(step) {
+            // STEP 1: Identity Information
             if (step === 1) {
                 const name = document.getElementById('regName')?.value.trim() || '';
                 const email = document.getElementById('regEmail')?.value.trim() || '';
                 const id = document.getElementById('regId')?.value.trim() || '';
-                if (name.length < 3) { showToast('Incomplete', 'Please enter your full name.'); shakeStep(); return false; }
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Invalid Email', 'Please enter a valid email address.'); shakeStep(); return false; }
-                if (!id) { showToast('Missing ID', `Please enter your ${selectedRole === 'student' ? 'matric number' : 'staff ID'}.`); shakeStep(); return false; }
+                
+                if (name.length < 3) { 
+                    showToast('Incomplete', 'Please enter your full name.'); 
+                    shakeStep(); 
+                    return false; 
+                }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { 
+                    showToast('Invalid Email', 'Please enter a valid email address.'); 
+                    shakeStep(); 
+                    return false; 
+                }
+                if (!id) { 
+                    showToast('Missing ID', `Please enter your ${selectedRole === 'student' ? 'matric number' : 'staff ID'}.`); 
+                    shakeStep(); 
+                    return false; 
+                }
                 return true;
             }
+            
+            // STEP 2: Academic Information
             if (step === 2) {
                 const college = document.getElementById('collegeSelect')?.value || '';
                 const department = document.getElementById('departmentSelect')?.value || '';
-                if (!college) { showToast('Missing Info', 'Please select your college.'); shakeStep(); return false; }
-                if (!department) { showToast('Missing Info', 'Please select your department.'); shakeStep(); return false; }
+                
+                if (!college) { 
+                    showToast('Missing Info', 'Please select your college.'); 
+                    shakeStep(); 
+                    return false; 
+                }
+                if (!department) { 
+                    showToast('Missing Info', 'Please select your department.'); 
+                    shakeStep(); 
+                    return false; 
+                }
+                
                 if (selectedRole === 'student') {
                     const level = document.getElementById('levelSelect')?.value || '';
-                    if (!level) { showToast('Missing Info', 'Please select your academic level.'); shakeStep(); return false; }
+                    if (!level) { 
+                        showToast('Missing Info', 'Please select your academic level.'); 
+                        shakeStep(); 
+                        return false; 
+                    }
                 } else {
                     const title = document.getElementById('lecturerTitle')?.value || '';
-                    if (!title) { showToast('Missing Info', 'Please select your academic title.'); shakeStep(); return false; }
+                    if (!title) { 
+                        showToast('Missing Info', 'Please select your academic title.'); 
+                        shakeStep(); 
+                        return false; 
+                    }
+                    const code = document.getElementById('lecturerVerificationCode')?.value || '';
+                    if (!code) { 
+                        showToast('Missing Info', 'Please enter your verification code.'); 
+                        shakeStep(); 
+                        return false; 
+                    }
+                    document.getElementById('hiddenVerificationCode').value = code;
                 }
                 return true;
             }
+            
+            // STEP 3: Security (Password)
             if (step === 3) {
                 const password = document.getElementById('regPassword')?.value || '';
                 const confirm = document.getElementById('confirmPass')?.value || '';
-                if (password.length < 8) { showToast('Weak Password', 'Password must be at least 8 characters.'); shakeStep(); return false; }
-                if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-                    showToast('Weak Password', 'Password must include uppercase, number, and special character.'); shakeStep(); return false;
+                
+                if (password.length < 8) { 
+                    showToast('Weak Password', 'Password must be at least 8 characters.'); 
+                    shakeStep(); 
+                    return false; 
                 }
-                if (password !== confirm) { showToast('Mismatch', 'Passwords do not match.'); shakeStep(); return false; }
+                if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+                    showToast('Weak Password', 'Password must include uppercase, number, and special character.'); 
+                    shakeStep(); 
+                    return false; 
+                }
+                if (password !== confirm) { 
+                    showToast('Mismatch', 'Passwords do not match.'); 
+                    shakeStep(); 
+                    return false; 
+                }
                 return true;
             }
+            
+            // STEP 4: Review - always valid; user reviews info then proceeds to Terms
+            if (step === 4) {
+                return true;
+            }
+            
+            // STEP 5: handled by submit button + toggleSubmit(), not by nextBtn
+            if (step === 5) {
+                return true;
+            }
+            
             return true;
+        }
+
+        function updateStepValidation() {
+            let canProceed = true;
+            
+            if (currentStep === 1) {
+                const nameValid = document.getElementById('regName')?.value.trim().length >= 3;
+                const emailValid = isEmailValid && isEmailAvailable;
+                const idValid = isMatricValid && isMatricAvailable;
+                canProceed = nameValid && emailValid && idValid;
+            } 
+            else if (currentStep === 2) {
+                const college = document.getElementById('collegeSelect')?.value || '';
+                const dept = document.getElementById('departmentSelect')?.value || '';
+                canProceed = college && dept;
+                
+                if (selectedRole === 'student') {
+                    canProceed = canProceed && (document.getElementById('levelSelect')?.value || '');
+                } else {
+                    canProceed = canProceed && (document.getElementById('lecturerTitle')?.value || '');
+                }
+            } 
+            else if (currentStep === 3) {
+                const pass = document.getElementById('regPassword')?.value || '';
+                const confirm = document.getElementById('confirmPass')?.value || '';
+                canProceed = pass.length >= 8 && /[A-Z]/.test(pass) && /[0-9]/.test(pass) && /[^A-Za-z0-9]/.test(pass) && pass === confirm;
+            }
+            else if (currentStep === 4) {
+                // Step 4 (Review) - ALWAYS allow proceeding
+                canProceed = true;
+            }
+            else if (currentStep === 5) {
+                // Step 5 uses submitBtn; toggleSubmit() controls it via the checkbox
+                // nextBtn is hidden on step 5, so nothing to disable here
+                if (nextBtn) {
+                    nextBtn.disabled = false;
+                    nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                return;
+            }
+            
+            if (nextBtn) {
+                nextBtn.disabled = !canProceed;
+                nextBtn.classList.toggle('opacity-50', !canProceed);
+                nextBtn.classList.toggle('cursor-not-allowed', !canProceed);
+            }
         }
 
         function shakeStep() {
@@ -1162,6 +1160,121 @@
                 current.classList.add('error-shake');
                 setTimeout(() => current.classList.remove('error-shake'), 500);
             }
+        }
+
+        // ==================== DYNAMIC DROPDOWNS ====================
+        function loadDepartments() {
+            const collegeId = document.getElementById('collegeSelect').value;
+            const deptSelect = document.getElementById('departmentSelect');
+            const levelSelect = document.getElementById('levelSelect');
+            
+            if (!collegeId) {
+                deptSelect.innerHTML = '<option value="">-- First Select College --</option>';
+                deptSelect.disabled = true;
+                levelSelect.innerHTML = '<option value="">-- First Select Department --</option>';
+                levelSelect.disabled = true;
+                return;
+            }
+            
+            deptSelect.innerHTML = '<option value="">Loading departments...</option>';
+            deptSelect.disabled = true;
+            levelSelect.innerHTML = '<option value="">-- First Select Department --</option>';
+            levelSelect.disabled = true;
+            
+            fetch(`/api/departments/${encodeURIComponent(collegeId)}`, {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    // Safe DOM creation — no innerHTML with server data
+                    while (deptSelect.firstChild) deptSelect.removeChild(deptSelect.firstChild);
+                    if (data.success && data.departments.length > 0) {
+                        const placeholder = document.createElement('option');
+                        placeholder.value = '';
+                        placeholder.textContent = '-- Select Department --';
+                        deptSelect.appendChild(placeholder);
+                        data.departments.forEach(dept => {
+                            const opt = document.createElement('option');
+                            opt.value = dept.id;
+                            opt.textContent = `${dept.name} (${dept.code})`;
+                            deptSelect.appendChild(opt);
+                        });
+                        deptSelect.disabled = false;
+                    } else {
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = 'No departments found';
+                        deptSelect.appendChild(opt);
+                        deptSelect.disabled = true;
+                    }
+                    updateStepValidation();
+                })
+                .catch(() => {
+                    while (deptSelect.firstChild) deptSelect.removeChild(deptSelect.firstChild);
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = 'Error loading departments';
+                    deptSelect.appendChild(opt);
+                    deptSelect.disabled = true;
+                });
+        }
+
+        function loadLevels() {
+            const departmentId = document.getElementById('departmentSelect').value;
+            const levelSelect = document.getElementById('levelSelect');
+            
+            if (!departmentId) {
+                levelSelect.innerHTML = '<option value="">-- First Select Department --</option>';
+                levelSelect.disabled = true;
+                return;
+            }
+            
+            levelSelect.innerHTML = '<option value="">Loading levels...</option>';
+            levelSelect.disabled = true;
+            
+            fetch(`/api/levels/${encodeURIComponent(departmentId)}`, {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    while (levelSelect.firstChild) levelSelect.removeChild(levelSelect.firstChild);
+                    if (data.success && data.levels.length > 0) {
+                        const placeholder = document.createElement('option');
+                        placeholder.value = '';
+                        placeholder.textContent = '-- Select Level --';
+                        levelSelect.appendChild(placeholder);
+                        data.levels.forEach(level => {
+                            const opt = document.createElement('option');
+                            opt.value = level;
+                            opt.textContent = `${level} Level`;
+                            levelSelect.appendChild(opt);
+                        });
+                        levelSelect.disabled = false;
+                    } else {
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = 'No levels available';
+                        levelSelect.appendChild(opt);
+                        levelSelect.disabled = true;
+                    }
+                    updateStepValidation();
+                })
+                .catch(() => {
+                    while (levelSelect.firstChild) levelSelect.removeChild(levelSelect.firstChild);
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.textContent = 'Error loading levels';
+                    levelSelect.appendChild(opt);
+                    levelSelect.disabled = true;
+                });
         }
 
         // ==================== ROLE SELECTION ====================
@@ -1179,6 +1292,10 @@
                 const idHint = document.getElementById('idHint');
                 const idErrorText = document.getElementById('idErrorText');
                 const identityHint = document.getElementById('identityHint');
+                const studentLevelGroup = document.getElementById('studentLevelGroup');
+                const lecturerVerificationGroup = document.getElementById('lecturerVerificationGroup');
+                const lecturerTitleGroup = document.getElementById('lecturerTitleGroup');
+                const levelSelect = document.getElementById('levelSelect');
 
                 if (role === 'student') {
                     idLabel.textContent = 'Matric Number *';
@@ -1186,12 +1303,20 @@
                     idHint.textContent = 'Format: U2023/12345 (as shown on your student ID card)';
                     idErrorText.textContent = 'Enter a valid matric number';
                     identityHint.textContent = 'Students must use their official university matric number';
+                    studentLevelGroup.classList.remove('hidden');
+                    lecturerVerificationGroup.classList.add('hidden');
+                    lecturerTitleGroup.classList.add('hidden');
+                    levelSelect.disabled = false;
                 } else {
                     idLabel.textContent = 'Staff ID *';
                     idIcon.className = 'fa-solid fa-id-badge input-icon absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors text-xs';
                     idHint.textContent = 'Format: STF/2023/001 or your assigned staff identifier';
                     idErrorText.textContent = 'Enter a valid staff ID';
                     identityHint.textContent = 'Lecturers must use their official staff ID and verification code';
+                    studentLevelGroup.classList.add('hidden');
+                    lecturerVerificationGroup.classList.remove('hidden');
+                    lecturerTitleGroup.classList.remove('hidden');
+                    levelSelect.disabled = true;
                 }
 
                 if (role === 'lecturer') {
@@ -1225,19 +1350,15 @@
             const titleEl = document.getElementById('formTitle');
             if (selectedRole === 'student') {
                 titleEl.innerHTML = '<i class="fa-solid fa-graduation-cap text-emerald-200 mr-2"></i>Student Registration';
-                document.getElementById('studentLevelGroup').classList.remove('hidden');
-                document.getElementById('lecturerTitleGroup').classList.add('hidden');
-                document.getElementById('levelSelect').setAttribute('required', '');
             } else {
                 titleEl.innerHTML = '<i class="fa-solid fa-chalkboard-user text-emerald-200 mr-2"></i>Lecturer Registration';
-                document.getElementById('studentLevelGroup').classList.add('hidden');
-                document.getElementById('lecturerTitleGroup').classList.remove('hidden');
-                document.getElementById('levelSelect').removeAttribute('required');
-                document.getElementById('lecturerTitle').setAttribute('required', '');
             }
 
             currentStep = 1;
             initSteps();
+            
+            // Attach department change event
+            document.getElementById('departmentSelect').addEventListener('change', loadLevels);
         }
 
         function resetForm() {
@@ -1256,8 +1377,6 @@
             const overlay = document.getElementById('verificationOverlay');
             overlay.classList.add('hidden');
             overlay.style.display = 'none';
-            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
-            selectedRole = null;
             hideGlobalLoading();
         }
 
@@ -1313,7 +1432,11 @@
             try {
                 const response = await fetch('/api/check-existing-user', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
                     body: JSON.stringify({ email: email })
                 });
                 const data = await response.json();
@@ -1343,7 +1466,11 @@
             try {
                 const response = await fetch('/api/check-existing-user', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
                     body: JSON.stringify({ matric: matric })
                 });
                 const data = await response.json();
@@ -1441,30 +1568,25 @@
             }, 500);
         }
 
-        function updateStepValidation() {
-            let canProceed = true;
-            if (currentStep === 1) {
-                const nameValid = document.getElementById('regName')?.value.trim().length >= 3;
-                const emailValid = isEmailValid && isEmailAvailable;
-                const idValid = isMatricValid && isMatricAvailable;
-                canProceed = nameValid && emailValid && idValid;
-            } else if (currentStep === 2) {
-                const college = document.getElementById('collegeSelect')?.value || '';
-                const dept = document.getElementById('departmentSelect')?.value || '';
-                canProceed = college && dept;
-                if (selectedRole === 'student') {
-                    canProceed = canProceed && (document.getElementById('levelSelect')?.value || '');
-                } else {
-                    canProceed = canProceed && (document.getElementById('lecturerTitle')?.value || '');
-                }
-            } else if (currentStep === 3) {
-                const pass = document.getElementById('regPassword')?.value || '';
-                const confirm = document.getElementById('confirmPass')?.value || '';
-                canProceed = pass.length >= 8 && /[A-Z]/.test(pass) && /[0-9]/.test(pass) && /[^A-Za-z0-9]/.test(pass) && pass === confirm;
+        // ==================== TOGGLE SUBMIT ====================
+        function toggleSubmit() {
+            const checked = document.getElementById('acceptTerms')?.checked || false;
+            const submitBtn = document.getElementById('submitBtn');
+            const termsWarning = document.getElementById('termsWarning');
+            
+            if (submitBtn) {
+                submitBtn.disabled = !checked;
+                submitBtn.classList.toggle('opacity-50', !checked);
+                submitBtn.classList.toggle('cursor-not-allowed', !checked);
             }
-            if (nextBtn) {
-                nextBtn.disabled = !canProceed;
-                nextBtn.classList.toggle('opacity-50', !canProceed);
+            if (termsWarning) {
+                if (checked) {
+                    termsWarning.classList.add('hidden');
+                    termsWarning.style.display = '';
+                } else {
+                    termsWarning.classList.remove('hidden');
+                    termsWarning.style.display = 'flex';
+                }
             }
         }
 
@@ -1512,40 +1634,20 @@
             }
         }
 
-        function toggleSubmit() {
-            const checked = document.getElementById('acceptTerms')?.checked || false;
-            if (submitBtn) submitBtn.disabled = !checked;
-        }
-
-        // ==================== DEPARTMENTS ====================
-        function loadDepartments() {
-            const college = document.getElementById('collegeSelect')?.value;
-            const deptSelect = document.getElementById('departmentSelect');
-            const collegeData = academicStructure?.find(c => c.College === college);
-            deptSelect.innerHTML = '<option value="">Select Department</option>';
-            if (collegeData?.Departments) {
-                collegeData.Departments.forEach(d => {
-                    const opt = document.createElement('option');
-                    opt.value = d;
-                    opt.textContent = d;
-                    deptSelect.appendChild(opt);
-                });
-                deptSelect.disabled = false;
-            } else {
-                deptSelect.disabled = true;
-            }
-        }
-
         // ==================== REVIEW ====================
         function populateReview() {
             const list = document.getElementById('reviewList');
             const name = document.getElementById('regName')?.value || '';
             const email = document.getElementById('regEmail')?.value || '';
             const id = document.getElementById('regId')?.value || '';
-            const college = document.getElementById('collegeSelect')?.value || '';
-            const dept = document.getElementById('departmentSelect')?.value || '';
-            const level = document.getElementById('levelSelect')?.value || '';
-            const title = document.getElementById('lecturerTitle')?.value || '';
+            const collegeSelect = document.getElementById('collegeSelect');
+            const deptSelect = document.getElementById('departmentSelect');
+            const levelSelect = document.getElementById('levelSelect');
+            
+            const college = collegeSelect.options[collegeSelect.selectedIndex]?.text || 'Not selected';
+            const department = deptSelect.options[deptSelect.selectedIndex]?.text || 'Not selected';
+            const level = levelSelect.value || 'Not selected';
+            
             list.innerHTML = `
                 <div class="review-item flex justify-between items-center py-2 px-2 border-b border-gray-100">
                     <span class="text-xs text-gray-500">Full Name</span>
@@ -1565,10 +1667,9 @@
                 </div>
                 <div class="review-item flex justify-between items-center py-2 px-2 border-b border-gray-100">
                     <span class="text-xs text-gray-500">Department</span>
-                    <span class="text-xs font-bold text-gray-900">${escapeHtml(dept)}</span>
+                    <span class="text-xs font-bold text-gray-900">${escapeHtml(department)}</span>
                 </div>
                 ${selectedRole === 'student' && level ? `<div class="review-item flex justify-between items-center py-2 px-2"><span class="text-xs text-gray-500">Level</span><span class="text-xs font-bold text-gray-900">${escapeHtml(level)} Level</span></div>` : ''}
-                ${selectedRole === 'lecturer' && title ? `<div class="review-item flex justify-between items-center py-2 px-2"><span class="text-xs text-gray-500">Title</span><span class="text-xs font-bold text-gray-900">${escapeHtml(title)}</span></div>` : ''}
             `;
         }
 
@@ -1629,7 +1730,6 @@
             document.getElementById('collegeSelect')?.addEventListener('change', updateStepValidation);
             document.getElementById('departmentSelect')?.addEventListener('change', updateStepValidation);
             document.getElementById('levelSelect')?.addEventListener('change', updateStepValidation);
-            document.getElementById('lecturerTitle')?.addEventListener('change', updateStepValidation);
             document.getElementById('regPassword')?.addEventListener('input', function () { checkStrength(this.value); updateStepValidation(); });
             document.getElementById('confirmPass')?.addEventListener('input', function () { checkMatch(); updateStepValidation(); });
         });

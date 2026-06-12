@@ -1,4 +1,4 @@
-# load_all.py - FIXED VERSION
+# load_all.py - FIXED for your JSON structure
 from app import app, db
 from models import College, Department, Course
 import json
@@ -21,37 +21,64 @@ with app.app_context():
     with open('academic_structure.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
     
-    colleges_data = data['Universities'][0]['colleges']
-    print(f"Found {len(colleges_data)} colleges\n")
+    # Navigate the JSON structure
+    # Your JSON has: Universities -> [0] -> colleges -> []
+    universities = data.get('Universities', [])
+    if not universities:
+        print("❌ No 'Universities' key found in JSON")
+        exit(1)
+    
+    university = universities[0]
+    colleges_data = university.get('colleges', [])
+    
+    print(f"Found {len(colleges_data)} colleges in JSON\n")
     
     college_count = 0
     dept_count = 0
     course_count = 0
     
     for college_data in colleges_data:
+        college_name = college_data.get('name')
+        college_code = college_data.get('code')
+        
+        if not college_name:
+            print(f"⚠️ Skipping college without name: {college_data}")
+            continue
+        
+        # Create college
         college = College(
-            name=college_data['name'],
-            code=college_data['code'],
-            description=f"{college_data['name']} - MOUAU"
+            name=college_name,
+            code=college_code,
+            description=f"{college_name} - {university.get('name', 'MOUAU')}"
         )
         db.session.add(college)
         db.session.flush()
         college_count += 1
-        print(f"✓ {college.name}")
+        print(f"\n✓ College {college_count}: {college.name} ({college.code})")
         
-        for dept_data in college_data['departments']:
+        # Add departments
+        departments_list = college_data.get('departments', [])
+        print(f"   📚 Adding {len(departments_list)} departments...")
+        
+        for dept_data in departments_list:
+            dept_name = dept_data.get('name')
+            dept_code = dept_data.get('code')
+            
+            if not dept_name:
+                continue
+            
             department = Department(
-                name=dept_data['name'],
-                code=dept_data['code'],
+                name=dept_name,
+                code=dept_code,
                 college_id=college.id,
-                description=f"{dept_data['name']} Department"
+                description=f"{dept_name} Department"
             )
             db.session.add(department)
-            db.session.flush()  # IMPORTANT: Get department.id
+            db.session.flush()
             dept_count += 1
-            print(f"   📚 {department.name} (ID: {department.id})")
+            print(f"      📚 {dept_name} ({dept_code})")
             
-            # Load courses - NOW WITH CORRECT department_id
+            # Load courses if any
             courses_by_level = dept_data.get('courses', {})
             for level, courses in courses_by_level.items():
                 for course_data in courses:
@@ -62,15 +89,15 @@ with app.app_context():
                             credits=course_data.get('credits', 3),
                             level=level,
                             semester=course_data.get('semester', 'First'),
-                            department_id=department.id,  # ← FIXED: Use department.id
+                            department_id=department.id,
                             college_id=college.id,
-                            lecturer_id=1  # Default admin user
+                            lecturer_id=1
                         )
                         db.session.add(course)
                         course_count += 1
-                        print(f"      📖 {course.code} - {course.title} ({level}L)")
+                        print(f"         📖 {course.code} - {course.title} ({level}L)")
                     except Exception as e:
-                        print(f"      ⚠️ Error: {e}")
+                        print(f"         ⚠️ Error adding course: {e}")
     
     db.session.commit()
     

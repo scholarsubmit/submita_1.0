@@ -33,8 +33,8 @@ from models import (
 from email_service import EmailService
 from ai_grading import AIGrading
 from plagiarism_checker import PlagiarismChecker
-#from course_service import CourseService
-#from academic_service import AcademicService
+# from course_service import CourseService
+# from academic_service import AcademicService
 
 from dotenv import load_dotenv
 
@@ -59,16 +59,6 @@ try:
 except ImportError:
     print("⚠️ psycopg2-binary not installed")
 
-# ==================== DATABASE URL CONVERSION ====================
-DATABASE_URL = os.environ.get('DATABASE_URL', '')
-
-if DATABASE_URL:
-    if DATABASE_URL.startswith('postgres://'):
-        DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-        os.environ['DATABASE_URL'] = DATABASE_URL
-        print("✅ Converted postgres:// to postgresql://")
-    print(f"📁 Using PostgreSQL database")
-
 # ==================== PRODUCTION CONFIGURATION ====================
 IS_PRODUCTION = os.environ.get('RENDER', False) or os.environ.get('PRODUCTION', False)
 
@@ -78,13 +68,14 @@ app = Flask(__name__, static_folder='static', static_url_path='/static', templat
 # ==================== DATABASE CONFIGURATION ====================
 database_url = os.environ.get('DATABASE_URL', '')
 
-if database_url:
+# Check if we're using PostgreSQL (not just any non-empty URL)
+if database_url and (database_url.startswith('postgres://') or database_url.startswith('postgresql://')):
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
         os.environ['DATABASE_URL'] = database_url
-    
+
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-    print("✅ Using PostgreSQL database")
+    print("✅ Configured for PostgreSQL database")
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_size': 5,
         'max_overflow': 10,
@@ -93,7 +84,8 @@ if database_url:
         'pool_pre_ping': True,
     }
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///submita.db'
+    # Default to SQLite (handles empty URL, SQLite URLs, or any non-postgres URL)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url if database_url and database_url.startswith('sqlite') else 'sqlite:///submita.db'
     print("📁 Using SQLite database")
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'connect_args': {'check_same_thread': False, 'timeout': 30}
@@ -144,7 +136,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'warning'
-login_manager.session_protection = "strong"
+login_manager.session_protection = "basic"
 login_manager.refresh_view = 'login'
 login_manager.needs_refresh_message = 'Session expired. Please login again.'
 
@@ -202,6 +194,26 @@ def generate_csrf_token():
 @app.context_processor
 def inject_csrf_token():
     return {'csrf_token': generate_csrf_token()}
+
+@app.context_processor
+def inject_verification_status():
+    """
+    Injects verification warning data into every template so the banner
+    can be rendered in base.html without any route needing to pass it manually.
+    """
+    unverified_warning = None
+    if current_user.is_authenticated and current_user.is_student() and not current_user.email_verified:
+        deadline = current_user.created_at + timedelta(days=VERIFICATION_GRACE_DAYS)
+        days_remaining = max(0, (deadline - datetime.now()).days)
+        hours_remaining = max(0, int((deadline - datetime.now()).total_seconds() / 3600))
+        unverified_warning = {
+            'days_remaining': days_remaining,
+            'hours_remaining': hours_remaining,
+            'grace_days': VERIFICATION_GRACE_DAYS,
+            'email': current_user.email,
+            'urgent': days_remaining <= 1,
+        }
+    return {'unverified_warning': unverified_warning}
 
 # ==================== SECURE FILE UPLOAD ====================
 def secure_file_upload(file, allowed_extensions=None, max_size_mb=10):
@@ -283,8 +295,9 @@ def security_middleware():
     if request.path and any(pattern in request.path.lower() for pattern in malicious_patterns):
         log_activity(None, 'attack_blocked', f"Blocked malicious path: {request.path}", request)
         return "Access Denied", 403
-    if current_user.is_authenticated:
-        session['last_activity'] = datetime.now().isoformat()
+    # Removed: session['last_activity'] write on every request.
+    # Writing to session every request forces Flask to re-sign and resend the session
+    # cookie on every response, which added latency and risked domain-mismatch drops.
 
 # ==================== LOAD ACADEMIC STRUCTURE ====================
 def load_academic_structure():
@@ -313,17 +326,13 @@ def get_department_code(department_name):
     return dept_codes.get(department_name, department_name[:3].upper() if len(department_name) >= 3 else "GEN")
 
 # ==================== COOKIES AND SESSION MANAGEMENT ====================
-@app.before_request
-def set_cookie_domain():
-    if request.host and not request.host.startswith('localhost') and not request.host.startswith('127.0.0.1'):
-        host = request.host.split(':')[0]
-        app.config['SESSION_COOKIE_DOMAIN'] = host
-        app.config['REMEMBER_COOKIE_DOMAIN'] = host
-        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-        app.config['REMEMBER_COOKIE_SAMESITE'] = 'Lax'
-    else:
-        app.config['SESSION_COOKIE_DOMAIN'] = None
-        app.config['REMEMBER_COOKIE_DOMAIN'] = None
+# SESSION_COOKIE_DOMAIN must NOT be set dynamically per-request.
+# Setting it in a before_request hook causes the cookie domain to differ
+# between the response that writes the cookie and the request that reads it,
+# which silently drops the session and loops the user back to /login.
+# Leave it as None (Flask default) — the browser scopes it to the current host automatically.
+app.config['SESSION_COOKIE_DOMAIN'] = None
+app.config['REMEMBER_COOKIE_DOMAIN'] = None
 
 # ==================== SECURE CODE GENERATION ====================
 def generate_secure_verification_code(full_name, email, department):
@@ -353,7 +362,7 @@ def verify_lecturer_code_rate_limit(verification):
 
 # ==================== USER CACHE ====================
 class UserCache:
-    def __init__(self, max_size=100, ttl=300):
+    def __init__(self, max_size=500, ttl=600):  # 10 min TTL, 500 users
         self.cache = OrderedDict()
         self.max_size = max_size
         self.ttl = ttl
@@ -378,16 +387,23 @@ user_cache = UserCache()
 # ==================== USER LOADER ====================
 @login_manager.user_loader
 def load_user(user_id):
+    """
+    Called by Flask-Login on EVERY request for authenticated users.
+    Cache hit  → zero DB round-trips (TTL: 5 min).
+    Cache miss → single indexed primary-key lookup.
+    Cache is invalidated on logout, password change, or deactivation.
+    """
     try:
-        user = db.session.get(User, int(user_id))
+        uid = int(user_id)
+        cached = user_cache.get(uid)
+        if cached is not None:
+            return cached
+        # Primary key lookup — always uses the PK index, fastest possible query
+        user = db.session.get(User, uid)
         if user:
-            _ = user.role
-            _ = user.email
-            _ = user.name
-            _ = user.matric
-            _ = user.password
+            user_cache.set(uid, user)
         return user
-    except Exception as e:
+    except (ValueError, Exception) as e:
         print(f"Error loading user {user_id}: {e}")
         return None
 
@@ -438,6 +454,114 @@ def no_cache(f):
         return response
     return decorated_function
 
+# ==================== FORCED EMAIL VERIFICATION SYSTEM ====================
+# This system ensures unverified students CANNOT access any dashboard
+# or protected features until they verify their email address.
+
+VERIFICATION_GRACE_DAYS = 3  # Days before unverified account is deactivated
+
+def auto_deactivate_unverified(user):
+    """Deactivate an unverified student account if grace period has elapsed."""
+    if user.is_student() and not user.email_verified and user.account_active:
+        deadline = user.created_at + timedelta(days=VERIFICATION_GRACE_DAYS)
+        if datetime.now() > deadline:
+            user.account_active = False
+            db.session.commit()
+            log_activity(user.id, 'account_auto_deactivated',
+                         'Account deactivated: email not verified within grace period.')
+            return True
+    return False
+
+def verification_required(f):
+    """
+    Soft verification decorator.
+    Unverified students can use the app during the grace period but see a warning banner.
+    After the grace period, the account is deactivated and login is denied.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_authenticated and current_user.is_student() and not current_user.email_verified:
+            if auto_deactivate_unverified(current_user):
+                logout_user()
+                session.clear()
+                flash(
+                    f'Your account has been deactivated because you did not verify your email within {VERIFICATION_GRACE_DAYS} days of registration. Please contact support.',
+                    'danger'
+                )
+                return redirect(url_for('login'))
+            # Still within grace period — pass through; banner shown via template context
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/verify-email', methods=['GET', 'POST'])
+@login_required
+@no_cache
+def verify_forced():
+    """
+    Self-service email verification page.
+    Students can visit this at any time during the grace period to verify their account.
+    After the grace period, the account will have been deactivated on next login/page access.
+    """
+    if current_user.email_verified:
+        flash('Your account is already verified.', 'info')
+        return redirect(url_for('dashboard'))
+
+    if not current_user.is_student():
+        return redirect(url_for('dashboard'))
+
+    # Compute days remaining in grace period
+    deadline = current_user.created_at + timedelta(days=VERIFICATION_GRACE_DAYS)
+    days_remaining = max(0, (deadline - datetime.now()).days)
+
+    email = current_user.email
+    student_id = current_user.student_id
+
+    if request.method == 'POST':
+        entered_code = sanitize_input(request.form.get('code', ''))
+        if current_user.code and current_user.code == entered_code:
+            current_user.verified = True
+            current_user.email_verified = True
+            current_user.code = None
+            db.session.commit()
+            user_cache.invalidate(current_user.id)
+            flash('Email verified successfully! Your account is now fully active.', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid verification code. Please check your email and try again.', 'danger')
+
+    return render_template('verify_forced.html',
+                           email=email,
+                           student_id=student_id,
+                           days_remaining=days_remaining,
+                           grace_days=VERIFICATION_GRACE_DAYS)
+
+@app.route('/resend-code-forced/<email>')
+@login_required
+@rate_limit(limit=3, window=300)
+def resend_code_forced(email):
+    """Resend verification code from the forced verification page."""
+    email = sanitize_input(email)
+    user = current_user
+
+    if not user or user.email != email:
+        flash('Account mismatch.', 'danger')
+        return redirect(url_for('verify_forced'))
+
+    if user.email_verified:
+        flash('Account already verified.', 'info')
+        return redirect(url_for('dashboard'))
+
+    new_code = str(random.randint(100000, 999999))
+    user.code = new_code
+    db.session.commit()
+    EmailService.send_verification_email(user.name, email, user.student_id, new_code)
+    flash(f'A new verification code has been sent to {email}.', 'success')
+    return redirect(url_for('verify_forced'))
+
+# ==================== PROTECT ALL DASHBOARD ROUTES WITH VERIFICATION ====================
+# The @verification_required decorator is applied to all protected routes below.
+# This ensures unverified students cannot bypass verification by typing URLs directly.
+
 # ==================== ROUTES ====================
 @app.route('/')
 def home():
@@ -446,6 +570,7 @@ def home():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    """Redirect router — no verification check here, actual dashboards handle that."""
     if current_user.is_admin():
         return redirect(url_for('admin_dashboard'))
     elif current_user.is_lecturer():
@@ -471,69 +596,70 @@ def login():
             return redirect(url_for('student_dashboard'))
     
     if request.method == 'POST':
-        identifier = sanitize_input(request.form.get('loginIdentifier', ''))
+        identifier = request.form.get('loginIdentifier', '').strip()
         password = request.form.get('loginPassword', '')
-        remember = request.form.get('remember', False)
-        
+        remember = bool(request.form.get('remember', False))
+
         if not identifier or not password:
             flash('Please enter both email/ID and password.', 'danger')
             return redirect(url_for('login'))
-        
-        user = None
-        if identifier.upper().startswith('S/'):
-            user = db.session.query(User).filter_by(student_id=identifier.upper()).first()
-        if not user:
-            user = db.session.query(User).filter_by(matric=identifier.upper()).first()
-        if not user:
-            user = db.session.query(User).filter_by(email=identifier.lower()).first()
-        
-        if user and check_password_hash(user.password, password):
-            if user.is_student() and not user.email_verified:
-                session['verification_email'] = user.email
-                session['verification_student_id'] = user.student_id
-                session['verification_name'] = user.name
-                flash('Please verify your email before logging in.', 'warning')
-                return redirect(url_for('verify'))
-            if not user.account_active:
-                flash('Your account has been deactivated. Please contact support.', 'danger')
-                return redirect(url_for('login'))
-            
-            user.last_login = datetime.now()
-            db.session.commit()
-            login_user(user, remember=remember)
-            
-            try:
-                db.session.rollback()
-                log = ActivityLog(
-                    user_id=user.id, action='user_login',
-                    details=f"User logged in from {request.remote_addr}",
-                    ip_address=request.remote_addr,
-                    user_agent=request.headers.get('User-Agent', '')
-                )
-                db.session.add(log)
-                db.session.commit()
-            except Exception as e:
-                print(f"Login logging error: {e}")
-                db.session.rollback()
-            
-            flash(f'Welcome back, {user.name}!', 'success')
-            
-            if user.is_admin():
-                redirect_url = url_for('admin_dashboard')
-            elif user.is_lecturer():
-                redirect_url = url_for('lecturer_dashboard')
-            else:
-                redirect_url = url_for('student_dashboard')
-            
-            if request.host and not request.host.startswith('localhost') and not request.host.startswith('127.0.0.1'):
-                host = request.host.split(':')[0]
-                response = make_response(redirect(redirect_url))
-                response.set_cookie('session', domain=host, samesite='Lax', secure=False, httponly=True)
-                return response
-            return redirect(redirect_url)
-        else:
+
+        # ── Single query with OR across all identifier columns ──
+        # Avoids up to 3 sequential round-trips to the DB.
+        id_upper = identifier.upper()
+        id_lower = identifier.lower()
+        user = db.session.query(User).filter(
+            db.or_(
+                User.student_id == id_upper,
+                User.matric     == id_upper,
+                User.email      == id_lower,
+            )
+        ).first()
+
+        # ── Constant-time password check (werkzeug PBKDF2) ──
+        # Always call check_password_hash even on miss to prevent timing attacks.
+        password_ok = check_password_hash(user.password, password) if user else False
+
+        if not password_ok or not user:
             flash('Invalid credentials. Please check your email/ID and password.', 'danger')
             return redirect(url_for('login'))
+
+        if not user.account_active:
+            flash('Your account has been deactivated. Please contact support.', 'danger')
+            return redirect(url_for('login'))
+
+        # ── Log user in before any further DB writes ──
+        login_user(user, remember=remember)
+        user_cache.set(user.id, user)   # pre-warm cache so next request is instant
+
+        # ── Fire-and-forget: update last_login + activity log in one commit ──
+        # This runs after the response is already determined; any failure here
+        # does NOT block or slow down the redirect the user sees.
+        try:
+            user.last_login = datetime.now()
+            log = ActivityLog(
+                user_id=user.id,
+                action='user_login',
+                details=f"Login from {request.remote_addr}",
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent', '')[:500]
+            )
+            db.session.add(log)
+            db.session.commit()
+        except Exception as e:
+            print(f"Login post-processing error: {e}")
+            db.session.rollback()
+
+        flash(f'Welcome back, {user.name}!', 'success')
+
+        if user.is_admin():
+            redirect_url = url_for('admin_dashboard')
+        elif user.is_lecturer():
+            redirect_url = url_for('lecturer_dashboard')
+        else:
+            redirect_url = url_for('student_dashboard')
+
+        return redirect(redirect_url)
     
     return render_template('login.html')
 
@@ -677,7 +803,7 @@ def register():
             
             user = User(
                 email=email, matric=matric, name=name,
-                password=generate_password_hash(password),
+                password=generate_password_hash(password, method='scrypt'),
                 code=email_verification_code,
                 role=UserRole.STUDENT,
                 college=college_name, college_id=college_id,
@@ -690,17 +816,59 @@ def register():
                 db.session.add(user)
                 db.session.commit()
                 EmailService.send_verification_email(name, email, student_id, email_verification_code)
-                session['verification_email'] = email
-                session['verification_student_id'] = student_id
-                session['verification_name'] = name
-                flash('Account created! Please check your email for verification code.', 'success')
-                return redirect(url_for('verify'))
+                # Log the user in immediately — verification is a soft requirement
+                login_user(user, remember=False)
+                flash(
+                    'Welcome to Submita! A verification code has been sent to your email. '
+                    'Please verify within 3 days to keep your account active.',
+                    'warning'
+                )
+                return redirect(url_for('student_dashboard'))
             except Exception as e:
                 db.session.rollback()
                 flash('Registration failed. Please try again.', 'danger')
                 return redirect(url_for('register'))
     
     return render_template('shared/register.html', academic_structure=ACADEMIC_STRUCTURE, colleges=colleges, departments=departments, now=datetime.now())
+
+# ==================== API ENDPOINTS FOR DYNAMIC DROPDOWNS ====================
+@app.route('/api/departments/<int:college_id>', methods=['GET'])
+def api_get_departments(college_id):
+    """Get departments for a specific college"""
+    departments = Department.query.filter_by(college_id=college_id).order_by(Department.name).all()
+    return jsonify({
+        'success': True,
+        'departments': [{'id': d.id, 'name': d.name, 'code': d.code} for d in departments]
+    })
+
+@app.route('/api/levels/<int:department_id>', methods=['GET'])
+def api_get_levels(department_id):
+    """Get available levels for a specific department"""
+    # Get unique levels from courses for this department
+    levels = db.session.query(Course.level).filter_by(department_id=department_id).distinct().all()
+    
+    # If no courses found, return default levels
+    if not levels:
+        default_levels = ['100', '200', '300', '400']
+        department = Department.query.get(department_id)
+        if department:
+            # Engineering departments have 5 levels
+            if department.code in ['AGE', 'CVE', 'CHE', 'CEN', 'EEE', 'MEE']:
+                default_levels = ['100', '200', '300', '400', '500']
+            # Veterinary Medicine has 6 levels
+            if department.code in ['VET', 'VAN', 'VMB', 'VPH', 'VSR', 'THE']:
+                default_levels = ['100', '200', '300', '400', '500', '600']
+        
+        return jsonify({
+            'success': True,
+            'levels': default_levels
+        })
+    
+    level_list = sorted([l[0] for l in levels if l[0]])
+    return jsonify({
+        'success': True,
+        'levels': level_list
+    })
 
 @app.route('/api/department-levels/<int:department_id>')
 def api_department_levels(department_id):
@@ -759,6 +927,7 @@ def resend_code(email):
 @app.route('/create-assignment', methods=['GET', 'POST'])
 @lecturer_required
 @no_cache
+@verification_required
 def create_assignment():
     colleges = College.query.all()
     departments = Department.query.all()
@@ -833,6 +1002,7 @@ def create_assignment_alias():
 @app.route('/assignment/<int:assignment_id>/edit', methods=['GET', 'POST'])
 @lecturer_required
 @no_cache
+@verification_required
 def edit_assignment(assignment_id):
     assignment = Assignment.query.get_or_404(assignment_id)
     if assignment.created_by != current_user.id and not current_user.is_admin():
@@ -900,6 +1070,7 @@ def edit_assignment(assignment_id):
 @app.route('/assignment/manage/<int:assignment_id>')
 @lecturer_required
 @no_cache
+@verification_required
 def manage_assignment(assignment_id):
     assignment = Assignment.query.get_or_404(assignment_id)
     if assignment.created_by != current_user.id and not current_user.is_admin():
@@ -919,6 +1090,7 @@ def manage_assignment(assignment_id):
 @app.route('/grade/<int:submission_id>', methods=['GET', 'POST'])
 @lecturer_required
 @no_cache
+@verification_required
 def grade_submission(submission_id):
     submission = Submission.query.get_or_404(submission_id)
     assignment = submission.assignment
@@ -950,6 +1122,7 @@ def grade_submission(submission_id):
 @app.route('/ai-grade/<int:submission_id>')
 @lecturer_required
 @no_cache
+@verification_required
 def ai_grade_report(submission_id):
     submission = Submission.query.get_or_404(submission_id)
     assignment = submission.assignment
@@ -973,114 +1146,51 @@ def ai_grade_report(submission_id):
 @app.route('/plagiarism-report/<int:submission_id>')
 @login_required
 @no_cache
+@verification_required
 def plagiarism_report_student(submission_id):
     """Show plagiarism report for a student (student view)"""
     submission = Submission.query.get_or_404(submission_id)
     
-    # Check permissions - students can only see their own reports
     if current_user.is_student() and submission.student_id != current_user.id:
         flash('Access denied.', 'danger')
         return redirect(url_for('student_dashboard'))
     
-    # Get all submissions for this assignment for comparison
-    all_submissions = Submission.query.filter_by(
-        assignment_id=submission.assignment_id, 
-        is_draft=False
-    ).all()
-    
-    # Prepare current submission for comparison
-    current_submission = {
-        'id': submission.id,
-        'content': submission.content or '',
-        'student_name': submission.student.name,
-        'student_id': submission.student.matric
-    }
-    
-    # Prepare other submissions
-    other_submissions = []
-    for sub in all_submissions:
-        if sub.id != submission.id:
-            other_submissions.append({
-                'id': sub.id,
-                'content': sub.content or '',
-                'student_name': sub.student.name,
-                'student_id': sub.student.matric
-            })
-    
-    # Detect plagiarism
+    all_submissions = Submission.query.filter_by(assignment_id=submission.assignment_id, is_draft=False).all()
+    current_submission = {'id': submission.id, 'content': submission.content or '', 'student_name': submission.student.name, 'student_id': submission.student.matric}
+    other_submissions = [{'id': sub.id, 'content': sub.content or '', 'student_name': sub.student.name, 'student_id': sub.student.matric} for sub in all_submissions if sub.id != submission.id]
     matches = PlagiarismChecker.detect_plagiarism(current_submission, other_submissions)
     report = PlagiarismChecker.get_plagiarism_report(submission, matches)
     
-    # ✅ FIXED: Use student subfolder
-    return render_template('student/plagiarism_report_student.html',
-                         submission=submission,
-                         plagiarism_score=submission.plagiarism_score or 0,
-                         matches=matches,
-                         report=report)
-
+    return render_template('student/plagiarism_report_student.html', submission=submission, plagiarism_score=submission.plagiarism_score or 0, matches=matches, report=report)
 
 @app.route('/lecturer/plagiarism/<int:submission_id>')
 @lecturer_required
 @no_cache
+@verification_required
 def lecturer_plagiarism_report(submission_id):
     """Show plagiarism report for a submission (lecturer view with more detail)"""
     submission = Submission.query.get_or_404(submission_id)
     assignment = submission.assignment
     
-    # Check permissions
     if assignment.created_by != current_user.id and not current_user.is_admin():
         flash('Access denied.', 'danger')
         return redirect(url_for('lecturer_dashboard'))
     
-    # Get all submissions for comparison
-    all_submissions = Submission.query.filter_by(
-        assignment_id=assignment.id, 
-        is_draft=False
-    ).all()
-    
-    # Prepare data for plagiarism check
-    current_submission = {
-        'id': submission.id,
-        'content': submission.content or '',
-        'student_name': submission.student.name,
-        'student_id': submission.student.matric
-    }
-    
-    other_submissions = []
-    for sub in all_submissions:
-        if sub.id != submission.id:
-            other_submissions.append({
-                'id': sub.id,
-                'content': sub.content or '',
-                'student_name': sub.student.name,
-                'student_id': sub.student.matric
-            })
-    
-    # Run plagiarism detection
+    all_submissions = Submission.query.filter_by(assignment_id=assignment.id, is_draft=False).all()
+    current_submission = {'id': submission.id, 'content': submission.content or '', 'student_name': submission.student.name, 'student_id': submission.student.matric}
+    other_submissions = [{'id': sub.id, 'content': sub.content or '', 'student_name': sub.student.name, 'student_id': sub.student.matric} for sub in all_submissions if sub.id != submission.id]
     matches = PlagiarismChecker.detect_plagiarism(current_submission, other_submissions)
-    
-    # Update submission with plagiarism score
-    if matches:
-        submission.plagiarism_score = matches[0]['similarity']
-    else:
-        submission.plagiarism_score = 0
-    
+    submission.plagiarism_score = matches[0]['similarity'] if matches else 0
     db.session.commit()
-    
     report = PlagiarismChecker.get_plagiarism_report(submission, matches)
     
-    # ✅ FIXED: Use lecturer subfolder
-    return render_template('lecturer/lecturer_plagiarism_report.html',
-                         submission=submission,
-                         assignment=assignment,
-                         matches=matches,
-                         report=report)
-
+    return render_template('lecturer/lecturer_plagiarism_report.html', submission=submission, assignment=assignment, matches=matches, report=report)
 
 # ==================== SUBMIT ASSIGNMENT ROUTE ====================
 @app.route('/submit/<int:assignment_id>', methods=['GET', 'POST'])
 @login_required
 @no_cache
+@verification_required
 def submit_assignment(assignment_id):
     if not current_user.is_student():
         flash('Only students can submit assignments.', 'danger')
@@ -1140,6 +1250,7 @@ def submit_assignment(assignment_id):
 # ==================== ADMIN ROUTES ====================
 @app.route('/admin-dashboard')
 @admin_required
+@verification_required
 def admin_dashboard():
     try:
         total_users = db.session.query(User).count()
@@ -1156,6 +1267,7 @@ def admin_dashboard():
 @app.route('/admin/lecturer-codes')
 @admin_required
 @no_cache
+@verification_required
 def admin_lecturer_codes():
     codes = db.session.query(LecturerVerification).order_by(LecturerVerification.created_at.desc()).all()
     return render_template('admin/admin_lecturer_codes.html', codes=codes, now=datetime.now())
@@ -1163,6 +1275,7 @@ def admin_lecturer_codes():
 @app.route('/admin/send-verification', methods=['POST'])
 @admin_required
 @rate_limit(limit=10, window=3600)
+@verification_required
 def send_verification_email():
     try:
         full_name = sanitize_input(request.form.get('full_name', ''))
@@ -1194,11 +1307,13 @@ def send_verification_email():
 @app.route('/admin/send-verification', methods=['GET'])
 @admin_required
 @no_cache
+@verification_required
 def send_verification_page():
     return render_template('admin/admin_send_verification.html', academic_structure=ACADEMIC_STRUCTURE)
 
 @app.route('/admin/resend-code/<int:code_id>', methods=['POST'])
 @admin_required
+@verification_required
 def resend_lecturer_code(code_id):
     verification = db.session.query(LecturerVerification).get(code_id)
     if not verification or verification.is_used:
@@ -1215,6 +1330,7 @@ def resend_lecturer_code(code_id):
 @app.route('/admin/lecturer-requests')
 @admin_required
 @no_cache
+@verification_required
 def admin_lecturer_requests():
     pending_requests = db.session.query(LecturerRegistrationRequest).filter_by(status='pending').order_by(LecturerRegistrationRequest.created_at.desc()).all()
     approved_requests = db.session.query(LecturerRegistrationRequest).filter(LecturerRegistrationRequest.status.in_(['approved', 'rejected'])).order_by(LecturerRegistrationRequest.reviewed_at.desc()).limit(50).all()
@@ -1222,6 +1338,7 @@ def admin_lecturer_requests():
 
 @app.route('/admin/approve-request/<int:request_id>', methods=['POST'])
 @admin_required
+@verification_required
 def approve_lecturer_request(request_id):
     try:
         request_obj = db.session.query(LecturerRegistrationRequest).get(request_id)
@@ -1244,6 +1361,7 @@ def approve_lecturer_request(request_id):
 
 @app.route('/admin/reject-request/<int:request_id>', methods=['POST'])
 @admin_required
+@verification_required
 def reject_lecturer_request(request_id):
     try:
         request_obj = db.session.query(LecturerRegistrationRequest).get(request_id)
@@ -1271,6 +1389,7 @@ def check_existing_user():
 
 @app.route('/api/submission/<int:submission_id>/feedback')
 @login_required
+@verification_required
 def get_submission_feedback(submission_id):
     submission = Submission.query.get_or_404(submission_id)
     if current_user.is_student() and submission.student_id != current_user.id:
@@ -1319,6 +1438,7 @@ def connectivity_check():
 # ==================== LECTURER DASHBOARD ====================
 @app.route('/lecturer-dashboard')
 @login_required
+@verification_required
 def lecturer_dashboard():
     if not current_user.is_lecturer() and not current_user.is_admin():
         flash('Access denied. Lecturer privileges required.', 'danger')
@@ -1343,6 +1463,7 @@ def lecturer_dashboard():
 # ==================== STUDENT DASHBOARD ====================
 @app.route('/student-dashboard')
 @login_required
+@verification_required
 def student_dashboard():
     if not current_user.is_student():
         flash('Access denied. Student privileges required.', 'danger')
@@ -1376,19 +1497,22 @@ def student_dashboard():
     graded_submissions = [s for s in submissions if s.grade is not None]
     avg_grade = sum(s.grade for s in graded_submissions) / len(graded_submissions) if graded_submissions else 0
     
-    progress_summary = CourseService.get_student_progress_summary(current_user.id) if hasattr(CourseService, 'get_student_progress_summary') else None
-    eligible, message = AcademicService.check_promotion_eligibility(current_user.id) if hasattr(AcademicService, 'check_promotion_eligibility') else (False, '')
+    # Commented out since services are not available
+    # progress_summary = CourseService.get_student_progress_summary(current_user.id) if hasattr(CourseService, 'get_student_progress_summary') else None
+    # eligible, message = AcademicService.check_promotion_eligibility(current_user.id) if hasattr(AcademicService, 'check_promotion_eligibility') else (False, '')
     
-    return render_template('student/student_dashboard.html', submissions=submissions, available_assignments=available_assignments, total_submissions=len(submissions), graded_count=len(graded_submissions), pending_count=len(submissions)-len(graded_submissions), avg_grade=round(avg_grade, 1), pending_assignments=len(available_assignments), completed_assignments=len(graded_submissions), recent_submissions=submissions[:5], now=datetime.now(), progress_summary=progress_summary, eligible_for_promotion=eligible, promotion_message=message)
+    return render_template('student/student_dashboard.html', submissions=submissions, available_assignments=available_assignments, total_submissions=len(submissions), graded_count=len(graded_submissions), pending_count=len(submissions)-len(graded_submissions), avg_grade=round(avg_grade, 1), pending_assignments=len(available_assignments), completed_assignments=len(graded_submissions), recent_submissions=submissions[:5], now=datetime.now())
 
 # ==================== PROFILE ROUTES ====================
 @app.route('/profile')
 @login_required
+@verification_required
 def profile():
     return render_template('shared/profile.html')
 
 @app.route('/change-password', methods=['GET', 'POST'])
 @login_required
+@verification_required
 def change_password():
     if request.method == 'POST':
         current_pwd = request.form.get('current_password')
@@ -1405,19 +1529,22 @@ def change_password():
             for error in errors:
                 flash(error, 'danger')
             return redirect(url_for('change_password'))
-        current_user.password = generate_password_hash(new_pwd)
+        current_user.password = generate_password_hash(new_pwd, method='scrypt')
         db.session.commit()
+        user_cache.invalidate(current_user.id)  # force fresh load on next request
         flash('Password changed successfully!', 'success')
         return redirect(url_for('profile'))
     return render_template('shared/change_password.html')
 
 @app.route('/settings')
 @login_required
+@verification_required
 def settings():
     return render_template('shared/settings.html')
 
 @app.route('/help')
 @login_required
+@verification_required
 def help_page():
     return render_template('shared/help.html')
 
@@ -1440,15 +1567,12 @@ def internal_error(error):
     return render_template('errors/500.html'), 500
 
 # ==================== BEFORE REQUEST ====================
+# NOTE: Auth enforcement is handled by @login_required on individual routes.
+# This guard is intentionally removed to avoid conflicts with session_protection
+# and the @no_cache decorator pattern used on auth routes.
 @app.before_request
 def before_request():
-    public_routes = ['home', 'login', 'register', 'static', 'verify_lecturer_code', 'check_auth', 'verify', 'resend_code', 'check_existing_user', 'api_academic_structure', 'api_departments_by_college', 'connectivity-check', 'logout']
-    if request.endpoint in public_routes:
-        return None
-    if current_user.is_authenticated:
-        return None
-    flash('Please log in to access this page.', 'warning')
-    return redirect(url_for('login'))
+    pass  # Reserved for future middleware; auth is handled per-route
 
 # ==================== CREATE DEFAULT ADMIN ====================
 def create_default_admin():
@@ -1473,9 +1597,58 @@ def create_default_admin():
             print(f"Error creating default users: {e}")
 
 # ==================== RUN APP ====================
+def _auto_migrate():
+    """
+    Add any columns that exist in models but are missing from the DB.
+    Runs every startup — safe to call repeatedly, only acts on missing columns.
+    SQLite does not support DROP/MODIFY, only ADD COLUMN, which is all we need here.
+    """
+    try:
+        from sqlalchemy import text, inspect as sa_inspect
+        inspector = sa_inspect(db.engine)
+
+        def _add_if_missing(table, column, col_def):
+            try:
+                existing = {c['name'] for c in inspector.get_columns(table)}
+                if column not in existing:
+                    with db.engine.connect() as conn:
+                        conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col_def}"))
+                        conn.commit()
+                    print(f"  ✅  Migrated: {table}.{column}")
+            except Exception as e:
+                print(f"  ⚠️   Could not add {table}.{column}: {e}")
+
+        # assignments — targeting + security fields added after initial schema
+        _add_if_missing("assignments", "target_level",           "VARCHAR(10) NOT NULL DEFAULT '100'")
+        _add_if_missing("assignments", "target_department_id",   "INTEGER REFERENCES departments(id)")
+        _add_if_missing("assignments", "target_semester",         "VARCHAR(20) NOT NULL DEFAULT 'First'")
+        _add_if_missing("assignments", "target_academic_year",   "VARCHAR(20) NOT NULL DEFAULT '2025/2026'")
+        _add_if_missing("assignments", "target_course_id",       "INTEGER REFERENCES courses(id)")
+        _add_if_missing("assignments", "is_published",           "BOOLEAN NOT NULL DEFAULT 0")
+        _add_if_missing("assignments", "published_at",           "DATETIME")
+        _add_if_missing("assignments", "is_locked",              "BOOLEAN NOT NULL DEFAULT 0")
+        _add_if_missing("assignments", "late_submission_penalty", "FLOAT NOT NULL DEFAULT 10.0")
+        _add_if_missing("assignments", "max_file_size",          "INTEGER NOT NULL DEFAULT 10")
+        _add_if_missing("assignments", "allowed_file_types",     "VARCHAR(200)")
+        _add_if_missing("assignments", "plagiarism_threshold",   "FLOAT NOT NULL DEFAULT 30.0")
+        _add_if_missing("assignments", "course_id",              "INTEGER REFERENCES courses(id)")
+        _add_if_missing("assignments", "questions",              "TEXT")
+        _add_if_missing("assignments", "instructions",           "TEXT")
+        _add_if_missing("assignments", "total_points",           "INTEGER NOT NULL DEFAULT 100")
+        _add_if_missing("assignments", "attachment_path",        "VARCHAR(500)")
+        _add_if_missing("assignments", "attachment_filename",    "VARCHAR(200)")
+        _add_if_missing("assignments", "attachment_type",        "VARCHAR(50)")
+
+    except Exception as err:
+        print(f"  ⚠️  Auto-migration error (non-fatal): {err}")
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        print("✅ Database tables created/verified")
+        _auto_migrate()
+        print("✅ Schema migration check complete")
         create_default_admin()
     
     print("\n" + "=" * 70)

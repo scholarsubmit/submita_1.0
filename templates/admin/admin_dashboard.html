@@ -1,599 +1,1234 @@
-<!-- templates/admin_dashboard.html -->
 {% extends "base.html" %}
 
 {% block title %}Admin Portal — Submita{% endblock %}
 
-{% block extra_head %}
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+{% block extra_css %}
+<style>
+/* Override any conflicting base styles */
+:root {
+  --sidebar-w: 264px;
+  --topbar-h: 64px;
+  --accent: #16a34a;
+  --accent-dark: #15803d;
+  --accent-light: #f0fdf4;
+  --accent-mid: #bbf7d0;
+  --sidebar-bg: #0a0f1e;
+  --sidebar-text: #94a3b8;
+  --sidebar-border: rgba(255,255,255,.06);
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --radius: 14px;
+  --radius-sm: 9px;
+}
+
+/* Make sure admin styles don't break base layout */
+body {
+  background: var(--bg);
+  overflow-x: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  border-right: 1px solid var(--sidebar-border);
+}
+
+.sidebar.collapsed {
+  transform: translateX(calc(-1 * var(--sidebar-w)));
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 999;
+  backdrop-filter: blur(3px);
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 20px 20px 18px;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22,163,74,.4);
+}
+
+.logo-icon i {
+  color: #fff;
+  font-size: 16px;
+}
+
+.logo-wordmark {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.5px;
+}
+
+.logo-wordmark span {
+  color: var(--accent);
+}
+
+.sidebar-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  background: rgba(22,163,74,.2);
+  color: #4ade80;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.sidebar-user {
+  margin: 14px 12px 8px;
+  background: rgba(255,255,255,.05);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid var(--sidebar-border);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.sidebar-user:hover {
+  background: rgba(255,255,255,.08);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sidebar-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-user-info .uname {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.sidebar-user-info .urole {
+  font-size: 10px;
+  color: #4ade80;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px 0;
+}
+
+.nav-section-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  padding: 16px 10px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 2px;
+  color: var(--sidebar-text);
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all .2s;
+}
+
+.nav-item:hover {
+  background: rgba(255,255,255,.07);
+  color: #e2e8f0;
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(22,163,74,.2) 0%, rgba(22,163,74,.08) 100%);
+  color: #4ade80;
+}
+
+.nav-item i {
+  width: 18px;
+  font-size: 14px;
+}
+
+.nav-badge {
+  margin-left: auto;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.sidebar-footer {
+  padding: 10px 10px 18px;
+  border-top: 1px solid var(--sidebar-border);
+}
+
+/* Topbar */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-w);
+  right: 0;
+  height: 64px;
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 14px;
+  z-index: 900;
+  transition: left .3s;
+}
+
+.topbar.sidebar-collapsed {
+  left: 0;
+}
+
+.hamburger {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: all .2s;
+}
+
+.hamburger:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-mid);
+}
+
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-clock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-family: monospace;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .5; transform: scale(.85); }
+}
+
+.session-timer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  background: var(--accent-light);
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s;
+  color: var(--text-muted);
+}
+
+.icon-btn:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-mid);
+  color: var(--accent);
+}
+
+/* Main Area */
+.main-area {
+  margin-left: var(--sidebar-w);
+  margin-top: 64px;
+  padding: 28px;
+  min-height: calc(100vh - 64px);
+  transition: margin-left .3s;
+}
+
+.main-area.sidebar-collapsed {
+  margin-left: 0;
+}
+
+/* Welcome Banner */
+.welcome-banner {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #16a34a 100%);
+  border-radius: 18px;
+  padding: 32px 36px;
+  color: #fff;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.wb-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.wb-title {
+  font-size: 26px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.wb-sub {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.wb-meta {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wb-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  background: rgba(255,255,255,.12);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 22px;
+  border: 1px solid var(--border);
+  position: relative;
+  transition: all .25s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 40px rgba(0,0,0,.12);
+}
+
+.stat-card.green::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+  border-radius: 3px 3px 0 0;
+}
+
+.s-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.s-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.s-trend {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.s-trend.up {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.s-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.s-value {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 6px 0;
+}
+
+.s-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Section Cards */
+.section-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.section-header h2 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+/* Content Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 22px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .2s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-sm {
+  padding: 5px 11px;
+  font-size: 11.5px;
+}
+
+/* Action Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 18px 22px;
+}
+
+.action-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 20px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  text-decoration: none;
+  transition: all .2s;
+  cursor: pointer;
+}
+
+.action-tile:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-3px);
+}
+
+.at-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* List Rows */
+.list-row {
+  display: flex;
+  align-items: center;
+  padding: 15px 22px;
+  border-bottom: 1px solid var(--border-light);
+  gap: 14px;
+}
+
+.row-body {
+  flex: 1;
+}
+
+.row-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.row-meta {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 12px;
+}
+
+/* Role Pills */
+.role-pill {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.role-admin {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.role-lecturer {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.role-student {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Alert Banner */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.alert-banner.warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.alert-close {
+  margin-left: auto;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 18px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal-card {
+  background: white;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90%;
+}
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+}
+
+.toast {
+  background: #1e293b;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin-top: 10px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(calc(-1 * var(--sidebar-w)));
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .topbar {
+    left: 0 !important;
+  }
+  
+  .main-area {
+    margin-left: 0 !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Badge */
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--border-light);
+}
+
+.badge.green {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* Health Item */
+.health-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.health-item:last-child {
+  border-bottom: none;
+}
+
+.status-online {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon" onclick="location.href='{{ url_for('home') }}'">
+      <i class="fas fa-paper-plane"></i>
+    </div>
+    <div class="logo-wordmark">Sub<span>mita</span></div>
+    <span class="sidebar-badge">Admin</span>
+  </div>
+
+  <div class="sidebar-user" onclick="location.href='{{ url_for('profile') }}'">
+    <div class="user-avatar">{{ current_user.name[0]|upper if current_user.name else 'A' }}</div>
+    <div class="sidebar-user-info">
+      <div class="uname">{{ current_user.name.split()[0] if current_user.name else 'Admin' }}</div>
+      <div class="urole">Administrator</div>
+    </div>
+    <div class="live-dot"></div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="{{ url_for('admin_dashboard') }}" class="nav-item active">
+      <i class="fas fa-th-large"></i> Overview
+    </a>
+
+    <div class="nav-section-label">Users</div>
+    <a href="#" class="nav-item">
+      <i class="fas fa-users"></i> All Users
+    </a>
+    <a href="{{ url_for('admin_lecturer_requests') }}" class="nav-item">
+      <i class="fas fa-user-clock"></i> Lecturer Requests
+      {% if pending_requests is defined and pending_requests > 0 %}
+      <span class="nav-badge">{{ pending_requests }}</span>
+      {% endif %}
+    </a>
+
+    <div class="nav-section-label">Verification</div>
+    <a href="{{ url_for('send_verification_page') }}" class="nav-item">
+      <i class="fas fa-envelope-open-text"></i> Send Codes
+    </a>
+    <a href="{{ url_for('admin_lecturer_codes') }}" class="nav-item">
+      <i class="fas fa-qrcode"></i> Manage Codes
+    </a>
+
+    <div class="nav-section-label">Security</div>
+    <a href="#" class="nav-item">
+      <i class="fas fa-shield-alt"></i> Plagiarism Flags
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fas fa-history"></i> Audit Logs
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a href="#" class="nav-item" onclick="showLogoutModal(event)">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<header class="topbar" id="topbar">
+  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+  
+  <div class="topbar-breadcrumb">
+    <span class="page-title">Admin Portal</span>
+    <span>/</span>
+    <span>Overview</span>
+  </div>
+  
+  <div class="topbar-right">
+    <div class="topbar-clock">
+      <div class="live-dot"></div>
+      <span id="liveTime">--:--:--</span>
+    </div>
+    
+    <div class="session-timer" id="sessionTimer">
+      <i class="fas fa-shield-alt"></i>
+      <span id="sessionCountdown">30:00</span>
+    </div>
+    
+    <button class="icon-btn" onclick="toggleNotifDrawer()">
+      <i class="fas fa-bell"></i>
+    </button>
+    
+    <a href="{{ url_for('profile') }}" class="icon-btn">
+      <i class="fas fa-user-circle"></i>
+    </a>
+  </div>
+</header>
+
+<main class="main-area" id="mainArea">
+  {% if pending_requests is defined and pending_requests > 0 %}
+  <div class="alert-banner warning">
+    <i class="fas fa-exclamation-circle"></i>
+    <strong>{{ pending_requests }} pending lecturer request{{ 's' if pending_requests > 1 else '' }}</strong>
+    <a href="{{ url_for('admin_lecturer_requests') }}" class="btn btn-sm btn-secondary">Review now</a>
+    <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+  {% endif %}
+  
+  <div class="welcome-banner">
+    <div class="wb-eyebrow">
+      <i class="fas fa-shield-alt"></i> Admin Portal
+    </div>
+    <div class="wb-title">Welcome back, {{ current_user.name.split()[0] if current_user.name else 'Admin' }} 👋</div>
+    <div class="wb-sub">Here's your platform overview for today.</div>
+    <div class="wb-meta">
+      <div class="wb-pill"><i class="fas fa-users"></i> {{ total_users if total_users else 0 }} total users</div>
+      <div class="wb-pill"><i class="fas fa-graduation-cap"></i> {{ total_students if total_students else 0 }} students</div>
+      <div class="wb-pill"><i class="fas fa-check-circle"></i> All systems operational</div>
+    </div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card green">
+      <div class="s-top">
+        <div class="s-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-users"></i></div>
+        <div class="s-trend up"><i class="fas fa-arrow-up"></i> +12%</div>
+      </div>
+      <div class="s-label">Total Users</div>
+      <div class="s-value counter" data-target="{{ total_users if total_users else 0 }}">0</div>
+      <div class="s-sub">Registered accounts</div>
+    </div>
+    
+    <div class="stat-card green">
+      <div class="s-top">
+        <div class="s-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-user-graduate"></i></div>
+        <div class="s-trend up"><i class="fas fa-arrow-up"></i> +8%</div>
+      </div>
+      <div class="s-label">Students</div>
+      <div class="s-value counter" data-target="{{ total_students if total_students else 0 }}">0</div>
+      <div class="s-sub">Enrolled learners</div>
+    </div>
+    
+    <div class="stat-card green">
+      <div class="s-top">
+        <div class="s-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-chalkboard-teacher"></i></div>
+        <div class="s-trend up"><i class="fas fa-arrow-up"></i> +3</div>
+      </div>
+      <div class="s-label">Lecturers</div>
+      <div class="s-value counter" data-target="{{ total_lecturers if total_lecturers else 0 }}">0</div>
+      <div class="s-sub">Active faculty</div>
+    </div>
+    
+    <div class="stat-card green">
+      <div class="s-top">
+        <div class="s-icon" style="background:#fee2e2;color:#dc2626;"><i class="fas fa-user-clock"></i></div>
+        {% if pending_requests is defined and pending_requests > 0 %}
+        <div class="s-trend down">Action</div>
+        {% endif %}
+      </div>
+      <div class="s-label">Pending Requests</div>
+      <div class="s-value counter" data-target="{{ pending_requests if pending_requests is defined else 0 }}">0</div>
+      <div class="s-sub">Awaiting approval</div>
+    </div>
+  </div>
+  
+  <div class="content-grid">
+    <div>
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+          <span class="badge green">Admin Tools</span>
+        </div>
+        <div class="actions-grid">
+          <a href="{{ url_for('send_verification_page') }}" class="action-tile">
+            <div class="at-label">Send Code</div>
+            <div class="at-sub">Email verification</div>
+          </a>
+          <a href="{{ url_for('admin_lecturer_codes') }}" class="action-tile">
+            <div class="at-label">Manage Codes</div>
+            <div class="at-sub">Verify access</div>
+          </a>
+          <a href="{{ url_for('admin_lecturer_requests') }}" class="action-tile">
+            <div class="at-label">Requests</div>
+            <div class="at-sub">Pending approvals</div>
+          </a>
+        </div>
+      </div>
+      
+      <div class="section-card" id="users-section">
+        <div class="section-header">
+          <h2><i class="fas fa-user-plus"></i> Recent Registrations</h2>
+          <span class="badge green">{{ recent_users|length if recent_users is defined else 0 }} new</span>
+        </div>
+        <div>
+          {% if recent_users and recent_users|length > 0 %}
+            {% for user_item in recent_users %}
+            <div class="list-row">
+              <div class="row-body">
+                <p class="row-title">{{ user_item.name }}</p>
+                <div class="row-meta">
+                  <span><i class="fas fa-envelope"></i> {{ user_item.email }}</span>
+                  <span><i class="fas fa-calendar"></i> {{ user_item.created_at.strftime('%d %b %Y') if user_item.created_at else 'Just now' }}</span>
+                </div>
+              </div>
+              <span class="role-pill {% if user_item.is_admin() %}role-admin{% elif user_item.is_lecturer() %}role-lecturer{% else %}role-student{% endif %}">
+                {{ user_item.role.title() if user_item.role is string else user_item.role.value.title() }}
+              </span>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <p>No recent registrations</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div>
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-server"></i> System Health</h2>
+          <span class="badge green">All Systems Go</span>
+        </div>
+        <div style="padding: 16px;">
+          <div class="health-item">
+            <span><i class="fas fa-database"></i> Database</span>
+            <span class="status-online">✓ Operational</span>
+          </div>
+          <div class="health-item">
+            <span><i class="fas fa-envelope"></i> Email Service</span>
+            <span class="status-online">✓ Active</span>
+          </div>
+          <div class="health-item">
+            <span><i class="fas fa-shield-alt"></i> Authentication</span>
+            <span class="status-online">✓ Secure</span>
+          </div>
+          <div class="health-item">
+            <span><i class="fas fa-cloud-upload-alt"></i> File Storage</span>
+            <span class="status-online">✓ Available</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-user-shield"></i> Admin Account</h2>
+          <a href="{{ url_for('profile') }}" class="btn btn-sm btn-secondary">Edit</a>
+        </div>
+        <div style="padding: 16px;">
+          <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light);">
+            <span>Full Name</span>
+            <span><strong>{{ current_user.name }}</strong></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light);">
+            <span>Email</span>
+            <span><strong>{{ current_user.email }}</strong></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+            <span>Role</span>
+            <span class="role-pill role-admin">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal-card">
+    <div style="padding: 32px 28px 22px; text-align: center;">
+      <div style="width: 64px; height: 64px; background: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px;">
+        <i class="fas fa-sign-out-alt" style="font-size: 26px; color: #ef4444;"></i>
+      </div>
+      <h3 style="font-size: 18px; font-weight: 800; margin-bottom: 8px;">End Admin Session?</h3>
+      <p style="font-size: 13.5px; color: var(--text-muted);">You will be signed out and need to log in again.</p>
+    </div>
+    <div style="padding: 0 24px 24px; display: flex; gap: 10px;">
+      <button onclick="closeLogoutModal()" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+      <button onclick="executeLogout()" class="btn btn-primary" style="flex: 1; background: #dc2626;">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// ============================================================
-// AUTHENTICATION & SESSION PROTECTION
-// ============================================================
-(function() {
-    'use strict';
+// Sidebar Toggle
+let sidebarOpen = window.innerWidth >= 768;
 
-    // Prevent back-button cache exposure after logout
-    if (window.performance && window.performance.navigation.type === 2) {
-        fetch('/check-auth', { 
-            method: 'GET', 
-            headers: { 'Cache-Control': 'no-cache' }, 
-            cache: 'no-store' 
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (!data.authenticated) {
-                window.location.replace("{{ url_for('login') }}");
-            }
-        })
-        .catch(() => { 
-            window.location.replace("{{ url_for('login') }}"); 
-        });
-    }
-
-    // Periodic auth check (every 60 seconds)
-    setInterval(() => {
-        fetch('/check-auth', { method: 'GET', cache: 'no-store' })
-            .then(r => r.json())
-            .then(data => {
-                if (!data.authenticated) {
-                    window.location.replace("{{ url_for('login') }}");
-                }
-            })
-            .catch(() => {});
-    }, 60000);
-})();
-
-// ============================================================
-// LOGOUT SYSTEM
-// ============================================================
-function handleAdminLogout(e) {
-    if (e) e.preventDefault();
-    showAdminLogoutModal();
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  applyState();
 }
 
-function showAdminLogoutModal() {
-    const modal = document.getElementById('adminLogoutModal');
-    const backdrop = document.getElementById('adminLogoutBackdrop');
-    const card = document.getElementById('adminLogoutCard');
-
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-
-    requestAnimationFrame(() => {
-        backdrop.classList.add('opacity-100');
-        card.classList.add('scale-100', 'opacity-100');
-        card.classList.remove('scale-95', 'opacity-0');
-    });
+function closeSidebar() {
+  sidebarOpen = false;
+  applyState();
 }
 
-function hideAdminLogoutModal() {
-    const modal = document.getElementById('adminLogoutModal');
-    const backdrop = document.getElementById('adminLogoutBackdrop');
-    const card = document.getElementById('adminLogoutCard');
-
-    backdrop.classList.remove('opacity-100');
-    card.classList.remove('scale-100', 'opacity-100');
-    card.classList.add('scale-95', 'opacity-0');
-
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.style.overflow = '';
-    }, 300);
+function applyState() {
+  const sidebar = document.getElementById('sidebar');
+  const topbar = document.getElementById('topbar');
+  const mainArea = document.getElementById('mainArea');
+  const overlay = document.getElementById('sidebarOverlay');
+  const isMobile = window.innerWidth < 768;
+  
+  if (isMobile) {
+    if (sidebar) sidebar.classList.toggle('mobile-open', sidebarOpen);
+    if (overlay) overlay.classList.toggle('active', sidebarOpen);
+    if (topbar) topbar.classList.remove('sidebar-collapsed');
+    if (mainArea) mainArea.classList.remove('sidebar-collapsed');
+  } else {
+    if (sidebar) sidebar.classList.toggle('collapsed', !sidebarOpen);
+    if (topbar) topbar.classList.toggle('sidebar-collapsed', !sidebarOpen);
+    if (mainArea) mainArea.classList.toggle('sidebar-collapsed', !sidebarOpen);
+    if (overlay) overlay.classList.remove('active');
+  }
 }
 
-function executeAdminLogout() {
-    hideAdminLogoutModal();
+window.addEventListener('resize', () => {
+  sidebarOpen = window.innerWidth >= 768;
+  applyState();
+});
 
-    sessionStorage.clear();
-    localStorage.clear();
+applyState();
 
-    document.cookie.split(";").forEach(function(c) {
-        const cookieName = c.split('=')[0].trim();
-        document.cookie = cookieName + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
-        document.cookie = cookieName + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;domain=" + window.location.hostname;
-    });
+// Live Clock
+function updateClock() {
+  const now = new Date();
+  const timeEl = document.getElementById('liveTime');
+  if (timeEl) {
+    timeEl.textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+}
+updateClock();
+setInterval(updateClock, 1000);
 
-    setTimeout(() => {
-        window.location.href = "{{ url_for('logout') }}";
-    }, 150);
+// Session Timer
+let sessionSeconds = 30 * 60;
+const timerEl = document.getElementById('sessionCountdown');
+const timerWrapper = document.getElementById('sessionTimer');
+
+function updateSessionTimer() {
+  if (!timerEl) return;
+  const minutes = Math.floor(sessionSeconds / 60);
+  const seconds = sessionSeconds % 60;
+  timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  
+  if (sessionSeconds <= 300 && timerWrapper) {
+    timerWrapper.classList.add('danger');
+    timerWrapper.classList.remove('warning');
+    if (sessionSeconds === 300) showToast('⚠️ Session expiring in 5 minutes', 'warning');
+  } else if (sessionSeconds <= 600 && timerWrapper) {
+    timerWrapper.classList.add('warning');
+    timerWrapper.classList.remove('danger');
+    if (sessionSeconds === 600) showToast('Session expiring in 10 minutes', 'info');
+  }
+  
+  if (sessionSeconds <= 0) {
+    executeLogout();
+    return;
+  }
+  sessionSeconds--;
+  setTimeout(updateSessionTimer, 1000);
+}
+updateSessionTimer();
+
+// Logout Functions
+function showLogoutModal(e) {
+  if (e) e.preventDefault();
+  const modal = document.getElementById('logoutModal');
+  if (modal) modal.classList.add('open');
 }
 
+function closeLogoutModal() {
+  const modal = document.getElementById('logoutModal');
+  if (modal) modal.classList.remove('open');
+}
+
+function executeLogout() {
+  window.location.href = "{{ url_for('logout') }}";
+}
+
+// Close modal on escape
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('adminLogoutModal');
-        if (modal && !modal.classList.contains('hidden')) {
-            hideAdminLogoutModal();
-        }
-    }
+  if (e.key === 'Escape') closeLogoutModal();
 });
 
+// Notification Drawer
+function toggleNotifDrawer() {
+  const drawer = document.getElementById('notifDrawer');
+  if (drawer) drawer.classList.toggle('open');
+}
+
+// Counter Animation
+function animateCounters() {
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseInt(el.dataset.target) || 0;
+    if (target === 0) {
+      el.textContent = '0';
+      return;
+    }
+    let current = 0;
+    const increment = target / 50;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        el.textContent = target.toLocaleString();
+        clearInterval(timer);
+      } else {
+        el.textContent = Math.floor(current).toLocaleString();
+      }
+    }, 20);
+  });
+}
+
+// Toast Function
+function showToast(message, type = 'info', duration = 4000) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <span>${message}</span>
+    <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; margin-left: 10px; cursor: pointer;">×</button>
+  `;
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  animateCounters();
+  setTimeout(() => showToast('Welcome back, Admin!', 'success'), 1000);
+  {% if pending_requests is defined and pending_requests > 0 %}
+  setTimeout(() => showToast('{{ pending_requests }} lecturer request(s) awaiting review', 'warning'), 2000);
+  {% endif %}
+});
+
+// Click outside to close sidebar on mobile
 document.addEventListener('click', (e) => {
-    const modal = document.getElementById('adminLogoutModal');
-    const backdrop = document.getElementById('adminLogoutBackdrop');
-    if (e.target === backdrop && modal && !modal.classList.contains('hidden')) {
-        hideAdminLogoutModal();
-    }
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const isMobile = window.innerWidth < 768;
+  
+  if (isMobile && sidebarOpen && sidebar && !sidebar.contains(e.target) && e.target !== sidebarOverlay) {
+    closeSidebar();
+  }
 });
-</script>
-{% endblock %}
-
-{% block content %}
-<div class="dashboard-bg min-h-screen relative overflow-hidden">
-    <!-- Ambient Background Elements -->
-    <div class="fixed inset-0 pointer-events-none z-0">
-        <div class="absolute top-20 left-10 w-72 h-72 bg-emerald-200/10 rounded-full blur-3xl animate-float-1"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-200/10 rounded-full blur-3xl animate-float-2"></div>
-        <div class="absolute top-1/3 right-1/4 w-56 h-56 bg-amber-200/10 rounded-full blur-3xl animate-float-3"></div>
-        <div class="absolute top-1/2 left-1/3 w-48 h-48 bg-purple-200/10 rounded-full blur-3xl animate-float-4"></div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-
-        <!-- Welcome Banner -->
-        <div class="reveal mb-8" data-delay="0">
-            <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-2xl p-6 sm:p-8 text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden">
-                <div class="absolute inset-0 opacity-10">
-                    <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                        <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"/>
-                        </pattern>
-                        <rect width="100" height="100" fill="url(#grid)"/>
-                    </svg>
-                </div>
-
-                <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Welcome back, {{ current_user.name.split()[0] }}</h2>
-                        <p class="text-emerald-100 mt-2 text-sm sm:text-base">Here's what's happening with your platform today.</p>
-                    </div>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full border border-white/20">
-                            <i class="fas fa-calendar-alt text-emerald-200 text-sm"></i>
-                            <span class="text-sm font-mono font-medium" id="liveDate"></span>
-                        </div>
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-sm rounded-full border border-white/20">
-                            <i class="fas fa-clock text-emerald-200 text-sm"></i>
-                            <span class="text-sm font-mono font-medium" id="liveTime"></span>
-                            <span class="live-dot inline-block w-1.5 h-1.5 bg-emerald-300 rounded-full ml-1"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Statistics Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-blue-500 reveal" data-delay="50">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-users text-blue-600 text-xl"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
-                        +{{ (total_users * 0.12)|int if total_users else 0 }}
-                    </span>
-                </div>
-                <p class="text-3xl font-bold text-gray-900 counter" data-target="{{ total_users if total_users else 0 }}">0</p>
-                <p class="text-sm text-gray-500 mt-1">Total Users</p>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <div class="flex justify-between text-xs">
-                        <span class="text-gray-400">Active Accounts</span>
-                        <span class="text-gray-700 font-medium">{{ (total_students + total_lecturers) if total_students is defined and total_lecturers is defined else 0 }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-emerald-500 reveal" data-delay="100">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user-graduate text-emerald-600 text-xl"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Majority</span>
-                </div>
-                <p class="text-3xl font-bold text-gray-900 counter" data-target="{{ total_students if total_students else 0 }}">0</p>
-                <p class="text-sm text-gray-500 mt-1">Enrolled Students</p>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <div class="w-full bg-gray-100 rounded-full h-1.5">
-                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-1000" 
-                             style="width: 0%" 
-                             data-width="{{ (total_students / total_users * 100) if total_users and total_users > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-amber-500 reveal" data-delay="150">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-chalkboard-teacher text-amber-600 text-xl"></i>
-                    </div>
-                </div>
-                <p class="text-3xl font-bold text-gray-900 counter" data-target="{{ total_lecturers if total_lecturers else 0 }}">0</p>
-                <p class="text-sm text-gray-500 mt-1">Faculty Members</p>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <div class="w-full bg-gray-100 rounded-full h-1.5">
-                        <div class="bg-amber-500 h-1.5 rounded-full transition-all duration-1000" 
-                             style="width: 0%" 
-                             data-width="{{ (total_lecturers / total_users * 100) if total_users and total_users > 0 else 0 }}%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-purple-500 reveal" data-delay="200">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-file-alt text-purple-600 text-xl"></i>
-                    </div>
-                    <span class="text-xs font-semibold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full">
-                        {{ total_assignments if total_assignments else 0 }} total
-                    </span>
-                </div>
-                <p class="text-3xl font-bold text-gray-900 counter" data-target="{{ total_submissions if total_submissions else 0 }}">0</p>
-                <p class="text-sm text-gray-500 mt-1">Assignment Submissions</p>
-                <div class="mt-4 pt-4 border-t border-gray-100">
-                    <div class="flex justify-between text-xs">
-                        <span class="text-gray-400">Completion Rate</span>
-                        <span class="text-purple-600 font-medium">
-                            {{ "%.1f"|format((total_submissions / total_assignments * 100) if total_assignments and total_assignments > 0 else 0) }}%
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Grid Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column (2/3) -->
-            <div class="lg:col-span-2 space-y-8">
-
-                <!-- Quick Actions -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 reveal" data-delay="250">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-bolt text-emerald-500"></i>
-                            Quick Actions
-                        </h3>
-                        <span class="text-xs text-gray-400 font-medium">Administrative Tools</span>
-                    </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <a href="{{ url_for('send_verification_page') }}" class="group">
-                            <div class="flex flex-col items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 hover:border-emerald-300 hover:shadow-md transition-all duration-300">
-                                <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fas fa-envelope-open-text text-white text-lg"></i>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-700 group-hover:text-emerald-700">Send Code</span>
-                                <span class="text-xs text-gray-400">Email verification</span>
-                            </div>
-                        </a>
-                        <a href="{{ url_for('admin_lecturer_codes') }}" class="group">
-                            <div class="flex flex-col items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 hover:border-blue-300 hover:shadow-md transition-all duration-300">
-                                <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fas fa-qrcode text-white text-lg"></i>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-700 group-hover:text-blue-700">Verify Codes</span>
-                                <span class="text-xs text-gray-400">Manage access</span>
-                            </div>
-                        </a>
-                        <a href="{{ url_for('admin_lecturer_requests') }}" class="group">
-                            <div class="flex flex-col items-center gap-3 p-4 rounded-xl bg-gradient-to-br from-purple-50 to-white border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all duration-300">
-                                <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform duration-300">
-                                    <i class="fas fa-user-plus text-white text-lg"></i>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-700 group-hover:text-purple-700">Requests</span>
-                                <span class="text-xs text-gray-400">Pending approvals</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Recent Users -->
-                <div class="bg-white rounded-2xl shadow-lg overflow-hidden reveal" data-delay="300">
-                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white">
-                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                            <i class="fas fa-user-plus text-emerald-500"></i>
-                            Recent Registrations
-                        </h3>
-                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full font-medium">
-                            {{ recent_users|length if recent_users is defined else 0 }} new
-                        </span>
-                    </div>
-                    <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto custom-scrollbar">
-                        {% if recent_users and recent_users|length > 0 %}
-                        {% for user_item in recent_users %}
-                        <div class="recent-item px-6 py-4 flex items-center gap-4 hover:bg-gray-50 transition-all duration-200">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm
-                                {% if user_item.is_admin() %}bg-gradient-to-br from-red-100 to-red-200 text-red-600
-                                {% elif user_item.is_lecturer() %}bg-gradient-to-br from-amber-100 to-amber-200 text-amber-600
-                                {% else %}bg-gradient-to-br from-emerald-100 to-emerald-200 text-emerald-600{% endif %}">
-                                <i class="fas {% if user_item.is_admin() %}fa-user-shield{% elif user_item.is_lecturer() %}fa-chalkboard-teacher{% else %}fa-user-graduate{% endif %} text-sm"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <p class="text-sm font-semibold text-gray-900 truncate">{{ user_item.name }}</p>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
-                                        {% if user_item.role == 'admin' %}bg-red-100 text-red-700
-                                        {% elif user_item.role == 'lecturer' %}bg-amber-100 text-amber-700
-                                        {% else %}bg-emerald-100 text-emerald-700{% endif %}">
-                                        {{ user_item.role.title() }}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 truncate">{{ user_item.email }}</p>
-                            </div>
-                            <div class="text-right flex-shrink-0">
-                                <p class="text-xs text-gray-400 font-mono">{{ user_item.created_at.strftime('%d %b %Y') }}</p>
-                                <p class="text-xs text-gray-400">{{ user_item.created_at.strftime('%I:%M %p') }}</p>
-                            </div>
-                        </div>
-                        {% endfor %}
-                        {% else %}
-                        <div class="px-6 py-12 text-center">
-                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i class="fas fa-users text-gray-300 text-2xl"></i>
-                            </div>
-                            <p class="text-gray-400 text-sm font-medium">No users registered yet</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column (1/3) -->
-            <div class="space-y-8">
-
-                <!-- Admin Profile Card -->
-                <div class="bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 rounded-2xl p-6 text-white shadow-xl shadow-emerald-500/20 reveal" data-delay="150">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm ring-2 ring-white/30">
-                            <i class="fas fa-user-shield text-3xl"></i>
-                        </div>
-                        <div class="min-w-0">
-                            <p class="text-sm text-emerald-200 font-medium">Administrator</p>
-                            <p class="text-xl font-bold truncate">{{ current_user.name }}</p>
-                            <p class="text-xs text-emerald-200 truncate">{{ current_user.email }}</p>
-                        </div>
-                    </div>
-                    <div class="border-t border-white/20 pt-4 space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-emerald-200">Account Status</span>
-                            <span class="font-semibold flex items-center gap-1.5">
-                                <span class="relative flex h-2 w-2">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-300"></span>
-                                </span>
-                                Active
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- System Health -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 reveal" data-delay="200">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-server text-emerald-500"></i>
-                        System Health
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <span class="relative flex h-2.5 w-2.5">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                                </span>
-                                <span class="text-sm text-gray-700 font-medium">Database</span>
-                            </div>
-                            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Operational</span>
-                        </div>
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                            <div class="flex items-center gap-3">
-                                <span class="relative flex h-2.5 w-2.5">
-                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                                </span>
-                                <span class="text-sm text-gray-700 font-medium">Email Service</span>
-                            </div>
-                            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Active</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- User Distribution -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 reveal" data-delay="250">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <i class="fas fa-chart-pie text-emerald-500"></i>
-                        User Distribution
-                    </h3>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between text-sm mb-2">
-                                <span class="text-gray-600 flex items-center gap-1.5">👨‍🎓 Students</span>
-                                <span class="font-semibold text-gray-900">{{ "%.1f"|format((total_students / total_users * 100) if total_users and total_users > 0 else 0) }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-2.5 rounded-full transition-all duration-1000" 
-                                     style="width: 0%" 
-                                     data-width="{{ (total_students / total_users * 100) if total_users and total_users > 0 else 0 }}%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm mb-2">
-                                <span class="text-gray-600 flex items-center gap-1.5">👨‍🏫 Lecturers</span>
-                                <span class="font-semibold text-gray-900">{{ "%.1f"|format((total_lecturers / total_users * 100) if total_users and total_users > 0 else 0) }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                                <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-2.5 rounded-full transition-all duration-1000" 
-                                     style="width: 0%" 
-                                     data-width="{{ (total_lecturers / total_users * 100) if total_users and total_users > 0 else 0 }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-2xl p-6 text-white shadow-xl reveal" data-delay="300">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-chart-simple text-emerald-400 text-lg"></i>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-400">Platform Stats</p>
-                            <p class="text-2xl font-bold tracking-tight font-mono" id="liveStatClock">--:--:--</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-700">
-                        <div>
-                            <p class="text-xs text-gray-400">Active Today</p>
-                            <p class="text-lg font-bold text-emerald-400">{{ (total_users * 0.45)|int if total_users else 0 }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400">New This Week</p>
-                            <p class="text-lg font-bold text-emerald-400">{{ (total_users * 0.08)|int if total_users else 0 }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 pt-3 border-t border-gray-700">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="text-gray-500">System Version</span>
-                            <span class="text-emerald-400 font-mono font-semibold">v2.1.0</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Logout Confirmation Modal -->
-    <div id="adminLogoutModal" class="fixed inset-0 z-[10001] hidden items-center justify-center">
-        <div id="adminLogoutBackdrop" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 opacity-0"></div>
-        <div id="adminLogoutCard" class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
-            <div class="h-1.5 w-full bg-gradient-to-r from-red-400 via-red-500 to-red-600"></div>
-            <div class="px-6 pt-6 pb-5 text-center">
-                <div class="relative w-16 h-16 mx-auto mb-4">
-                    <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-20" style="animation-duration: 2s;"></div>
-                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shadow-inner border border-red-100">
-                        <i class="fas fa-sign-out-alt text-red-500 text-xl"></i>
-                    </div>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1.5 tracking-tight">Sign Out?</h3>
-                <p class="text-sm text-gray-500 leading-relaxed">Are you sure you want to end your admin session? You will need to log in again to access the admin portal.</p>
-            </div>
-            <div class="px-6 pb-6 flex gap-3">
-                <button onclick="hideAdminLogoutModal()" type="button" 
-                        class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] border border-gray-200">
-                    <i class="fas fa-times mr-1.5 text-xs"></i> Cancel
-                </button>
-                <button onclick="executeAdminLogout()" type="button" 
-                        class="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-red-500/25 hover:shadow-red-500/40 flex items-center justify-center gap-2 group">
-                    <i class="fas fa-sign-out-alt group-hover:translate-x-0.5 transition-transform duration-200"></i>
-                    <span>Sign Out</span>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-    @keyframes float1 { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-20px) rotate(2deg); } }
-    @keyframes float2 { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(-2deg); } }
-    @keyframes float3 { 0%, 100% { transform: translateY(0px) scale(1); } 50% { transform: translateY(-10px) scale(1.02); } }
-    @keyframes float4 { 0%, 100% { transform: translateX(0px); } 50% { transform: translateX(10px); } }
-    @keyframes livePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-
-    .dashboard-bg {
-        background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc);
-        background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
-    }
-
-    .animate-float-1 { animation: float1 8s ease-in-out infinite; }
-    .animate-float-2 { animation: float2 6s ease-in-out infinite 1s; }
-    .animate-float-3 { animation: float3 7s ease-in-out infinite 0.5s; }
-    .animate-float-4 { animation: float4 9s ease-in-out infinite 2s; }
-
-    .stat-card { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); opacity: 0; animation: fadeInUp 0.5s ease forwards; }
-    .stat-card:hover { transform: translateY(-4px); }
-
-    .reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-
-    .recent-item { transition: all 0.3s ease; opacity: 0; animation: slideInLeft 0.4s ease forwards; }
-
-    .live-dot { animation: livePulse 2s ease-in-out infinite; }
-
-    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-
-    #adminLogoutBackdrop { transition: opacity 0.3s ease; }
-    #adminLogoutCard { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
-</style>
-
-<script>
-    function startClock() {
-        const dateEl = document.getElementById('liveDate');
-        const timeEl = document.getElementById('liveTime');
-        const statClockEl = document.getElementById('liveStatClock');
-
-        function update() {
-            const now = new Date();
-            if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            if (statClockEl) statClockEl.textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
-        update();
-        setInterval(update, 1000);
-    }
-
-    function animateCounters() {
-        document.querySelectorAll('.counter').forEach(el => {
-            const target = parseInt(el.dataset.target) || 0;
-            if (target === 0) { el.textContent = '0'; return; }
-            let current = 0;
-            const duration = 1500, steps = 60;
-            const increment = target / steps;
-            const interval = setInterval(() => {
-                current += increment;
-                if (current >= target) { el.textContent = target.toLocaleString(); clearInterval(interval); }
-                else { el.textContent = Math.floor(current).toLocaleString(); }
-            }, duration / steps);
-        });
-    }
-
-    function animateProgressBars() {
-        setTimeout(() => {
-            document.querySelectorAll('[data-width]').forEach(el => { el.style.width = el.dataset.width; });
-        }, 500);
-    }
-
-    function initRevealAnimations() {
-        const reveals = document.querySelectorAll('.reveal');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const delay = entry.target.dataset.delay || 0;
-                    setTimeout(() => entry.target.classList.add('visible'), parseInt(delay));
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-        reveals.forEach(el => observer.observe(el));
-    }
-
-    window.addEventListener('load', () => {
-        startClock();
-        animateCounters();
-        animateProgressBars();
-        initRevealAnimations();
-    });
-
-    document.querySelectorAll('.recent-item').forEach((el, i) => { el.style.animationDelay = `${i * 0.05}s`; });
 </script>
 {% endblock %}

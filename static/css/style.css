@@ -369,3 +369,22 @@ textarea.form-control {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--gray-500);
 }
+
+/* Custom scrollbar for terms container */
+.terms-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.terms-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.terms-scroll::-webkit-scrollbar-thumb:hover {
+    background: #10b981;
+}

@@ -74,7 +74,7 @@ class User(UserMixin, db.Model):
     carry_over_courses = db.relationship(
         'CarryOverCourse', 
         foreign_keys='CarryOverCourse.student_id',
-        backref='student', 
+        backref='carry_over_student', 
         lazy='select', 
         cascade='all, delete-orphan'
     )
@@ -83,7 +83,7 @@ class User(UserMixin, db.Model):
     promotion_requests = db.relationship(
         'LevelPromotionRequest', 
         foreign_keys='LevelPromotionRequest.student_id',
-        backref='student', 
+        backref='promotion_student', 
         lazy='select', 
         cascade='all, delete-orphan'
     )
@@ -112,7 +112,12 @@ class User(UserMixin, db.Model):
     
     @property
     def is_active(self):
-        return self.account_active and self.verified
+        # Flask-Login calls this on every request for authenticated users.
+        # ONLY check account_active here — verified (email verification) is a
+        # soft requirement handled by the verification_required decorator.
+        # Including `verified` here would silently log out every new student
+        # immediately after registration since they start with verified=False.
+        return bool(self.account_active)
     
     @property
     def is_authenticated(self):

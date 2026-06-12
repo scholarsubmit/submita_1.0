@@ -1,41 +1,79 @@
 {% extends "base.html" %}
 
+{% block title %}Authentication Required - Submita{% endblock %}
+
+{% block extra_css %}
+<style>
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .animate-slide-in {
+        animation: slideIn 0.6s ease-out forwards;
+    }
+    
+    .animate-spin-slow {
+        animation: spin 8s linear infinite;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication Required - Submita</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        * { font-family: 'Inter', sans-serif; }
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
+    <div class="max-w-2xl w-full text-center animate-slide-in">
+        <!-- Login Icon -->
+        <div class="relative mb-8">
+            <div class="w-40 h-40 mx-auto bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl">
+                <i class="fas fa-user-circle text-white text-7xl"></i>
+            </div>
+        </div>
         
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        <!-- Message -->
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">Authentication Required</h1>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+            Please log in to access this page. You'll be redirected to the login page momentarily.
+        </p>
         
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('login') }}" 
+               class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg">
+                <i class="fas fa-sign-in-alt"></i>
+                Log In Now
+            </a>
+            <a href="{{ url_for('home') }}" 
+               class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-all">
+                <i class="fas fa-home"></i>
+                Go to Homepage
+            </a>
+        </div>
         
-        .animate-slide-in {
-            animation: slideIn 0.6s ease-out forwards;
-        }
-        
-        .animate-spin-slow {
-            animation: spin 8s linear infinite;
-        }
-    </style>
-</head>
-<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-    <div class="min-h-screen flex items-center justify-center px-4">
-        <div class="max-w-2xl w-full text-center animate-slide-in">
-            <!-- Login Icon -->
-            <div class="relative mb-8">
-                <div class="w-40 h-40 mx-auto bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-2xl">
-                    <i class="fas fa-user-circle text-white text-7xl"></
+        <!-- Auto-redirect message -->
+        <p class="text-sm text-gray-400 mt-8">
+            <i class="fas fa-hourglass-half"></i> Redirecting in <span id="countdown">5</span> seconds...
+        </p>
+    </div>
+</div>
+
+<script>
+    // Optional: Add auto-redirect countdown
+    let seconds = 5;
+    const countdownEl = document.getElementById('countdown');
+    if (countdownEl) {
+        const interval = setInterval(() => {
+            seconds--;
+            if (countdownEl) countdownEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(interval);
+                window.location.href = "{{ url_for('login') }}";
+            }
+        }, 1000);
+    }
+</script>
+{% endblock %}

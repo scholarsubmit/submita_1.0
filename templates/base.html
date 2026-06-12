@@ -36,150 +36,95 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
+        .touch-target { min-height: 44px; min-width: 44px; }
 
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #10b981;
-        }
-
-        /* Improved touch targets */
-        .touch-target {
-            min-height: 44px;
-            min-width: 44px;
-        }
-
-        /* Mobile menu animations */
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes slideUp {
-            from {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
+            from { opacity: 1; transform: translateY(0); }
+            to   { opacity: 0; transform: translateY(-10px); }
         }
+        .mobile-menu-open    { animation: slideDown 0.3s ease forwards; }
+        .mobile-menu-closing { animation: slideUp   0.3s ease forwards; }
 
-        .mobile-menu-open {
-            animation: slideDown 0.3s ease forwards;
-        }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes bounce    { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes slideInRight { from { opacity:0; transform:translateX(100%); } to { opacity:1; transform:translateX(0); } }
+        @keyframes fadeIn       { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
-        .mobile-menu-closing {
-            animation: slideUp 0.3s ease forwards;
-        }
+        .animate-spin-slow { animation: spin-slow 2s linear infinite; }
+        .animate-bounce    { animation: bounce   1s ease-in-out infinite; }
+        .flash-message     { animation: slideInRight 0.3s ease; }
+        .page-transition   { animation: fadeIn 0.3s ease-out; }
 
-        /* Loading Animations */
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(100%); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-spin-slow {
-            animation: spin-slow 2s linear infinite;
-        }
-
-        .animate-bounce {
-            animation: bounce 1s ease-in-out infinite;
-        }
-
-        .flash-message {
-            animation: slideInRight 0.3s ease;
-        }
-
-        .page-transition {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Logout Modal Animations */
         @keyframes logoutModalEnter {
-            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
-            60% { opacity: 1; transform: scale(1.02) translateY(-2px); }
-            100% { opacity: 1; transform: scale(1) translateY(0); }
+            0%   { opacity:0; transform:scale(0.9)  translateY(20px); }
+            60%  { opacity:1; transform:scale(1.02) translateY(-2px); }
+            100% { opacity:1; transform:scale(1)    translateY(0); }
         }
-
         @keyframes logoutModalExit {
-            0% { opacity: 1; transform: scale(1) translateY(0); }
-            100% { opacity: 0; transform: scale(0.92) translateY(15px); }
+            0%   { opacity:1; transform:scale(1)    translateY(0); }
+            100% { opacity:0; transform:scale(0.92) translateY(15px); }
         }
-
-        .logout-modal-show {
-            animation: logoutModalEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .logout-modal-hide {
-            animation: logoutModalExit 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .logout-icon-animate {
-            animation: logoutIconShake 0.6s ease-in-out;
-        }
+        .logout-modal-show { animation: logoutModalEnter 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .logout-modal-hide { animation: logoutModalExit  0.25s cubic-bezier(0.16,1,0.3,1) forwards; }
 
         @keyframes logoutIconShake {
-            0%, 100% { transform: rotate(0deg); }
-            15% { transform: rotate(-12deg); }
-            30% { transform: rotate(10deg); }
-            45% { transform: rotate(-8deg); }
-            60% { transform: rotate(5deg); }
-            75% { transform: rotate(-3deg); }
-            90% { transform: rotate(1deg); }
+            0%,100% { transform:rotate(0deg);   }
+            15%     { transform:rotate(-12deg);  }
+            30%     { transform:rotate(10deg);   }
+            45%     { transform:rotate(-8deg);   }
+            60%     { transform:rotate(5deg);    }
+            75%     { transform:rotate(-3deg);   }
+            90%     { transform:rotate(1deg);    }
         }
+        .logout-icon-animate { animation: logoutIconShake 0.6s ease-in-out; }
 
-        body.logout-modal-open {
-            overflow: hidden;
-        }
+        body.logout-modal-open { overflow: hidden; }
 
-        @media (max-width: 640px) {
-            body {
-                font-size: 13px;
-            }
-        }
+        @media (max-width: 640px) { body { font-size: 13px; } }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 
 <body class="bg-gray-50">
+
+    <!-- ── Verification Banner ── -->
+    {% if unverified_warning %}
+    <div id="verif-banner"
+         class="relative z-50 w-full px-4 py-3 text-sm font-medium flex items-center justify-between gap-4
+                {% if unverified_warning.urgent %}bg-red-600 text-white{% else %}bg-amber-500 text-white{% endif %}">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+            <i class="fas {% if unverified_warning.urgent %}fa-exclamation-triangle{% else %}fa-envelope{% endif %} shrink-0"></i>
+            <span class="truncate">
+                {% if unverified_warning.urgent %}
+                    <strong>Action required:</strong> Your account will be deactivated in less than 24 hours.
+                {% else %}
+                    <strong>Verify your email</strong> — {{ unverified_warning.days_remaining }} day{{ 's' if unverified_warning.days_remaining != 1 else '' }} left before your account is deactivated.
+                {% endif %}
+                &nbsp;
+                <a href="{{ url_for('verify_forced') }}"
+                   class="underline font-bold hover:opacity-80 transition whitespace-nowrap">
+                    Verify now &rarr;
+                </a>
+            </span>
+        </div>
+        <button onclick="document.getElementById('verif-banner').remove()"
+                class="shrink-0 opacity-75 hover:opacity-100 transition text-lg leading-none"
+                aria-label="Dismiss">&times;</button>
+    </div>
+    {% endif %}
+
     <!-- Global Loading Overlay -->
-    <div id="globalLoadingOverlay" class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[9999] hidden items-center justify-center flex-col">
+    <div id="globalLoadingOverlay"
+         class="fixed inset-0 bg-white/95 backdrop-blur-sm z-[9999] hidden items-center justify-center flex-col">
         <div class="text-center">
             <div class="relative w-24 h-24 mx-auto mb-6">
                 <div class="absolute inset-0 border-4 border-emerald-200 rounded-full"></div>
@@ -200,14 +145,15 @@
     </div>
 
     <!-- Page Loading Bar -->
-    <div id="topLoadingBar" class="fixed top-0 left-0 w-full h-1 bg-emerald-500 z-[10000] transform -translate-x-full transition-transform duration-300"></div>
+    <div id="topLoadingBar"
+         class="fixed top-0 left-0 w-full h-1 bg-emerald-500 z-[10000] transform -translate-x-full transition-transform duration-300">
+    </div>
 
-    <!-- Improved Navbar for authenticated users -->
-    {% if current_user.is_authenticated %}
+    <!-- Navbar for non-dashboard pages -->
+    {% if current_user.is_authenticated and not (request.endpoint in ['student_dashboard','lecturer_dashboard','admin_dashboard']) %}
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-14">
-                <!-- Logo -->
                 <a href="{{ url_for('dashboard') }}" class="flex items-center gap-2 group touch-target">
                     <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-active:scale-95">
                         <i class="fa-solid fa-paper-plane text-white text-sm"></i>
@@ -215,25 +161,19 @@
                     <span class="text-base font-bold text-gray-800 group-hover:text-emerald-600 transition-colors">Submita</span>
                 </a>
 
-                <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center gap-4">
-                    <!-- User Name - Desktop -->
                     <div class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full">
                         <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center">
                             <i class="fas fa-user text-emerald-600 text-xs"></i>
                         </div>
                         <span class="text-sm font-medium text-gray-700">{{ current_user.name.split()[0] if current_user.name else 'User' }}</span>
                     </div>
-                    
-                    <!-- Role Badge -->
                     <span class="text-xs px-3 py-1 rounded-full font-semibold shadow-sm
                         {% if current_user.is_admin() %}bg-red-100 text-red-700
                         {% elif current_user.is_lecturer() %}bg-purple-100 text-purple-700
                         {% else %}bg-emerald-100 text-emerald-700{% endif %}">
                         {{ current_user.role|capitalize }}
                     </span>
-                    
-                    <!-- Logout Button -->
                     <button onclick="showLogoutConfirm(event)"
                         class="logout-btn flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 active:bg-red-100 rounded-xl transition-all duration-200 text-sm font-medium touch-target">
                         <i class="fas fa-sign-out-alt text-sm"></i>
@@ -241,17 +181,16 @@
                     </button>
                 </div>
 
-                <!-- Mobile Menu Button -->
-                <button id="mobileMenuBtn" class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-all touch-target" aria-label="Menu">
+                <button id="mobileMenuBtn"
+                        class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-gray-100 active:bg-gray-200 transition-all touch-target"
+                        aria-label="Menu">
                     <i id="menuIcon" class="fas fa-bars text-gray-600 text-xl"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Menu Panel -->
         <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-lg">
             <div class="px-4 py-3 space-y-2">
-                <!-- User Info -->
                 <div class="flex items-center gap-3 py-3 border-b border-gray-100">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center">
                         <i class="fas fa-user text-emerald-600 text-lg"></i>
@@ -267,23 +206,10 @@
                         {{ current_user.role|capitalize }}
                     </span>
                 </div>
-                
-                <!-- Navigation Links -->
                 <a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition touch-target">
                     <i class="fas fa-tachometer-alt text-emerald-500 w-5"></i>
                     <span class="text-sm font-medium text-gray-700">Dashboard</span>
                 </a>
-                {% if current_user.is_student() %}
-                <a href="{{ url_for('student_dashboard') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition touch-target">
-                    <i class="fas fa-tasks text-emerald-500 w-5"></i>
-                    <span class="text-sm font-medium text-gray-700">My Assignments</span>
-                </a>
-                {% elif current_user.is_lecturer() %}
-                <a href="{{ url_for('lecturer_dashboard') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition touch-target">
-                    <i class="fas fa-chalkboard-user text-emerald-500 w-5"></i>
-                    <span class="text-sm font-medium text-gray-700">My Courses</span>
-                </a>
-                {% endif %}
                 <a href="{{ url_for('profile') }}" class="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition touch-target">
                     <i class="fas fa-user-circle text-emerald-500 w-5"></i>
                     <span class="text-sm font-medium text-gray-700">Profile</span>
@@ -305,15 +231,16 @@
     {% endif %}
 
     <!-- Flash Messages -->
-    <div id="flash-container" class="fixed top-20 right-4 left-4 sm:right-4 sm:left-auto z-50 space-y-2 max-w-md ml-auto">
+    <div id="flash-container"
+         class="fixed top-20 right-4 left-4 sm:right-4 sm:left-auto z-50 space-y-2 max-w-md ml-auto">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
         {% for category, message in messages %}
         <div class="flash-message p-4 rounded-xl shadow-lg text-sm
-                        {% if category == 'success' %}bg-green-50 text-green-800 border-l-4 border-green-500
-                        {% elif category == 'danger' %}bg-red-50 text-red-800 border-l-4 border-red-500
-                        {% elif category == 'warning' %}bg-yellow-50 text-yellow-800 border-l-4 border-yellow-500
-                        {% else %}bg-blue-50 text-blue-800 border-l-4 border-blue-500{% endif %}">
+                {% if category == 'success' %}bg-green-50 text-green-800 border-l-4 border-green-500
+                {% elif category == 'danger' %}bg-red-50 text-red-800 border-l-4 border-red-500
+                {% elif category == 'warning' %}bg-yellow-50 text-yellow-800 border-l-4 border-yellow-500
+                {% else %}bg-blue-50 text-blue-800 border-l-4 border-blue-500{% endif %}">
             <div class="flex items-center gap-2">
                 <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% else %}info-circle{% endif %} text-sm"></i>
                 <span>{{ message }}</span>
@@ -329,14 +256,19 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Improved Logout Confirmation Modal -->
-    <div id="logoutModalOverlay" class="fixed inset-0 z-[10001] hidden items-center justify-center p-4" style="perspective: 1000px;">
-        <div id="logoutModalBackdrop" class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300 opacity-0"></div>
-        <div id="logoutModalCard" class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
+    <!-- Logout Modal -->
+    {% if not (request.endpoint in ['student_dashboard','lecturer_dashboard','admin_dashboard']) %}
+    <div id="logoutModalOverlay"
+         class="fixed inset-0 z-[10001] hidden items-center justify-center p-4"
+         style="perspective:1000px;">
+        <div id="logoutModalBackdrop"
+             class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300 opacity-0"></div>
+        <div id="logoutModalCard"
+             class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
             <div class="h-1.5 w-full bg-gradient-to-r from-red-400 via-red-500 to-red-600"></div>
             <div class="px-6 pt-6 pb-5 text-center">
                 <div class="relative w-16 h-16 mx-auto mb-4">
-                    <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-20" style="animation-duration: 2s;"></div>
+                    <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-20" style="animation-duration:2s;"></div>
                     <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shadow-inner border border-red-100">
                         <i id="logoutModalIcon" class="fas fa-sign-out-alt text-red-500 text-2xl transition-transform duration-500"></i>
                     </div>
@@ -345,11 +277,11 @@
                 <p class="text-sm text-gray-500 leading-relaxed">Are you sure you want to end your session? You will need to log in again to access your dashboard.</p>
             </div>
             <div class="px-6 pb-6 flex gap-3">
-                <button onclick="hideLogoutConfirm()" type="button" 
+                <button onclick="hideLogoutConfirm()" type="button"
                     class="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-xl text-sm font-semibold transition-all duration-200 touch-target">
                     <i class="fas fa-times mr-2"></i> Cancel
                 </button>
-                <button onclick="confirmLogout()" type="button" 
+                <button onclick="confirmLogout()" type="button"
                     class="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg shadow-red-500/30 flex items-center justify-center gap-2 touch-target">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Sign Out</span>
@@ -357,33 +289,25 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <style>
-        @keyframes slide-up {
-            from { opacity: 0; transform: translateY(20px) translateX(-50%); }
-            to { opacity: 1; transform: translateY(0) translateX(-50%); }
-        }
-        @keyframes slide-down {
-            from { opacity: 1; transform: translateY(0) translateX(-50%); }
-            to { opacity: 0; transform: translateY(20px) translateX(-50%); }
-        }
-        .animate-slide-up { animation: slide-up 0.3s ease forwards; }
+        @keyframes slide-up   { from{opacity:0;transform:translateY(20px) translateX(-50%)} to{opacity:1;transform:translateY(0) translateX(-50%)} }
+        @keyframes slide-down { from{opacity:1;transform:translateY(0)     translateX(-50%)} to{opacity:0;transform:translateY(20px) translateX(-50%)} }
+        .animate-slide-up   { animation: slide-up   0.3s ease forwards; }
         .animate-slide-down { animation: slide-down 0.3s ease forwards; }
-        
         #logoutModalBackdrop { transition: opacity 0.3s ease; }
-        #logoutModalCard { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease; }
-        
-        /* Mobile menu transitions */
+        #logoutModalCard     { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease; }
         .mobile-menu-enter { animation: slideDown 0.3s ease forwards; }
-        .mobile-menu-exit { animation: slideUp 0.3s ease forwards; }
+        .mobile-menu-exit  { animation: slideUp   0.3s ease forwards; }
     </style>
 
     <script>
-        // ==================== MOBILE MENU TOGGLE ====================
+        // Mobile Menu
         let mobileMenuOpen = false;
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const menuIcon = document.getElementById('menuIcon');
+        const mobileMenu    = document.getElementById('mobileMenu');
+        const menuIcon      = document.getElementById('menuIcon');
 
         if (mobileMenuBtn) {
             mobileMenuBtn.addEventListener('click', function(e) {
@@ -391,164 +315,117 @@
                 if (!mobileMenuOpen) {
                     mobileMenu.classList.remove('hidden');
                     mobileMenu.classList.add('mobile-menu-enter');
-                    menuIcon.classList.remove('fa-bars');
-                    menuIcon.classList.add('fa-times');
+                    menuIcon.classList.replace('fa-bars','fa-times');
                     mobileMenuOpen = true;
                 } else {
-                    mobileMenu.classList.remove('mobile-menu-enter');
-                    mobileMenu.classList.add('mobile-menu-exit');
-                    setTimeout(() => {
-                        mobileMenu.classList.add('hidden');
-                        mobileMenu.classList.remove('mobile-menu-exit');
-                    }, 300);
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
+                    mobileMenu.classList.replace('mobile-menu-enter','mobile-menu-exit');
+                    setTimeout(() => { mobileMenu.classList.add('hidden'); mobileMenu.classList.remove('mobile-menu-exit'); }, 300);
+                    menuIcon.classList.replace('fa-times','fa-bars');
                     mobileMenuOpen = false;
                 }
             });
         }
-
-        // Close mobile menu when clicking outside
+        
         document.addEventListener('click', function(e) {
             if (mobileMenuOpen && mobileMenuBtn && !mobileMenuBtn.contains(e.target) && mobileMenu && !mobileMenu.contains(e.target)) {
-                mobileMenu.classList.remove('mobile-menu-enter');
-                mobileMenu.classList.add('mobile-menu-exit');
-                setTimeout(() => {
-                    mobileMenu.classList.add('hidden');
-                    mobileMenu.classList.remove('mobile-menu-exit');
-                }, 300);
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
+                mobileMenu.classList.replace('mobile-menu-enter','mobile-menu-exit');
+                setTimeout(() => { mobileMenu.classList.add('hidden'); mobileMenu.classList.remove('mobile-menu-exit'); }, 300);
+                menuIcon.classList.replace('fa-times','fa-bars');
                 mobileMenuOpen = false;
             }
         });
-
-        // Close mobile menu on escape key
+        
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && mobileMenuOpen) {
-                mobileMenu.classList.remove('mobile-menu-enter');
-                mobileMenu.classList.add('mobile-menu-exit');
-                setTimeout(() => {
-                    mobileMenu.classList.add('hidden');
-                    mobileMenu.classList.remove('mobile-menu-exit');
-                }, 300);
-                menuIcon.classList.remove('fa-times');
-                menuIcon.classList.add('fa-bars');
+                mobileMenu.classList.replace('mobile-menu-enter','mobile-menu-exit');
+                setTimeout(() => { mobileMenu.classList.add('hidden'); mobileMenu.classList.remove('mobile-menu-exit'); }, 300);
+                menuIcon.classList.replace('fa-times','fa-bars');
                 mobileMenuOpen = false;
             }
         });
 
-        // ==================== LOADING FUNCTIONS ====================
-        function showGlobalLoading(message = 'Please wait...', title = 'Loading Submita') {
+        // Loading functions
+        function showGlobalLoading(message='Please wait...', title='Loading Submita') {
             const overlay = document.getElementById('globalLoadingOverlay');
-            const messageEl = document.getElementById('loadingMessage');
-            const titleEl = document.getElementById('loadingTitle');
-            if (overlay) {
-                if (messageEl) messageEl.textContent = message;
-                if (titleEl) titleEl.textContent = title;
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-                document.body.style.overflow = 'hidden';
-            }
+            if (!overlay) return;
+            document.getElementById('loadingMessage').textContent = message;
+            document.getElementById('loadingTitle').textContent   = title;
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            document.body.style.overflow = 'hidden';
         }
-
+        
         function hideGlobalLoading() {
             const overlay = document.getElementById('globalLoadingOverlay');
-            if (overlay) {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-                document.body.style.overflow = '';
-            }
+            if (!overlay) return;
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            document.body.style.overflow = '';
         }
 
-        // ==================== LOGOUT FUNCTIONS ====================
+        // Logout functions
         let logoutModalOpen = false;
-
+        
         function showLogoutConfirm(e) {
             if (e) { e.preventDefault(); e.stopPropagation(); }
+            if (typeof showLogoutModal === 'function') { showLogoutModal(e); return; }
             if (logoutModalOpen) return;
             logoutModalOpen = true;
-
-            const overlay = document.getElementById('logoutModalOverlay');
+            const overlay  = document.getElementById('logoutModalOverlay');
             const backdrop = document.getElementById('logoutModalBackdrop');
-            const card = document.getElementById('logoutModalCard');
-            const icon = document.getElementById('logoutModalIcon');
-
+            const card     = document.getElementById('logoutModalCard');
+            const icon     = document.getElementById('logoutModalIcon');
+            if (!overlay) return;
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
             document.body.classList.add('logout-modal-open');
-
-            setTimeout(() => {
-                backdrop.style.opacity = '1';
-                card.classList.add('logout-modal-show');
-            }, 10);
-
-            setTimeout(() => {
-                if (icon) icon.classList.add('logout-icon-animate');
-            }, 200);
-
-            setTimeout(() => {
-                if (icon) icon.classList.remove('logout-icon-animate');
-            }, 800);
-
+            setTimeout(() => { backdrop.style.opacity='1'; card.classList.add('logout-modal-show'); }, 10);
+            setTimeout(() => { if(icon) icon.classList.add('logout-icon-animate'); }, 200);
+            setTimeout(() => { if(icon) icon.classList.remove('logout-icon-animate'); }, 800);
             document.addEventListener('keydown', handleLogoutEscape);
-            backdrop.onclick = function (e) { if (e.target === backdrop) hideLogoutConfirm(); };
+            backdrop.onclick = e => { if(e.target===backdrop) hideLogoutConfirm(); };
         }
-
+        
         function hideLogoutConfirm() {
             if (!logoutModalOpen) return;
-            const overlay = document.getElementById('logoutModalOverlay');
+            const overlay  = document.getElementById('logoutModalOverlay');
             const backdrop = document.getElementById('logoutModalBackdrop');
-            const card = document.getElementById('logoutModalCard');
-
+            const card     = document.getElementById('logoutModalCard');
+            if (!overlay) return;
             backdrop.style.opacity = '0';
             card.classList.remove('logout-modal-show');
             card.classList.add('logout-modal-hide');
             document.removeEventListener('keydown', handleLogoutEscape);
-
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                overlay.classList.remove('flex');
-                document.body.classList.remove('logout-modal-open');
-                logoutModalOpen = false;
-            }, 300);
+            setTimeout(() => { overlay.classList.add('hidden'); overlay.classList.remove('flex'); document.body.classList.remove('logout-modal-open'); logoutModalOpen = false; }, 300);
         }
-
-        function handleLogoutEscape(e) {
-            if (e.key === 'Escape') hideLogoutConfirm();
-        }
-
-        function confirmLogout() {
-            hideLogoutConfirm();
-            setTimeout(() => { executeLogout(); }, 200);
-        }
-
+        
+        function handleLogoutEscape(e) { if(e.key==='Escape') hideLogoutConfirm(); }
+        
+        function confirmLogout() { hideLogoutConfirm(); setTimeout(executeLogout, 200); }
+        
         function executeLogout() {
-            sessionStorage.setItem('just_logged_out', 'true');
-            localStorage.setItem('just_logged_out', 'true');
+            sessionStorage.setItem('just_logged_out','true');
+            localStorage.setItem('just_logged_out','true');
             window.location.href = "{{ url_for('logout') }}";
         }
 
-        // Auto-hide flash messages after 5 seconds
-        setTimeout(function () {
-            document.querySelectorAll('.flash-message').forEach(function (msg) {
-                setTimeout(function () {
-                    msg.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                    msg.style.opacity = '0';
-                    msg.style.transform = 'translateX(100%)';
-                    setTimeout(function () { if (msg && msg.remove) msg.remove(); }, 300);
+        // Flash auto-hide
+        setTimeout(function() {
+            document.querySelectorAll('.flash-message').forEach(function(msg) {
+                setTimeout(function() {
+                    msg.style.transition = 'opacity .3s ease, transform .3s ease';
+                    msg.style.opacity    = '0';
+                    msg.style.transform  = 'translateX(100%)';
+                    setTimeout(() => { if(msg && msg.remove) msg.remove(); }, 300);
                 }, 4000);
             });
         }, 1000);
 
         // Page load
-        document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(function() {
-                hideGlobalLoading();
-            }, 500);
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(hideGlobalLoading, 500);
         });
     </script>
     {% block extra_js %}{% endblock %}
 </body>
-
 </html>

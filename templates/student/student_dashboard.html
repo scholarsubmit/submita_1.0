@@ -1,529 +1,815 @@
-{# FILE: templates/student_dashboard.html
-   LOCATION: /templates/student_dashboard.html
-   FIXES: COMPLETELY REMOVED all aggressive redirect checks #}
-
+<!-- FILE: templates/student_dashboard.html -->
 {% extends "base.html" %}
+{% block title %}My Dashboard — Submita{% endblock %}
 
-{% block title %}Student Dashboard — Submita{% endblock %}
-
-{% block extra_head %}
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// ============================================================
-// LOGOUT MODAL SYSTEM ONLY - NO AUTH CHECKS
-// ============================================================
-let logoutModalOpen = false;
-
-function showLogoutConfirm(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    if (logoutModalOpen) return;
-    logoutModalOpen = true;
-
-    const overlay = document.getElementById('logoutModalOverlay');
-    const backdrop = document.getElementById('logoutModalBackdrop');
-    const card = document.getElementById('logoutModalCard');
-    const icon = document.getElementById('logoutModalIcon');
-
-    overlay.classList.remove('hidden');
-    overlay.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-
-    requestAnimationFrame(() => {
-        backdrop.classList.add('opacity-100');
-        card.classList.add('scale-100', 'opacity-100');
-        card.classList.remove('scale-95', 'opacity-0');
-    });
-
-    setTimeout(() => { icon.classList.add('logout-icon-animate'); }, 150);
-    setTimeout(() => { icon.classList.remove('logout-icon-animate'); }, 800);
-
-    document.addEventListener('keydown', handleLogoutEscape);
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sidebar-w: 264px;
+  --topbar-h: 64px;
+  --accent: #16a34a;
+  --accent-dark: #15803d;
+  --accent-deeper: #166534;
+  --accent-light: #f0fdf4;
+  --accent-mid: #bbf7d0;
+  --sidebar-bg: #0a0f1e;
+  --sidebar-border: rgba(255,255,255,.06);
+  --sidebar-text: #94a3b8;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+  --radius: 14px;
+  --radius-sm: 9px;
 }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); overflow-x: hidden; }
 
-function hideLogoutConfirm() {
-    if (!logoutModalOpen) return;
-    const overlay = document.getElementById('logoutModalOverlay');
-    const backdrop = document.getElementById('logoutModalBackdrop');
-    const card = document.getElementById('logoutModalCard');
+/* ── SIDEBAR ── */
+.sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: var(--sidebar-w); background: var(--sidebar-bg); z-index: 300; display: flex; flex-direction: column; transition: transform .3s cubic-bezier(.4,0,.2,1); border-right: 1px solid var(--sidebar-border); }
+.sidebar.collapsed { transform: translateX(calc(-1 * var(--sidebar-w))); }
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 299; backdrop-filter: blur(3px); }
+.sidebar-overlay.active { display: block; }
+.sidebar-logo { display: flex; align-items: center; gap: 11px; padding: 20px 20px 18px; border-bottom: 1px solid var(--sidebar-border); }
+.logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(22,163,74,.4); }
+.logo-icon i { color: #fff; font-size: 16px; }
+.logo-wordmark { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+.logo-wordmark span { color: var(--accent); }
+.sidebar-badge { margin-left: auto; font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; background: rgba(22,163,74,.2); color: #4ade80; padding: 3px 8px; border-radius: 20px; border: 1px solid rgba(22,163,74,.3); }
 
-    backdrop.classList.remove('opacity-100');
-    card.classList.remove('scale-100', 'opacity-100');
-    card.classList.add('scale-95', 'opacity-0');
-    document.removeEventListener('keydown', handleLogoutEscape);
+.sidebar-user { margin: 14px 12px 8px; background: rgba(255,255,255,.05); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; align-items: center; gap: 11px; border: 1px solid var(--sidebar-border); cursor: pointer; transition: all .2s; }
+.sidebar-user:hover { background: rgba(255,255,255,.08); border-color: rgba(22,163,74,.3); }
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: #fff; flex-shrink: 0; border: 2px solid rgba(255,255,255,.15); box-shadow: 0 0 0 3px rgba(22,163,74,.2); }
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-info .uname { font-size: 13px; font-weight: 600; color: #f1f5f9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-info .urole { font-size: 10px; color: #4ade80; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; margin-top: 2px; }
+.user-online-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(74,222,128,.3); animation: pulse-dot 2s ease-in-out infinite; }
 
-    setTimeout(() => {
-        overlay.classList.add('hidden');
-        overlay.classList.remove('flex');
-        document.body.style.overflow = '';
-        logoutModalOpen = false;
-    }, 300);
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 10px 0; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.1) transparent; }
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+.nav-section-label { font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1.2px; padding: 16px 10px 6px; }
+.nav-item { display: flex; align-items: center; gap: 11px; padding: 9px 12px; border-radius: var(--radius-sm); margin-bottom: 2px; color: var(--sidebar-text); font-size: 13.5px; font-weight: 500; text-decoration: none; transition: all .2s; position: relative; cursor: pointer; }
+.nav-item:hover { background: rgba(255,255,255,.07); color: #e2e8f0; }
+.nav-item.active { background: linear-gradient(135deg, rgba(22,163,74,.2) 0%, rgba(22,163,74,.08) 100%); color: #4ade80; border: 1px solid rgba(22,163,74,.25); }
+.nav-item.active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--accent); border-radius: 0 3px 3px 0; }
+.nav-item i { width: 18px; text-align: center; font-size: 14px; flex-shrink: 0; }
+.nav-badge { margin-left: auto; background: #ef4444; color: #fff; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px; min-width: 20px; text-align: center; }
+.nav-badge.green { background: var(--accent); }
+.nav-badge.amber { background: #f59e0b; }
+.nav-badge.blue  { background: #3b82f6; }
+.sidebar-footer { padding: 10px 10px 18px; border-top: 1px solid var(--sidebar-border); }
+.sidebar-footer .nav-item { color: #64748b; }
+
+/* ── TOPBAR ── */
+.topbar { position: fixed; top: 0; left: var(--sidebar-w); right: 0; height: var(--topbar-h); background: rgba(255,255,255,.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 14px; z-index: 200; transition: left .3s cubic-bezier(.4,0,.2,1); box-shadow: 0 1px 0 rgba(0,0,0,.04), var(--shadow-sm); }
+.topbar.sidebar-collapsed { left: 0; }
+.hamburger { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); cursor: pointer; border: 1px solid var(--border); background: var(--surface); transition: all .2s; flex-shrink: 0; }
+.hamburger:hover { background: var(--accent-light); border-color: var(--accent-mid); }
+.topbar-breadcrumb { display: flex; align-items: center; gap: 8px; }
+.topbar-breadcrumb .page-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+.topbar-breadcrumb .sep { color: #cbd5e1; }
+.topbar-breadcrumb .sub { font-size: 13px; color: var(--text-muted); }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.topbar-clock { display: flex; align-items: center; gap: 8px; padding: 7px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--text-secondary); font-weight: 500; }
+.live-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: pulse-dot 2s ease-in-out infinite; }
+@keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+.session-timer { display: flex; align-items: center; gap: 7px; padding: 6px 12px; background: var(--accent-light); border: 1px solid var(--accent-mid); border-radius: var(--radius-sm); font-size: 11.5px; color: var(--accent-deeper); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+.session-timer.warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+.session-timer.danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; animation: blink-timer .8s ease-in-out infinite; }
+@keyframes blink-timer { 0%,100%{opacity:1} 50%{opacity:.6} }
+.icon-btn { width: 38px; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; color: var(--text-muted); text-decoration: none; position: relative; }
+.icon-btn:hover { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
+.icon-btn .badge-dot { position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; border: 2px solid #fff; }
+
+/* ── MAIN ── */
+.main-area { margin-left: var(--sidebar-w); margin-top: var(--topbar-h); padding: 28px; min-height: calc(100vh - var(--topbar-h)); transition: margin-left .3s cubic-bezier(.4,0,.2,1); }
+.main-area.sidebar-collapsed { margin-left: 0; }
+
+/* ── VERIFICATION BANNER ── */
+.verif-banner { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; font-weight: 500; animation: slide-down .3s ease; }
+@keyframes slide-down { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.verif-banner.warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.verif-banner.success { background: var(--accent-light); border: 1px solid var(--accent-mid); color: var(--accent-deeper); }
+.verif-banner i { font-size: 16px; flex-shrink: 0; }
+.banner-close { margin-left: auto; cursor: pointer; opacity: .6; background: none; border: none; color: inherit; font-size: 18px; }
+
+/* ── DEADLINE URGENCY BANNER ── */
+.urgency-strip { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; font-weight: 600; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; animation: slide-down .3s ease; }
+.urgency-strip i { flex-shrink: 0; font-size: 15px; }
+
+/* ── WELCOME BANNER ── */
+.welcome-banner { background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #16a34a 100%); border-radius: 18px; padding: 32px 36px; color: #fff; position: relative; overflow: hidden; margin-bottom: 28px; box-shadow: 0 8px 32px rgba(22,163,74,.3); }
+.welcome-banner::before { content: ''; position: absolute; top: -60px; right: -60px; width: 240px; height: 240px; background: rgba(255,255,255,.04); border-radius: 50%; }
+.welcome-banner::after { content: ''; position: absolute; bottom: -40px; right: 140px; width: 160px; height: 160px; background: rgba(255,255,255,.03); border-radius: 50%; }
+.wb-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,.6); margin-bottom: 6px; }
+.wb-title { font-size: 26px; font-weight: 900; letter-spacing: -.6px; margin-bottom: 4px; }
+.wb-sub { font-size: 14px; color: rgba(255,255,255,.7); }
+.wb-meta { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.wb-pill { display: flex; align-items: center; gap: 7px; padding: 7px 16px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; font-size: 12.5px; font-weight: 600; }
+.wb-actions { position: absolute; right: 36px; top: 50%; transform: translateY(-50%); display: flex; gap: 10px; z-index: 1; }
+.wb-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; border: none; transition: all .2s; }
+.wb-btn-solid { background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.3); }
+.wb-btn-solid:hover { background: rgba(255,255,255,.3); transform: translateY(-1px); }
+
+/* ── STATS ── */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 18px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border-radius: var(--radius); padding: 22px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); transition: all .25s; position: relative; overflow: hidden; cursor: default; border-top: 3px solid transparent; }
+.stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.stat-card.green { border-top-color: #16a34a; }
+.stat-card.amber { border-top-color: #f59e0b; }
+.stat-card.blue  { border-top-color: #3b82f6; }
+.stat-card.red   { border-top-color: #ef4444; }
+.stat-card.teal  { border-top-color: #0d9488; }
+.s-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.s-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.s-trend { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+.s-trend.up   { background: #d1fae5; color: #065f46; }
+.s-trend.down { background: #fee2e2; color: #991b1b; }
+.s-label { font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; }
+.s-value { font-size: 36px; font-weight: 900; color: var(--text-primary); line-height: 1; margin: 6px 0; font-variant-numeric: tabular-nums; letter-spacing: -1px; }
+.s-sub { font-size: 12px; color: var(--text-muted); }
+
+/* ── SECTION CARDS ── */
+.section-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm); overflow: hidden; margin-bottom: 22px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border-light); }
+.section-header h2 { font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 9px; }
+.section-header-right { display: flex; align-items: center; gap: 10px; }
+.badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; background: var(--border-light); color: var(--text-secondary); }
+.badge.green  { background: #d1fae5; color: #065f46; }
+.badge.amber  { background: #fef3c7; color: #92400e; }
+.badge.blue   { background: #dbeafe; color: #1d4ed8; }
+.badge.red    { background: #fee2e2; color: #991b1b; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; border: none; transition: all .2s; white-space: nowrap; }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 8px rgba(22,163,74,.3); }
+.btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+.btn-secondary { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--border-light); }
+.btn-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.btn-sm { padding: 5px 11px; font-size: 11.5px; }
+
+/* ── LIST ROWS ── */
+.list-row { display: flex; align-items: center; padding: 15px 22px; border-bottom: 1px solid var(--border-light); gap: 14px; transition: background .15s; }
+.list-row:last-child { border-bottom: none; }
+.list-row:hover { background: #f8fffe; }
+.row-icon { width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.row-body { flex: 1; min-width: 0; }
+.row-title { font-size: 13.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-meta { font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.row-meta span { display: flex; align-items: center; gap: 4px; }
+.row-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+/* ── GRADE PILLS ── */
+.grade-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.grade-pill.graded { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.grade-pill.pending { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.grade-pill.late    { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+/* ── ASSIGNMENT CARDS ── */
+.asgn-card { display: flex; flex-direction: column; gap: 10px; padding: 16px 22px; border-bottom: 1px solid var(--border-light); transition: background .15s; cursor: pointer; }
+.asgn-card:hover { background: #f8fffe; }
+.asgn-card:last-child { border-bottom: none; }
+.asgn-title { font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 9px; }
+.asgn-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.asgn-meta span { display: flex; align-items: center; gap: 5px; }
+.asgn-footer { display: flex; align-items: center; justify-content: space-between; }
+.countdown-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700; }
+.countdown-chip.ok     { background: var(--accent-light); color: var(--accent-deeper); border: 1px solid var(--accent-mid); }
+.countdown-chip.warn   { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.countdown-chip.urgent { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; animation: blink-timer .8s ease-in-out infinite; }
+
+/* ── GPA DISPLAY ── */
+.gpa-ring { display: flex; align-items: center; gap: 20px; padding: 20px 22px; }
+.gpa-circle { width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(var(--accent) 0% 75%, var(--border-light) 75% 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; }
+.gpa-circle-inner { width: 60px; height: 60px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+.gpa-value { font-size: 18px; font-weight: 900; color: var(--accent); }
+.gpa-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── PROGRESS BAR ── */
+.prog-row { margin-bottom: 14px; }
+.prog-row:last-child { margin-bottom: 0; }
+.prog-label { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12.5px; }
+.prog-bar { height: 6px; background: var(--border-light); border-radius: 6px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), #4ade80); transition: width 1.4s cubic-bezier(.4,0,.2,1); }
+
+/* ── NOTIFICATION DRAWER ── */
+.notif-drawer { position: fixed; top: var(--topbar-h); right: 0; bottom: 0; width: 360px; background: var(--surface); border-left: 1px solid var(--border); z-index: 250; transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: -8px 0 24px rgba(0,0,0,.08); }
+.notif-drawer.open { transform: translateX(0); }
+.notif-header { padding: 18px 20px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
+.notif-header h3 { font-size: 15px; font-weight: 700; }
+.notif-list { flex: 1; overflow-y: auto; }
+.notif-item { display: flex; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background .15s; }
+.notif-item:hover { background: var(--bg); }
+.notif-item.unread { background: #f0fdf4; border-left: 3px solid var(--accent); }
+.notif-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.notif-text { font-size: 13px; color: var(--text-primary); font-weight: 500; line-height: 1.4; }
+.notif-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+/* ── SCROLLABLE ── */
+.list-scroll { max-height: 420px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+.list-scroll::-webkit-scrollbar { width: 4px; }
+.list-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+/* ── CONTENT GRID ── */
+.content-grid { display: grid; grid-template-columns: 1fr; gap: 22px; }
+@media(min-width: 1100px) { .content-grid { grid-template-columns: 2fr 1fr; } }
+
+/* ── EMPTY STATE ── */
+.empty-state { padding: 48px 24px; text-align: center; }
+.e-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--border-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 24px; color: var(--text-muted); }
+.e-title { font-size: 15px; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px; }
+.e-sub { font-size: 13px; color: var(--text-muted); }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; background: rgba(15,23,42,.6); backdrop-filter: blur(5px); }
+.modal-overlay.open { display: flex; }
+.modal-card { background: var(--surface); border-radius: 20px; width: 100%; max-width: 440px; margin: 16px; overflow: hidden; animation: modal-in .28s cubic-bezier(.34,1.56,.64,1) forwards; box-shadow: var(--shadow-lg); }
+@keyframes modal-in { from{opacity:0;transform:scale(.88) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+/* ── SEARCH ── */
+.search-bar { display: flex; align-items: center; gap: 9px; padding: 7px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); min-width: 200px; transition: all .2s; }
+.search-bar:focus-within { border-color: var(--accent-mid); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(22,163,74,.12); }
+.search-bar input { border: none; background: transparent; font-size: 13px; color: var(--text-primary); outline: none; width: 100%; }
+.search-bar i { color: var(--text-muted); font-size: 13px; }
+
+/* ── TOAST ── */
+.toast-container { position: fixed; bottom: 26px; right: 26px; z-index: 1100; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+.toast { display: flex; align-items: center; gap: 11px; padding: 13px 18px; background: var(--sidebar-bg); color: #fff; border-radius: var(--radius); font-size: 13.5px; font-weight: 500; box-shadow: 0 12px 40px rgba(0,0,0,.3); animation: slide-up .3s ease; min-width: 300px; max-width: 400px; border: 1px solid rgba(255,255,255,.08); }
+@keyframes slide-up { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.toast.success { border-left: 4px solid #10b981; }
+.toast.warning { border-left: 4px solid #f59e0b; }
+.toast.info    { border-left: 4px solid #3b82f6; }
+.toast.danger  { border-left: 4px solid #ef4444; }
+.toast-close { margin-left: auto; background: none; border: none; color: #64748b; cursor: pointer; font-size: 18px; line-height: 1; padding: 0; }
+.toast-close:hover { color: #fff; }
+
+/* ── RESPONSIVE ── */
+@media(max-width: 768px) {
+  .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .topbar { left: 0 !important; padding: 0 16px; }
+  .main-area { margin-left: 0 !important; padding: 16px; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
+  .topbar-clock, .session-timer, .search-bar { display: none; }
+  .wb-actions { display: none; }
+  .notif-drawer { width: 100%; }
 }
-
-function handleLogoutEscape(e) {
-    if (e.key === 'Escape') hideLogoutConfirm();
-}
-
-function confirmLogout() {
-    hideLogoutConfirm();
-    setTimeout(() => { executeLogout(); }, 200);
-}
-
-function executeLogout() {
-    sessionStorage.setItem('just_logged_out', 'true');
-    localStorage.setItem('just_logged_out', 'true');
-    
-    document.cookie.split(";").forEach(function(c) {
-        var cookieName = c.split('=')[0].trim();
-        document.cookie = cookieName + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/";
-    });
-
-    setTimeout(function() {
-        window.location.replace("{{ url_for('logout') }}");
-    }, 100);
-}
-
-window.handleLogout = function(e) {
-    showLogoutConfirm(e);
-};
-
-document.addEventListener('click', (e) => {
-    const backdrop = document.getElementById('logoutModalBackdrop');
-    if (e.target === backdrop && logoutModalOpen) {
-        hideLogoutConfirm();
-    }
-});
-
-// ===== FEEDBACK MODAL =====
-function showFeedback(submissionId) {
-    const modal = document.getElementById('feedbackModal');
-    const content = document.getElementById('feedbackContent');
-    
-    fetch(`/api/submission/${submissionId}/feedback`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.feedback) {
-                content.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="bg-gray-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500 mb-1">Grade</p>
-                            <p class="text-2xl font-bold text-emerald-600">${data.grade}%</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 mb-1">Feedback</p>
-                            <p class="text-sm">${(data.feedback || 'No feedback provided.').replace(/\n/g, '<br>')}</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                content.innerHTML = '<p class="text-gray-500">No feedback provided for this submission yet.</p>';
-            }
-        })
-        .catch(() => {
-            content.innerHTML = '<p class="text-gray-500">Could not load feedback. Please try again.</p>';
-        });
-    
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeFeedbackModal() {
-    const modal = document.getElementById('feedbackModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-    document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeFeedbackModal();
-    }
-});
-
-document.getElementById('feedbackModal')?.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('feedbackModal')) {
-        closeFeedbackModal();
-    }
-});
-</script>
+@media(prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-bg min-h-screen relative overflow-hidden">
-    <!-- Ambient Background -->
-    <div class="fixed inset-0 pointer-events-none z-0">
-        <div class="absolute top-20 left-10 w-64 h-64 bg-emerald-200/10 rounded-full blur-3xl animate-float-1"></div>
-        <div class="absolute bottom-20 right-10 w-80 h-80 bg-blue-200/10 rounded-full blur-3xl animate-float-2"></div>
-        <div class="absolute top-1/3 right-1/4 w-48 h-48 bg-purple-200/10 rounded-full blur-3xl animate-float-3"></div>
+<aside class="sidebar" id="sidebar" role="navigation" aria-label="Student navigation">
+  <div class="sidebar-logo">
+    <a href="{{ url_for('home') }}" class="logo-icon"><i class="fas fa-paper-plane"></i></a>
+    <div class="logo-wordmark">Sub<span>mita</span></div>
+    <span class="sidebar-badge">Student</span>
+  </div>
+
+  <div class="sidebar-user" onclick="window.location.href='{{ url_for('profile') }}'">
+    <div class="user-avatar">{{ current_user.name[0].upper() }}</div>
+    <div class="sidebar-user-info">
+      <div class="uname">{{ current_user.name.split()[0] }}</div>
+      <div class="urole">{{ current_user.level or '100' }}L · {{ current_user.department or 'Student' }}</div>
     </div>
+    <div class="user-online-dot"></div>
+  </div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="{{ url_for('student_dashboard') }}" class="nav-item active" aria-current="page">
+      <i class="fas fa-th-large"></i> Dashboard
+    </a>
 
-        <!-- Welcome Section -->
-        <div class="reveal mb-8" data-delay="50">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2.5">
-                        <i class="fas fa-chart-line text-emerald-600 text-xl"></i>
-                        Student Dashboard
-                    </h1>
-                    <p class="text-sm text-gray-500 mt-1.5">
-                        Welcome back, <span class="font-semibold text-gray-700">{{ current_user.name }}</span>!
-                    </p>
-                    <p class="text-xs text-gray-400 mt-0.5">
-                        {{ current_user.department or 'Computer Science' }} • {{ current_user.level or '100' }} Level
-                    </p>
-                </div>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <div class="flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-sm rounded-full border border-gray-200/60 shadow-sm">
-                        <i class="fas fa-calendar-alt text-emerald-500 text-xs"></i>
-                        <span class="text-xs text-gray-600 font-medium" id="liveDate"></span>
-                    </div>
-                    <div class="flex items-center gap-2 px-3 py-1.5 bg-white/60 backdrop-blur-sm rounded-full border border-gray-200/60 shadow-sm">
-                        <i class="fas fa-clock text-emerald-500 text-xs"></i>
-                        <span class="text-xs font-mono text-gray-600 font-medium" id="liveTime"></span>
-                        <span class="live-dot inline-block w-1.5 h-1.5 bg-emerald-500 rounded-full ml-1"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="nav-section-label">Academics</div>
+    <a href="#" class="nav-item"><i class="fas fa-book-open"></i> My Courses</a>
+    <a href="#assignments" class="nav-item"><i class="fas fa-tasks"></i> Assignments
+      {% if open_assignments is defined and open_assignments|length > 0 %}<span class="nav-badge amber">{{ open_assignments|length }}</span>{% endif %}
+    </a>
+    <a href="#" class="nav-item"><i class="fas fa-file-upload"></i> Submit Work</a>
+    <a href="#" class="nav-item"><i class="fas fa-calendar-alt"></i> Schedule &amp; Timetable</a>
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="stat-card glass-card rounded-xl p-5 border border-white/60 shadow-sm reveal" data-delay="100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">AVAILABLE</p>
-                        <p class="text-3xl font-bold text-gray-900 counter mt-1" data-target="{{ available_assignments|length if available_assignments is defined else 0 }}">0</p>
-                    </div>
-                    <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shadow-sm">
-                        <i class="fas fa-tasks text-emerald-600 text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <p class="text-xs text-gray-400">Pending assignments</p>
-                </div>
-            </div>
+    <div class="nav-section-label">Grades &amp; Results</div>
+    <a href="#submissions" class="nav-item"><i class="fas fa-history"></i> My Submissions</a>
+    <a href="#" class="nav-item"><i class="fas fa-poll-h"></i> Results &amp; Grades</a>
+    <a href="#" class="nav-item"><i class="fas fa-chart-line"></i> My Progress</a>
+    <a href="#" class="nav-item"><i class="fas fa-certificate"></i> Transcripts</a>
 
-            <div class="stat-card glass-card rounded-xl p-5 border border-white/60 shadow-sm reveal" data-delay="150">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">SUBMITTED</p>
-                        <p class="text-3xl font-bold text-gray-900 counter mt-1" data-target="{{ submissions|length if submissions is defined else 0 }}">0</p>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shadow-sm">
-                        <i class="fas fa-paper-plane text-blue-600 text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <p class="text-xs text-gray-400">Completed work</p>
-                </div>
-            </div>
+    <div class="nav-section-label">Communication</div>
+    <a href="#" class="nav-item"><i class="fas fa-bell"></i> Notifications
+      <span class="nav-badge">3</span>
+    </a>
+    <a href="#" class="nav-item"><i class="fas fa-comment-dots"></i> Feedback</a>
+    <a href="#" class="nav-item"><i class="fas fa-bullhorn"></i> Announcements</a>
 
-            <div class="stat-card glass-card rounded-xl p-5 border border-white/60 shadow-sm reveal" data-delay="200">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">AVERAGE GRADE</p>
-                        <div>
-                            <span class="text-3xl font-bold text-gray-900 counter mt-1" data-target="{{ avg_grade if avg_grade is defined else 0 }}">0</span>
-                            <span class="text-lg text-gray-400">%</span>
-                        </div>
-                    </div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center shadow-sm">
-                        <i class="fas fa-star text-purple-600 text-lg"></i>
-                    </div>
-                </div>
-                <div class="mt-3 pt-3 border-t border-gray-100">
-                    <p class="text-xs text-gray-400">Overall performance</p>
-                </div>
-            </div>
-        </div>
+    <div class="nav-section-label">Library</div>
+    <a href="#" class="nav-item"><i class="fas fa-folder-open"></i> Resources</a>
+    <a href="#" class="nav-item"><i class="fas fa-download"></i> Downloads</a>
 
-        <!-- Available Assignments Section -->
-        <div class="reveal mb-8" data-delay="250">
-            <div class="glass-card rounded-xl overflow-hidden border border-white/60 shadow-sm">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-emerald-50/80 to-white flex items-center justify-between">
-                    <h2 class="text-sm font-bold text-gray-700 flex items-center gap-2">
-                        <i class="fas fa-clock text-emerald-600"></i> Available Assignments
-                        <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">
-                            {{ available_assignments|length if available_assignments is defined else 0 }}
-                        </span>
-                    </h2>
-                    <span class="text-xs text-gray-400">Due soon first</span>
-                </div>
-                <div class="divide-y divide-gray-100">
-                    {% if available_assignments and available_assignments|length > 0 %}
-                        {% for assignment in available_assignments %}
-                        <div class="assignment-card p-4 hover:bg-white/80 transition-all duration-200">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <h3 class="text-sm font-semibold text-gray-800 truncate">{{ assignment.title }}</h3>
-                                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-mono">{{ assignment.course_code }}</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-1">{{ assignment.course_title }}</p>
-                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-500">
-                                        <span class="flex items-center gap-1">
-                                            <i class="fas fa-calendar-alt text-gray-400"></i>
-                                            Due: {{ assignment.deadline.strftime('%b %d, %Y - %I:%M %p') }}
-                                        </span>
-                                        <span class="flex items-center gap-1">
-                                            <i class="fas fa-star text-amber-400"></i> {{ assignment.total_points }} pts
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2 flex-shrink-0">
-                                    <a href="{{ url_for('submit_assignment', assignment_id=assignment.id) }}" 
-                                       class="btn-shine bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap shadow-sm hover:shadow-md">
-                                        <i class="fas fa-paper-plane text-[10px]"></i> Submit
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                    <div class="p-8 text-center">
-                        <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
-                            <i class="fas fa-check-circle text-emerald-500 text-2xl"></i>
-                        </div>
-                        <p class="text-sm text-gray-600 font-medium">No available assignments</p>
-                        <p class="text-xs text-gray-400 mt-1">Check back later for new assignments.</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+    <div class="nav-section-label">Account</div>
+    <a href="{{ url_for('profile') }}" class="nav-item"><i class="fas fa-user-circle"></i> My Profile</a>
+    <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+    <a href="#" class="nav-item"><i class="fas fa-question-circle"></i> Help &amp; FAQ</a>
+    <a href="#" class="nav-item"><i class="fas fa-shield-alt"></i> Privacy &amp; Security</a>
+  </nav>
 
-        <!-- Your Submissions Section -->
-        <div class="reveal mb-8" data-delay="300">
-            <div class="glass-card rounded-xl overflow-hidden border border-white/60 shadow-sm">
-                <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50/80 to-white flex items-center justify-between">
-                    <h2 class="text-sm font-bold text-gray-700 flex items-center gap-2">
-                        <i class="fas fa-history text-blue-600"></i> Your Submissions
-                        <span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full font-medium">
-                            {{ submissions|length if submissions is defined else 0 }}
-                        </span>
-                    </h2>
-                    <span class="text-xs text-gray-400">Most recent first</span>
-                </div>
-                <div class="divide-y divide-gray-100 max-h-96 overflow-y-auto custom-scrollbar">
-                    {% if submissions and submissions|length > 0 %}
-                        {% for submission in submissions %}
-                        <div class="submission-item p-4 hover:bg-white/80 transition-all duration-200">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="text-sm font-semibold text-gray-800 truncate">{{ submission.assignment.title }}</h3>
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        <i class="fas fa-clock text-gray-400 text-[10px]"></i>
-                                        Submitted: {{ submission.submitted_at.strftime('%b %d, %Y - %I:%M %p') }}
-                                    </p>
-                                </div>
-                                <div class="flex gap-2 flex-shrink-0">
-                                    {% if submission.grade is not none %}
-                                    <div class="bg-green-100 text-green-700 px-3 py-1.5 rounded-lg text-xs font-bold">
-                                        Grade: {{ "%.1f"|format(submission.grade) }}%
-                                    </div>
-                                    <a href="{{ url_for('plagiarism_report_student', submission_id=submission.id) }}" 
-                                       class="bg-purple-100 text-purple-700 px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-purple-200 transition">
-                                        <i class="fas fa-shield-alt"></i> Report
-                                    </a>
-                                    {% else %}
-                                    <div class="bg-amber-100 text-amber-700 px-3 py-1.5 rounded-lg text-xs font-medium">
-                                        Pending Review
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                    <div class="p-8 text-center">
-                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-inbox text-gray-400 text-2xl"></i>
-                        </div>
-                        <p class="text-sm text-gray-500 font-medium">No submissions yet</p>
-                        <p class="text-xs text-gray-400 mt-1">Submit your first assignment to see it here</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+  <div class="sidebar-footer">
+    <a href="#" class="nav-item" onclick="showLogoutModal(event)">
+      <i class="fas fa-sign-out-alt"></i> Sign Out
+    </a>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- TOPBAR -->
+<header class="topbar" id="topbar" role="banner">
+  <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Toggle navigation" aria-expanded="true">
+    <i class="fas fa-bars" style="font-size:14px;color:#475569;"></i>
+  </button>
+  <div class="topbar-breadcrumb">
+    <span class="page-title">My Dashboard</span>
+    <span class="sep">/</span>
+    <span class="sub">{{ current_user.department or 'Overview' }}</span>
+  </div>
+  <div class="topbar-right">
+    <div class="search-bar">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search assignments, courses…" aria-label="Search">
     </div>
-
-    <!-- Feedback Modal -->
-    <div id="feedbackModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[10002] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-900">Assignment Feedback</h3>
-                <button onclick="closeFeedbackModal()" class="text-gray-400 hover:text-gray-600">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="feedbackContent" class="text-sm text-gray-700 leading-relaxed">
-                Loading...
-            </div>
-            <div class="mt-6">
-                <button onclick="closeFeedbackModal()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 rounded-lg transition">
-                    Close
-                </button>
-            </div>
-        </div>
+    <div class="topbar-clock">
+      <div class="live-dot"></div>
+      <span id="liveTime">--:--:--</span>
     </div>
-
-    <!-- Logout Confirmation Modal -->
-    <div id="logoutModalOverlay" class="fixed inset-0 z-[10001] hidden items-center justify-center">
-        <div id="logoutModalBackdrop" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm transition-all duration-300 opacity-0"></div>
-        <div id="logoutModalCard" class="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden transform transition-all duration-300 scale-95 opacity-0">
-            <div class="h-1.5 w-full bg-gradient-to-r from-red-400 via-red-500 to-red-600"></div>
-            <div class="px-6 pt-6 pb-5 text-center">
-                <div class="relative w-16 h-16 mx-auto mb-4">
-                    <div class="absolute inset-0 rounded-full bg-red-100 animate-ping opacity-20" style="animation-duration: 2s;"></div>
-                    <div class="absolute inset-0 rounded-full bg-gradient-to-br from-red-50 to-red-100 flex items-center justify-center shadow-inner border border-red-100">
-                        <i id="logoutModalIcon" class="fas fa-sign-out-alt text-red-500 text-xl transition-transform duration-500"></i>
-                    </div>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-1.5">Sign Out?</h3>
-                <p class="text-sm text-gray-500">Are you sure you want to end your session?</p>
-            </div>
-            <div class="px-6 pb-6 flex gap-3">
-                <button onclick="hideLogoutConfirm()" type="button" class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-semibold">
-                    Cancel
-                </button>
-                <button onclick="confirmLogout()" type="button" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-semibold">
-                    Sign Out
-                </button>
-            </div>
-        </div>
+    <div class="session-timer" id="sessionTimer" title="Session time remaining">
+      <i class="fas fa-lock"></i>
+      <span id="sessionCountdown">30:00</span>
     </div>
+    <button class="icon-btn" onclick="toggleNotifDrawer()" title="Notifications" aria-label="Notifications">
+      <i class="fas fa-bell"></i>
+      <span class="badge-dot"></span>
+    </button>
+    <a href="{{ url_for('profile') }}" class="icon-btn" title="My profile"><i class="fas fa-user-circle"></i></a>
+  </div>
+</header>
 
-    <style>
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        @keyframes float1 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
-        @keyframes float2 { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
-        @keyframes float3 { 0%, 100% { transform: translateX(0px); } 50% { transform: translateX(10px); } }
-        @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-
-        .dashboard-bg {
-            background: linear-gradient(-45deg, #ecfdf5, #f0fdf4, #ffffff, #f8fafc);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
-            min-height: 100vh;
-        }
-
-        .animate-float-1 { animation: float1 6s ease-in-out infinite; }
-        .animate-float-2 { animation: float2 5s ease-in-out infinite 1s; }
-        .animate-float-3 { animation: float3 7s ease-in-out infinite 0.5s; }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-        }
-
-        .stat-card {
-            transition: all 0.3s ease;
-            animation: fadeInUp 0.5s ease forwards;
-            opacity: 0;
-        }
-        .stat-card:hover { transform: translateY(-4px); }
-
-        .assignment-card { transition: all 0.3s ease; }
-        .assignment-card:hover { transform: translateY(-2px); background: white; }
-
-        .submission-item {
-            opacity: 0;
-            animation: slideInLeft 0.4s ease forwards;
-        }
-
-        .reveal {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease;
-        }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-
-        .btn-shine { position: relative; overflow: hidden; }
-        .btn-shine::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
-            transform: rotate(30deg) translateX(-100%);
-            transition: transform 0.6s;
-        }
-        .btn-shine:hover::after { transform: rotate(30deg) translateX(100%); }
-
-        .live-dot { animation: livePulse 2s ease-in-out infinite; }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-    </style>
-
-    <script>
-        function startClock() {
-            const dateEl = document.getElementById('liveDate');
-            const timeEl = document.getElementById('liveTime');
-            function update() {
-                const now = new Date();
-                if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            }
-            update();
-            setInterval(update, 1000);
-        }
-
-        function animateCounters() {
-            document.querySelectorAll('.counter').forEach(el => {
-                const target = parseInt(el.dataset.target) || 0;
-                if (target === 0) { el.textContent = '0'; return; }
-                let current = 0;
-                const interval = setInterval(() => {
-                    current += target / 60;
-                    if (current >= target) {
-                        el.textContent = target.toLocaleString();
-                        clearInterval(interval);
-                    } else {
-                        el.textContent = Math.floor(current).toLocaleString();
-                    }
-                }, 25);
-            });
-        }
-
-        function initRevealAnimations() {
-            const reveals = document.querySelectorAll('.reveal');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const delay = entry.target.dataset.delay || 0;
-                        setTimeout(() => entry.target.classList.add('visible'), delay);
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-            reveals.forEach(el => observer.observe(el));
-        }
-
-        document.querySelectorAll('.submission-item').forEach((el, i) => {
-            el.style.animationDelay = `${i * 0.05}s`;
-        });
-
-        window.addEventListener('load', () => {
-            startClock();
-            animateCounters();
-            initRevealAnimations();
-        });
-    </script>
+<!-- NOTIFICATION DRAWER -->
+<div class="notif-drawer" id="notifDrawer" role="dialog" aria-label="Notifications">
+  <div class="notif-header">
+    <h3><i class="fas fa-bell" style="color:var(--accent);margin-right:8px;"></i> Notifications</h3>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-sm btn-secondary" onclick="markAllRead()">Mark all read</button>
+      <button class="icon-btn" onclick="closeNotifDrawer()"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+  <div class="notif-list">
+    {% if open_assignments is defined and open_assignments|length > 0 %}
+    <div class="notif-item unread">
+      <div class="notif-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-exclamation-circle"></i></div>
+      <div>
+        <div class="notif-text">{{ open_assignments|length }} assignment{{ 's' if open_assignments|length > 1 else '' }} due soon — don't miss the deadline!</div>
+        <div class="notif-time"><i class="fas fa-clock"></i> Now</div>
+      </div>
+    </div>
+    {% endif %}
+    {% if graded_submissions is defined and graded_submissions|length > 0 %}
+    <div class="notif-item unread">
+      <div class="notif-icon" style="background:#d1fae5;color:var(--accent);"><i class="fas fa-star"></i></div>
+      <div>
+        <div class="notif-text">Your submission has been graded — view your result</div>
+        <div class="notif-time"><i class="fas fa-clock"></i> 1 hour ago</div>
+      </div>
+    </div>
+    {% endif %}
+    <div class="notif-item unread">
+      <div class="notif-icon" style="background:#dbeafe;color:#1d4ed8;"><i class="fas fa-bullhorn"></i></div>
+      <div>
+        <div class="notif-text">New announcement from your lecturer</div>
+        <div class="notif-time"><i class="fas fa-clock"></i> Yesterday</div>
+      </div>
+    </div>
+    <div class="notif-item">
+      <div class="notif-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-calendar-alt"></i></div>
+      <div>
+        <div class="notif-text">Exam timetable has been updated for this semester</div>
+        <div class="notif-time"><i class="fas fa-clock"></i> 2 days ago</div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- MAIN CONTENT -->
+<main class="main-area" id="mainArea">
+
+  {% if not current_user.email_verified %}
+  <div class="verif-banner warning" id="verifBanner">
+    <i class="fas fa-exclamation-triangle"></i>
+    <strong>Verify your email</strong> to unlock full access and receive important notifications.
+    <a href="{{ url_for('verify_forced') }}" class="btn btn-sm btn-secondary" style="margin-left:8px;"><i class="fas fa-envelope"></i> Verify now</a>
+    <button class="banner-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+  </div>
+  {% endif %}
+
+  {% if open_assignments is defined and open_assignments|length > 0 %}
+  <div class="urgency-strip" id="urgencyStrip">
+    <i class="fas fa-fire"></i>
+    <strong>{{ open_assignments|length }} assignment{{ 's' if open_assignments|length > 1 else '' }}</strong> due soon — submit before the deadline to avoid penalty.
+    <a href="#assignments" class="btn btn-sm btn-danger" style="margin-left:auto;border:1px solid #fecaca;">View assignments</a>
+  </div>
+  {% endif %}
+
+  <!-- Welcome Banner -->
+  <div class="welcome-banner">
+    <div class="wb-eyebrow"><i class="fas fa-graduation-cap"></i> &nbsp;Student Portal</div>
+    <div class="wb-title">Hello, {{ current_user.name.split()[0] }} 👋</div>
+    <div class="wb-sub">{{ current_user.department or 'Department' }} · {{ current_user.level or '100' }} Level · <span id="liveDate">Today</span></div>
+    <div class="wb-meta">
+      <div class="wb-pill"><i class="fas fa-tasks"></i> {{ open_assignments|length if open_assignments is defined else 0 }} pending assignments</div>
+      <div class="wb-pill"><i class="fas fa-history"></i> {{ my_submissions|length if my_submissions is defined else 0 }} submissions</div>
+      {% if current_user.email_verified %}<div class="wb-pill"><i class="fas fa-check-circle"></i> Email verified</div>{% endif %}
+    </div>
+    <div class="wb-actions">
+      <a href="#assignments" class="wb-btn wb-btn-solid"><i class="fas fa-tasks"></i> View Assignments</a>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card green">
+      <div class="s-top">
+        <div class="s-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-tasks"></i></div>
+        <div class="s-trend {% if open_assignments is defined and open_assignments|length > 0 %}down{% else %}up{% endif %}">
+          {{ open_assignments|length if open_assignments is defined else 0 }} open
+        </div>
+      </div>
+      <div class="s-label">Assignments</div>
+      <div class="s-value counter" data-target="{{ open_assignments|length if open_assignments is defined else 0 }}">0</div>
+      <div class="s-sub">Pending submission</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="s-top">
+        <div class="s-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-file-check"></i></div>
+        <div class="s-trend up"><i class="fas fa-check"></i> Done</div>
+      </div>
+      <div class="s-label">Submitted</div>
+      <div class="s-value counter" data-target="{{ my_submissions|length if my_submissions is defined else 0 }}">0</div>
+      <div class="s-sub">Total submissions</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="s-top">
+        <div class="s-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-star-half-alt"></i></div>
+      </div>
+      <div class="s-label">Graded</div>
+      <div class="s-value counter" data-target="{{ graded_submissions|length if graded_submissions is defined else 0 }}">0</div>
+      <div class="s-sub">Results available</div>
+    </div>
+    <div class="stat-card teal">
+      <div class="s-top">
+        <div class="s-icon" style="background:#ccfbf1;color:#0d9488;"><i class="fas fa-chart-line"></i></div>
+        <div class="s-trend up"><i class="fas fa-arrow-up"></i> Good</div>
+      </div>
+      <div class="s-label">Avg Score</div>
+      <div class="s-value">
+        {% if graded_submissions is defined and graded_submissions|length > 0 %}
+          {{ "%.0f"|format(graded_submissions|map(attribute='grade')|sum / graded_submissions|length) }}%
+        {% else %}—{% endif %}
+      </div>
+      <div class="s-sub">Across graded work</div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- LEFT COLUMN -->
+    <div>
+      <!-- Open Assignments -->
+      <div class="section-card" id="assignments">
+        <div class="section-header">
+          <h2><i class="fas fa-tasks" style="color:var(--accent);"></i> Open Assignments
+            {% if open_assignments is defined and open_assignments|length > 0 %}
+            <span class="badge amber">{{ open_assignments|length }} pending</span>
+            {% endif %}
+          </h2>
+          <div class="section-header-right">
+            <a href="#" class="btn btn-sm btn-secondary">View all</a>
+          </div>
+        </div>
+        <div class="list-scroll">
+          {% if open_assignments and open_assignments|length > 0 %}
+            {% for asgn in open_assignments %}
+            <div class="asgn-card">
+              <div class="asgn-title">
+                <i class="fas fa-file-alt" style="color:var(--accent);font-size:13px;"></i>
+                {{ asgn.title }}
+                {% if asgn.is_past_due %}<span class="badge red"><i class="fas fa-exclamation-triangle"></i> Overdue</span>{% endif %}
+              </div>
+              <div class="asgn-meta">
+                <span><i class="fas fa-chalkboard-teacher"></i> {{ asgn.lecturer.name if asgn.lecturer else 'Lecturer' }}</span>
+                <span><i class="fas fa-calendar-alt"></i> Due: {{ asgn.due_date.strftime('%d %b %Y · %I:%M %p') if asgn.due_date else '—' }}</span>
+              </div>
+              <div class="asgn-footer">
+                <div class="countdown-chip" id="countdown-{{ asgn.id }}" data-due="{{ asgn.due_date.isoformat() if asgn.due_date else '' }}">
+                  <i class="fas fa-hourglass-half"></i> Calculating…
+                </div>
+                <a href="{{ url_for('submit_assignment', assignment_id=asgn.id) }}" class="btn btn-primary btn-sm">
+                  <i class="fas fa-upload"></i> Submit
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <div class="e-icon"><i class="fas fa-check-circle"></i></div>
+            <p class="e-title">All caught up!</p>
+            <p class="e-sub">No pending assignments right now. New ones will appear here.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Submission History -->
+      <div class="section-card" id="submissions">
+        <div class="section-header">
+          <h2><i class="fas fa-history" style="color:var(--accent);"></i> Submission History
+            <span class="badge blue">{{ my_submissions|length if my_submissions is defined else 0 }}</span>
+          </h2>
+          <div class="section-header-right">
+            <a href="#" class="btn btn-sm btn-secondary">View all</a>
+          </div>
+        </div>
+        <div class="list-scroll">
+          {% if my_submissions and my_submissions|length > 0 %}
+            {% for sub in my_submissions %}
+            <div class="list-row">
+              <div class="row-icon" style="background:{% if sub.grade is not none %}#d1fae5{% elif sub.is_late %}#fee2e2{% else %}#dbeafe{% endif %};color:{% if sub.grade is not none %}#16a34a{% elif sub.is_late %}#dc2626{% else %}#1d4ed8{% endif %};">
+                <i class="fas {% if sub.grade is not none %}fa-check-circle{% elif sub.is_late %}fa-exclamation-triangle{% else %}fa-clock{% endif %}"></i>
+              </div>
+              <div class="row-body">
+                <p class="row-title">{{ sub.assignment.title if sub.assignment else 'Unknown Assignment' }}</p>
+                <div class="row-meta">
+                  <span><i class="fas fa-calendar-check"></i> {{ sub.submitted_at.strftime('%d %b %Y · %I:%M %p') }}</span>
+                  {% if sub.is_late %}<span style="color:#dc2626;font-weight:700;"><i class="fas fa-exclamation-triangle"></i> Late</span>{% endif %}
+                </div>
+              </div>
+              <div class="row-actions">
+                {% if sub.grade is not none %}
+                  <span class="grade-pill graded">{{ "%.1f"|format(sub.grade) }}%</span>
+                {% else %}
+                  <span class="grade-pill pending">Pending</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <div class="e-icon"><i class="fas fa-inbox"></i></div>
+            <p class="e-title">No submissions yet</p>
+            <p class="e-sub">Your submission history will appear here once you submit an assignment.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <!-- Academic Progress -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-chart-line" style="color:var(--accent);"></i> My Progress</h2>
+        </div>
+        <div style="padding:20px 22px;">
+          {% if graded_submissions is defined and graded_submissions|length > 0 %}
+          <div class="gpa-ring">
+            <div class="gpa-circle">
+              <div class="gpa-circle-inner">
+                <div class="gpa-value">{{ "%.0f"|format(graded_submissions|map(attribute='grade')|sum / graded_submissions|length) }}</div>
+              </div>
+            </div>
+            <div>
+              <div class="gpa-label">Average Score</div>
+              <div style="font-size:22px;font-weight:900;color:var(--text-primary);margin-top:4px;">{{ "%.1f"|format(graded_submissions|map(attribute='grade')|sum / graded_submissions|length) }}%</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Across {{ graded_submissions|length }} graded submission{{ 's' if graded_submissions|length > 1 else '' }}</div>
+            </div>
+          </div>
+          {% endif %}
+
+          <div style="margin-top:16px;">
+            <div class="prog-row">
+              <div class="prog-label">
+                <span style="color:var(--text-secondary);font-weight:600;">Assignments completed</span>
+                <span style="font-weight:800;color:var(--text-primary);">{{ my_submissions|length if my_submissions is defined else 0 }}/{{ (open_assignments|length + (my_submissions|length if my_submissions is defined else 0)) if open_assignments is defined else (my_submissions|length if my_submissions is defined else 0) }}</span>
+              </div>
+              <div class="prog-bar">
+                <div class="prog-fill" data-width="{{ ((my_submissions|length / (open_assignments|length + my_submissions|length)) * 100) if open_assignments is defined and my_submissions is defined and (open_assignments|length + my_submissions|length) > 0 else 0 }}%" style="width:0%;"></div>
+              </div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-label">
+                <span style="color:var(--text-secondary);font-weight:600;">Graded submissions</span>
+                <span style="font-weight:800;color:var(--text-primary);">{{ graded_submissions|length if graded_submissions is defined else 0 }}/{{ my_submissions|length if my_submissions is defined else 0 }}</span>
+              </div>
+              <div class="prog-bar">
+                <div class="prog-fill" data-width="{{ ((graded_submissions|length / my_submissions|length) * 100) if my_submissions is defined and my_submissions|length > 0 and graded_submissions is defined else 0 }}%" style="width:0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Info -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-id-badge" style="color:var(--accent);"></i> Account Info</h2>
+          <a href="{{ url_for('profile') }}" class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i> Edit</a>
+        </div>
+        <div style="padding:16px 22px;display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light);">
+            <span style="font-size:12.5px;color:var(--text-muted);">Student ID</span>
+            <span style="font-size:13px;font-weight:800;color:var(--text-primary);font-family:'JetBrains Mono',monospace;">{{ current_user.student_id or '—' }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light);">
+            <span style="font-size:12.5px;color:var(--text-muted);">Department</span>
+            <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);">{{ current_user.department or '—' }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light);">
+            <span style="font-size:12.5px;color:var(--text-muted);">Level</span>
+            <span style="font-size:12.5px;font-weight:700;color:var(--text-primary);">{{ current_user.level or '—' }} Level</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light);">
+            <span style="font-size:12.5px;color:var(--text-muted);">Email Status</span>
+            {% if current_user.email_verified %}
+              <span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--accent);"><i class="fas fa-check-circle"></i> Verified</span>
+            {% else %}
+              <a href="{{ url_for('verify_forced') }}" style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#d97706;text-decoration:none;"><i class="fas fa-exclamation-circle"></i> Verify now</a>
+            {% endif %}
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+            <span style="font-size:12.5px;color:var(--text-muted);">Account Status</span>
+            <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--accent);">
+              <span style="width:8px;height:8px;background:#10b981;border-radius:50%;display:inline-block;box-shadow:0 0 0 3px rgba(16,185,129,.2);"></span> Active
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2><i class="fas fa-bolt" style="color:var(--accent);"></i> Quick Actions</h2>
+        </div>
+        <div style="padding:16px 22px;display:flex;flex-direction:column;gap:10px;">
+          <a href="#assignments" class="btn btn-primary" style="justify-content:center;"><i class="fas fa-upload"></i> Submit Assignment</a>
+          <a href="#" class="btn btn-secondary" style="justify-content:center;"><i class="fas fa-poll-h"></i> View My Results</a>
+          <a href="#" class="btn btn-secondary" style="justify-content:center;"><i class="fas fa-book-open"></i> Browse Courses</a>
+          <a href="#" class="btn btn-secondary" style="justify-content:center;"><i class="fas fa-question-circle"></i> Get Help</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Logout Modal -->
+<div class="modal-overlay" id="logoutModal" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+  <div class="modal-card">
+    <div style="height:4px;background:linear-gradient(90deg,var(--accent),#ef4444);"></div>
+    <div style="padding:32px 28px 22px;text-align:center;">
+      <div style="width:64px;height:64px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:26px;color:#ef4444;"><i class="fas fa-sign-out-alt"></i></div>
+      <h3 id="logoutTitle" style="font-size:18px;font-weight:800;color:var(--text-primary);margin-bottom:8px;">Sign Out?</h3>
+      <p style="font-size:13.5px;color:var(--text-muted);">Your session will end. You'll need to log in again to access your dashboard.</p>
+    </div>
+    <div style="padding:0 24px 24px;display:flex;gap:10px;">
+      <button onclick="closeLogoutModal()" class="btn btn-secondary" style="flex:1;justify-content:center;">Cancel</button>
+      <button onclick="executeLogout()" class="btn" style="flex:1;justify-content:center;background:#dc2626;color:#fff;border:none;"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ── Sidebar ──
+const sidebar = document.getElementById('sidebar'), topbar = document.getElementById('topbar'), mainArea = document.getElementById('mainArea'), overlay = document.getElementById('sidebarOverlay'), hamBtn = document.getElementById('hamburgerBtn');
+let sidebarOpen = window.innerWidth >= 768;
+function toggleSidebar() { sidebarOpen = !sidebarOpen; applySidebarState(); }
+function closeSidebar() { sidebarOpen = false; applySidebarState(); }
+function applySidebarState() {
+  const isMobile = window.innerWidth < 768;
+  if (isMobile) { sidebar.classList.toggle('mobile-open', sidebarOpen); overlay.classList.toggle('active', sidebarOpen); topbar.classList.remove('sidebar-collapsed'); mainArea.classList.remove('sidebar-collapsed'); }
+  else { sidebar.classList.toggle('collapsed', !sidebarOpen); topbar.classList.toggle('sidebar-collapsed', !sidebarOpen); mainArea.classList.toggle('sidebar-collapsed', !sidebarOpen); overlay.classList.remove('active'); }
+  hamBtn.setAttribute('aria-expanded', sidebarOpen);
+}
+window.addEventListener('resize', () => { sidebarOpen = window.innerWidth >= 768; applySidebarState(); });
+applySidebarState();
+
+// ── Clock ──
+(function clock() {
+  const timeEl = document.getElementById('liveTime'), dateEl = document.getElementById('liveDate');
+  function tick() {
+    const n = new Date();
+    if (timeEl) timeEl.textContent = n.toLocaleTimeString('en-US', { hour12:true, hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    if (dateEl) dateEl.textContent = n.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+// ── Session timer ──
+(function sessionTimer() {
+  let secs = 30 * 60;
+  const el = document.getElementById('sessionCountdown'), wrapper = document.getElementById('sessionTimer');
+  function tick() {
+    if (!el) return;
+    const m = Math.floor(secs / 60), s = secs % 60;
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (secs <= 300) { wrapper.className = 'session-timer danger'; if (secs === 300) showToast('⚠️ Session expiring in 5 minutes. Save your work.', 'warning', 7000); }
+    else if (secs <= 600) { wrapper.className = 'session-timer warning'; if (secs === 600) showToast('Session expiring in 10 minutes', 'info'); }
+    if (secs <= 0) { executeLogout(); return; }
+    secs--; setTimeout(tick, 1000);
+  }
+  tick();
+})();
+
+// ── Assignment Countdowns ──
+function initCountdowns() {
+  document.querySelectorAll('[data-due]').forEach(chip => {
+    const due = new Date(chip.dataset.due);
+    if (!due || isNaN(due)) return;
+    function update() {
+      const diff = due - new Date();
+      if (diff <= 0) { chip.className = 'countdown-chip urgent'; chip.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Overdue'; return; }
+      const days = Math.floor(diff / 86400000), hrs = Math.floor((diff % 86400000) / 3600000), mins = Math.floor((diff % 3600000) / 60000);
+      if (days > 3) { chip.className = 'countdown-chip ok'; chip.innerHTML = `<i class="fas fa-hourglass-half"></i> ${days}d ${hrs}h left`; }
+      else if (days >= 1) { chip.className = 'countdown-chip warn'; chip.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${days}d ${hrs}h left`; }
+      else { chip.className = 'countdown-chip urgent'; chip.innerHTML = `<i class="fas fa-fire"></i> ${hrs}h ${mins}m left`; }
+    }
+    update(); setInterval(update, 60000);
+  });
+}
+
+// ── Logout ──
+function showLogoutModal(e) { if(e) e.preventDefault(); document.getElementById('logoutModal').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeLogoutModal() { document.getElementById('logoutModal').classList.remove('open'); document.body.style.overflow = ''; }
+function executeLogout() {
+  sessionStorage.clear(); localStorage.clear();
+  document.cookie.split(';').forEach(c => { const n = c.split('=')[0].trim(); document.cookie = n + '=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/'; });
+  window.location.href = '{{ url_for("logout") }}';
+}
+document.getElementById('logoutModal').addEventListener('click', e => { if(e.target.id === 'logoutModal') closeLogoutModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') { closeLogoutModal(); closeNotifDrawer(); } });
+
+// ── Notifications ──
+const notifDrawer = document.getElementById('notifDrawer');
+function toggleNotifDrawer() { notifDrawer.classList.toggle('open'); }
+function closeNotifDrawer() { notifDrawer.classList.remove('open'); }
+function markAllRead() { document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread')); document.querySelector('.badge-dot') && (document.querySelector('.badge-dot').style.display = 'none'); showToast('All notifications marked as read', 'success'); }
+
+// ── Counter animation ──
+function animateCounters() {
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseInt(el.dataset.target) || 0;
+    if (!target) { el.textContent = '0'; return; }
+    let cur = 0; const step = target / 50;
+    const iv = setInterval(() => { cur = Math.min(cur + step, target); el.textContent = Math.floor(cur).toLocaleString(); if (cur >= target) clearInterval(iv); }, 25);
+  });
+}
+function animateBars() { setTimeout(() => document.querySelectorAll('[data-width]').forEach(el => el.style.width = el.dataset.width), 500); }
+
+// ── Toast ──
+function showToast(msg, type = 'info', duration = 4500) {
+  const icons = { success:'fa-check-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle', danger:'fa-times-circle' };
+  const colors = { success:'#10b981', warning:'#f59e0b', info:'#3b82f6', danger:'#ef4444' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas ${icons[type]||icons.info}" style="color:${colors[type]};font-size:16px;flex-shrink:0;"></i><span style="flex:1;">${msg}</span><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>`;
+  document.getElementById('toastContainer').prepend(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; t.style.transition = 'all .3s'; setTimeout(() => t.remove(), 300); }, duration);
+}
+
+// ── Init ──
+window.addEventListener('load', () => {
+  animateCounters(); animateBars(); initCountdowns();
+  {% if not current_user.email_verified %}
+  setTimeout(() => showToast('Please verify your email to unlock full access', 'warning', 6000), 1200);
+  {% else %}
+  setTimeout(() => showToast('Welcome back, {{ current_user.name.split()[0] }}! Have a productive session.', 'success'), 800);
+  {% endif %}
+  {% if open_assignments is defined and open_assignments|length > 0 %}
+  setTimeout(() => showToast('{{ open_assignments|length }} assignment{{ "s" if open_assignments|length > 1 else "" }} pending — submit before the deadline!', 'warning', 6000), 2200);
+  {% endif %}
+  {% if graded_submissions is defined and graded_submissions|length > 0 %}
+  setTimeout(() => showToast('🎉 {{ graded_submissions|length }} submission{{ "s" if graded_submissions|length > 1 else "" }} graded — check your results!', 'success'), 3500);
+  {% endif %}
+});
+</script>
 {% endblock %}
