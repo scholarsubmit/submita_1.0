@@ -16,7 +16,13 @@ from app.extensions import db, login_manager, csrf, limiter
 
 
 def create_app(config_name=None):
-    config_name = config_name or os.environ.get('FLASK_ENV', 'default')
+    config_name = config_name or os.environ.get('FLASK_ENV')
+    if not config_name:
+        # Render sets RENDER=true on every service automatically. If FLASK_ENV
+        # was never configured in the dashboard, fail safe to production
+        # settings there instead of silently running with DEBUG=True (which
+        # would show visitors interactive stack traces and leak secrets).
+        config_name = 'production' if os.environ.get('RENDER') else 'default'
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
     app.config.from_object(CONFIG_MAP.get(config_name, CONFIG_MAP['default']))
 
@@ -25,6 +31,12 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     csrf.init_app(app)
     limiter.init_app(app)
+
+    # ── Database bootstrap: tables, seed data, first admin ─────────
+    # Must happen here (not in run.py's __main__ block) since gunicorn
+    # imports this factory directly and never runs that block.
+    from app.bootstrap import bootstrap_database
+    bootstrap_database(app, db)
 
     from app.models import User
 
@@ -77,6 +89,19 @@ def create_app(config_name=None):
     @app.errorhandler(500)
     def server_error(e):
         db.session.rollback()
+        return render_template('errors/500.html'), 500
+
+    @app.errorhandler(Exception)
+    def unhandled_exception(e):
+        # Safety net: catches anything that isn't a plain HTTPException
+        # (e.g. a raw SQLAlchemy/OperationalError) so a visitor always sees
+        # the styled 500 page instead of a bare "Internal Server Error"
+        # or, worse, a raw traceback if DEBUG ever ends up on in production.
+        from werkzeug.exceptions import HTTPException
+        if isinstance(e, HTTPException):
+            raise e
+        db.session.rollback()
+        app.logger.exception('Unhandled exception')
         return render_template('errors/500.html'), 500
 
     @app.errorhandler(CSRFError)
