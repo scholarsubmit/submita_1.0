@@ -1,0 +1,45 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}Submit Assignment{% endblock %}
+{% block page_title %}Submit: {{ assignment.title }}{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card card-pad" style="max-width: 640px;">
+    <p class="field-hint">{{ assignment.course_code }} · Due {{ assignment.deadline.strftime('%b %d, %Y %H:%M') }}</p>
+
+    {% if assignment.is_overdue() %}
+    <div class="alert alert-warning">This assignment is past its deadline — your submission will be marked late.</div>
+    {% endif %}
+
+    {% if assignment.questions_text %}
+    <div class="field">
+        <label>Questions</label>
+        <div class="card" style="padding: 16px; white-space: pre-wrap; font-size: 0.9rem; max-height: 220px; overflow-y: auto;">{{ assignment.questions_text }}</div>
+    </div>
+    {% endif %}
+    {% if assignment.questions_file_path %}
+    <div class="field">
+        <a href="{{ url_for('assignments.download_question_file', assignment_id=assignment.id) }}" class="btn btn-outline">
+            📎 Download question file — {{ assignment.questions_file_original_name }}
+        </a>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('assignments.submit_assignment', assignment_id=assignment.id) }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+            <label for="content">Your answer (optional if attaching a file)</label>
+            <textarea id="content" name="content" rows="10" placeholder="Type or paste your answer here…"></textarea>
+        </div>
+        <div class="field">
+            <label for="file">Attach a file (optional)</label>
+            <input type="file" id="file" name="file">
+            <p class="field-hint">Accepted: PDF, DOC/DOCX, TXT, ZIP, and common code files.</p>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endblock %}

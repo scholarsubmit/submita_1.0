@@ -1,0 +1,29 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}Course Results{% endblock %}
+{% block page_title %}Course Results{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+<a href="{{ url_for('assignments.create_assignment') }}" class="dash-nav-link"><span class="dash-nav-icon">➕</span><span class="dash-nav-label">New Assignment</span></a>
+<a href="{{ url_for('assignments.my_courses') }}" class="dash-nav-link active"><span class="dash-nav-icon">📊</span><span class="dash-nav-label">Course Results</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<p class="field-hint">A compiled result sheet combines every assignment sharing the same course code into one table per student.</p>
+
+{% if courses %}
+<div class="card" style="margin-top: 20px;">
+    {% for c in courses %}
+    <div class="row-between" style="padding: 16px 20px; border-bottom: 1px solid var(--border);">
+        <div>
+            <strong class="mono">{{ c.course_code }}</strong> — {{ c.course_title }}
+            <p class="field-hint" style="margin: 0;">{{ c.assignment_count }} assignment{{ 's' if c.assignment_count != 1 }}</p>
+        </div>
+        <a href="{{ url_for('assignments.course_results', course_code=c.course_code) }}" class="btn btn-outline">View compiled results</a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="margin-top: 20px;">You haven't created any assignments yet — course results appear here once you have.</p>
+{% endif %}
+{% endblock %}

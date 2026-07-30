@@ -1,0 +1,81 @@
+{% extends "shared/base.html" %}
+{% block title %}Lecturer Requests{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 24px;">
+    <h1>Lecturer access requests</h1>
+
+    <div class="card card-pad" style="margin-bottom: 32px;">
+        <h3>Directly invite a known lecturer</h3>
+        <form method="POST" action="{{ url_for('admin.invite_lecturer_direct') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="row" style="flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                <div class="field" style="flex: 1; min-width: 180px; margin: 0;">
+                    <label>Full name</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="field" style="flex: 1; min-width: 180px; margin: 0;">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Send invite</button>
+            </div>
+            <p class="field-hint" style="margin-top: 8px;">Staff ID is generated automatically (format: LEC/SUB/YY/NNNNAA) — you don't need to enter one.</p>
+        </form>
+    </div>
+
+    <h3>Pending requests ({{ pending|length }})</h3>
+    {% if pending %}
+    <div class="stack" style="--gap: 12px; margin-bottom: 32px;">
+        {% for req in pending %}
+        <div class="card card-pad">
+            <div class="row-between">
+                <div>
+                    <strong>{{ req.full_name }}</strong> — {{ req.email }}
+                    <p class="field-hint">{{ req.department.name if req.department else 'No department' }} · Requested {{ req.created_at.strftime('%b %d, %Y') }}</p>
+                    {% if req.reason %}<p style="font-size: 0.85rem;">{{ req.reason }}</p>{% endif %}
+                </div>
+            </div>
+            <form method="POST" action="{{ url_for('admin.approve_lecturer_request', request_id=req.id) }}" class="row" style="margin-top: 12px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-primary">Approve & send code</button>
+                <span class="field-hint">Staff ID will be generated automatically.</span>
+            </form>
+            <form method="POST" action="{{ url_for('admin.reject_lecturer_request', request_id=req.id) }}" style="margin-top: 8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="reason" placeholder="Rejection reason (optional)" style="margin-bottom: 8px;">
+                <button type="submit" class="btn btn-outline">Reject</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No pending requests.</p>
+    {% endif %}
+
+    <h3>Recently processed</h3>
+    {% if processed %}
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--border);">
+                <th style="padding: 8px;">Name</th><th>Email</th><th>Status</th><th>Reviewed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in processed %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 8px;">{{ req.full_name }}</td>
+                <td>{{ req.email }}</td>
+                <td>{{ req.status.value }}</td>
+                <td>{{ req.reviewed_at.strftime('%b %d, %Y') if req.reviewed_at else '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Nothing processed yet.</p>
+    {% endif %}
+
+    <p style="margin-top: 24px;"><a href="{{ url_for('dashboard.home') }}">← Back to dashboard</a></p>
+</div>
+{% endblock %}

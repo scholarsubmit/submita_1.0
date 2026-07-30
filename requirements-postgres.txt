@@ -1,0 +1,8 @@
+# NOTE: the Postgres driver (psycopg[binary]) now lives directly in
+# requirements.txt, because Render's default build command only runs
+# `pip install -r requirements.txt` — this file was never actually being
+# installed on deploy, which is why production builds failed with
+# "ModuleNotFoundError: No module named 'psycopg2'".
+#
+# This file is kept only so old local setup instructions don't 404;
+# there's nothing left to install from it.

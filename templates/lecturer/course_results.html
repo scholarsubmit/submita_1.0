@@ -1,0 +1,69 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}{{ course_code }} Results{% endblock %}
+{% block page_title %}{{ course_code }} — Compiled Results{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+<a href="{{ url_for('assignments.create_assignment') }}" class="dash-nav-link"><span class="dash-nav-icon">➕</span><span class="dash-nav-label">New Assignment</span></a>
+<a href="{{ url_for('assignments.my_courses') }}" class="dash-nav-link active"><span class="dash-nav-icon">📊</span><span class="dash-nav-label">Course Results</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row-between">
+    <p class="field-hint">{{ course_title }} · {{ compiled.assignments|length }} assignment{{ 's' if compiled.assignments|length != 1 }} · {{ compiled.total_possible }} points total</p>
+    <a href="{{ url_for('assignments.export_course_results', course_code=course_code) }}" class="btn btn-outline">⬇ Export compiled CSV</a>
+</div>
+
+{% set incomplete_count = compiled.rows|selectattr('percentage', 'none')|list|length %}
+{% if incomplete_count %}
+<div class="alert alert-warning">
+    {{ incomplete_count }} student{{ 's' if incomplete_count != 1 }} still {{ 'has' if incomplete_count == 1 else 'have' }}
+    missing or ungraded work — their total is marked <strong>Incomplete</strong> rather than shown as a misleadingly low score.
+</div>
+{% endif %}
+
+<div class="table-container card" style="margin-top: 16px;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+            <tr style="text-align: left; border-bottom: 1px solid var(--border); background: var(--bg);">
+                <th style="padding: 10px 16px;">Student</th>
+                {% for a in compiled.assignments %}
+                <th style="padding: 10px 12px; text-align: center;" title="{{ a.title }}">{{ a.title[:18] }}{{ '…' if a.title|length > 18 }}<br><span class="field-hint">/{{ a.total_points }}</span></th>
+                {% endfor %}
+                <th style="padding: 10px 16px; text-align: center;">Total</th>
+                <th style="padding: 10px 16px; text-align: center;">%</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in compiled.rows %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px 16px;">
+                    <strong>{{ row.student.name }}</strong>
+                    <div class="field-hint mono">{{ row.student.matric_number }}</div>
+                </td>
+                {% for a in compiled.assignments %}
+                {% set cell = row.cells[a.id] %}
+                <td style="padding: 10px 12px; text-align: center;">
+                    {% if cell.status == 'graded' %}{{ cell.grade }}
+                    {% elif cell.status == 'pending' %}<span class="field-hint">pending</span>
+                    {% else %}<span style="color: var(--color-red-600);">missing</span>{% endif %}
+                </td>
+                {% endfor %}
+                <td style="padding: 10px 16px; text-align: center; font-weight: 600;">
+                    {{ row.total_earned if row.total_earned is not none else '—' }}
+                </td>
+                <td style="padding: 10px 16px; text-align: center;">
+                    {% if row.percentage is not none %}
+                    <span class="alert alert-success" style="margin: 0; padding: 3px 10px; display: inline-block;">{{ row.percentage }}%</span>
+                    {% else %}
+                    <span class="alert alert-warning" style="margin: 0; padding: 3px 10px; display: inline-block;">Incomplete</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<p style="margin-top: 16px;"><a href="{{ url_for('assignments.my_courses') }}">← Back to courses</a></p>
+{% endblock %}

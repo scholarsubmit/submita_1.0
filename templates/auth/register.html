@@ -1,0 +1,133 @@
+{% extends "shared/base.html" %}
+{% block title %}Create Your Account{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <div class="auth-card" style="max-width: 560px;">
+        <div class="auth-header">
+            <div class="navbar-brand" style="justify-content: center; margin-bottom: 18px;">
+                <img class="mark" src="{{ url_for('static', filename='icons/logo-mark.png') }}" alt="{{ app_name }} logo">
+                <span>{{ app_name }}</span>
+            </div>
+            <h1 style="font-size: 1.6rem;">Create your student account</h1>
+            <p>Already registered? <a href="{{ url_for('auth.login') }}">Log in instead</a></p>
+        </div>
+
+        <div class="card card-pad">
+            <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="field">
+                    <label for="name">Full name</label>
+                    <input type="text" id="name" name="name" required placeholder="Chiamaka Nnadi" autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="email">University email</label>
+                    <input type="email" id="email" name="email" required placeholder="you@mouau.edu.ng">
+                </div>
+
+                <div class="field">
+                    <label for="matric">Matric number</label>
+                    <input type="text" id="matric" name="matric" class="mono-input" required
+                           placeholder="{{ config.MATRIC_EXAMPLE }}"
+                           pattern="^[A-Za-z]+/[A-Za-z]{2,5}/\d{2}/\d{6}$"
+                           title="Format: MOUAU/DEPT/YY/NNNNNN">
+                    <p class="field-hint">Format: <span class="mono">MOUAU/DEPT/YY/NNNNNN</span> — exactly as printed on your ID card.</p>
+                </div>
+
+                <div class="field">
+                    <label for="college_id">College</label>
+                    <select id="college_id" name="college_id" required>
+                        <option value="">— Select college —</option>
+                        {% for college in colleges %}
+                        <option value="{{ college.id }}">{{ college.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="department_id">Department</label>
+                    <select id="department_id" name="department_id" required disabled>
+                        <option value="">— Select college first —</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="level">Level</label>
+                    <select id="level" name="level" required disabled>
+                        <option value="">— Select department first —</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" name="password" required minlength="10">
+                        <button type="button" class="password-toggle-btn" data-password-toggle="password" aria-label="Show password">👁</button>
+                    </div>
+                    <p class="field-hint">At least 10 characters, with uppercase, lowercase, a number, and a symbol.</p>
+                </div>
+
+                <div class="field">
+                    <label for="confirm_password">Confirm password</label>
+                    <div class="password-field">
+                        <input type="password" id="confirm_password" name="confirm_password" required minlength="10">
+                        <button type="button" class="password-toggle-btn" data-password-toggle="confirm_password" aria-label="Show password">👁</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Create account</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const collegeSelect = document.getElementById('college_id');
+    const deptSelect = document.getElementById('department_id');
+    const levelSelect = document.getElementById('level');
+
+    collegeSelect.addEventListener('change', function () {
+        deptSelect.innerHTML = '<option value="">Loading…</option>';
+        deptSelect.disabled = true;
+        levelSelect.innerHTML = '<option value="">— Select department first —</option>';
+        levelSelect.disabled = true;
+
+        if (!this.value) {
+            deptSelect.innerHTML = '<option value="">— Select college first —</option>';
+            return;
+        }
+
+        fetch(`/api/departments/${this.value}`)
+            .then(r => r.json())
+            .then(data => {
+                deptSelect.innerHTML = '<option value="">— Select department —</option>';
+                data.departments.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.id;
+                    opt.textContent = `${d.name} (${d.code})`;
+                    opt.dataset.levels = d.levels;
+                    deptSelect.appendChild(opt);
+                });
+                deptSelect.disabled = false;
+            })
+            .catch(() => { deptSelect.innerHTML = '<option value="">Error loading departments</option>'; });
+    });
+
+    deptSelect.addEventListener('change', function () {
+        const selected = this.options[this.selectedIndex];
+        const levels = (selected && selected.dataset.levels) ? selected.dataset.levels.split(',') : [];
+        levelSelect.innerHTML = '<option value="">— Select level —</option>';
+        levels.forEach(lvl => {
+            const opt = document.createElement('option');
+            opt.value = lvl;
+            opt.textContent = `${lvl} Level`;
+            levelSelect.appendChild(opt);
+        });
+        levelSelect.disabled = levels.length === 0;
+    });
+})();
+</script>
+{% endblock %}

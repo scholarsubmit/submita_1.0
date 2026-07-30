@@ -1,0 +1,106 @@
+/* Landing page only — kept separate from main.css so the shared
+   design system file stays lean for every other page. */
+
+.landing-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 40px; max-width: 1200px; margin: 0 auto;
+}
+.landing-nav-links { display: flex; align-items: center; gap: 28px; }
+.landing-nav-links a { color: var(--text); font-size: 0.88rem; font-weight: 500; }
+.landing-nav-links a:hover { color: var(--accent); text-decoration: none; }
+
+/* ---------- Hero ---------- */
+.hero {
+  max-width: 1200px; margin: 0 auto; padding: 60px 40px 100px;
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center;
+}
+.hero-eyebrow {
+  display: inline-block; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent); background: var(--accent-soft);
+  padding: 6px 14px; border-radius: 20px; margin-bottom: 20px;
+}
+.hero h1 { font-size: 3rem; line-height: 1.08; margin-bottom: 20px; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero-sub { font-size: 1.05rem; max-width: 480px; margin-bottom: 32px; }
+.hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* Hero ID badge — the signature element, scaled up and tilted */
+.hero-visual { position: relative; display: flex; justify-content: center; }
+.hero-badge {
+  width: 100%; max-width: 360px; padding: 32px 28px; border-radius: 22px;
+  background: linear-gradient(135deg, var(--color-green-700), var(--color-green-900));
+  color: #fff; box-shadow: 0 24px 60px -12px rgba(10, 74, 52, 0.45);
+  transform: rotate(-4deg); position: relative; overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+  animation: hero-badge-float 6s ease-in-out infinite;
+}
+.hero-badge::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 35%, rgba(255,255,255,0.14) 50%, transparent 65%);
+}
+.hero-badge-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; }
+.hero-badge-name { font-family: var(--font-display); font-size: 1.3rem; margin: 6px 0 18px; }
+.hero-badge-number { font-family: var(--font-mono); font-size: 1.5rem; letter-spacing: 0.05em; margin-bottom: 16px; }
+.hero-badge-footer { display: flex; justify-content: space-between; font-size: 0.72rem; opacity: 0.75; }
+@keyframes hero-badge-float {
+  0%, 100% { transform: rotate(-4deg) translateY(0); }
+  50% { transform: rotate(-4deg) translateY(-10px); }
+}
+@media (prefers-reduced-motion: reduce) { .hero-badge { animation: none; } }
+
+/* ---------- How it works (real sequence — numbering is earned here) ---------- */
+.steps { max-width: 1200px; margin: 0 auto; padding: 20px 40px 90px; }
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 32px; }
+.step-card { position: relative; padding-top: 8px; }
+.step-num {
+  font-family: var(--font-display); font-size: 2.2rem; font-weight: 700;
+  color: var(--accent-soft); -webkit-text-stroke: 1.5px var(--accent); color: transparent;
+  display: block; margin-bottom: 8px;
+}
+.step-card h4 { margin-bottom: 6px; font-size: 1.02rem; }
+.step-card p { font-size: 0.86rem; margin: 0; }
+
+/* ---------- Features ---------- */
+.features { background: var(--bg-card); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 90px 40px; }
+.features-inner { max-width: 1200px; margin: 0 auto; }
+.features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 40px; }
+.feature-card { padding: 26px; border: 1px solid var(--border); border-radius: var(--radius-md); }
+.feature-icon {
+  width: 42px; height: 42px; border-radius: 10px; background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 16px;
+}
+.feature-card h4 { font-size: 1rem; margin-bottom: 8px; }
+.feature-card p { font-size: 0.85rem; margin: 0; }
+
+/* ---------- Security ---------- */
+.security-section { max-width: 1200px; margin: 0 auto; padding: 90px 40px; display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 60px; align-items: start; }
+.security-list { list-style: none; padding: 0; margin: 24px 0 0; }
+.security-list li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.security-list li:last-child { border-bottom: none; }
+.security-check { color: var(--accent); flex-shrink: 0; font-weight: 700; }
+
+/* ---------- CTA band ---------- */
+.cta-band {
+  background: linear-gradient(135deg, var(--color-green-700), var(--color-green-900));
+  color: #fff; text-align: center; padding: 70px 40px;
+}
+.cta-band h2 { color: #fff; }
+.cta-band p { color: rgba(255,255,255,0.85); max-width: 480px; margin: 0 auto 28px; }
+.cta-band .btn-primary { background: #fff; color: var(--color-green-800, #0F6B4C); }
+.cta-band .btn-primary:hover { background: var(--color-green-50); }
+
+/* ---------- Footer ---------- */
+.landing-footer { max-width: 1200px; margin: 0 auto; padding: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.landing-footer p { margin: 0; font-size: 0.82rem; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding: 40px 24px 60px; text-align: center; }
+  .hero-sub { margin-left: auto; margin-right: auto; }
+  .hero-ctas { justify-content: center; }
+  .hero h1 { font-size: 2.2rem; }
+  .steps-grid, .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .security-section { grid-template-columns: 1fr; padding: 60px 24px; }
+  .landing-nav { padding: 16px 20px; flex-direction: column; gap: 12px; }
+  .landing-nav-links { flex-wrap: wrap; justify-content: center; }
+  .features, .steps { padding-left: 20px; padding-right: 20px; }
+}

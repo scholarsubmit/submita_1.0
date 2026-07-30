@@ -1,0 +1,48 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}{{ assignment.title }}{% endblock %}
+{% block page_title %}{{ assignment.title }}{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+<a href="{{ url_for('assignments.create_assignment') }}" class="dash-nav-link"><span class="dash-nav-icon">➕</span><span class="dash-nav-label">New Assignment</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row-between">
+    <p class="field-hint">{{ assignment.course_code }} · {{ assignment.target_level }} Level · Due {{ assignment.deadline.strftime('%b %d, %Y %H:%M') }}</p>
+    <a href="{{ url_for('assignments.export_results', assignment_id=assignment.id) }}" class="btn btn-outline">⬇ Export results (CSV)</a>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="stat-card-value">{{ submissions|length }}</div><div class="stat-card-label">Submitted</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ submissions|selectattr('is_graded')|list|length }}</div><div class="stat-card-label">Graded</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ submissions|rejectattr('is_graded')|list|length }}</div><div class="stat-card-label">Pending</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ avg_grade if avg_grade is not none else '—' }}</div><div class="stat-card-label">Average grade</div></div>
+</div>
+
+<h3>Submissions</h3>
+{% if submissions %}
+<div class="card">
+    {% for s in submissions %}
+    <div class="row-between" style="padding: 14px 20px; border-bottom: 1px solid var(--border);">
+        <div>
+            <strong>{{ s.student.name }}</strong>
+            <p class="field-hint" style="margin: 0;">{{ s.student.matric_number }} · {{ s.submitted_at.strftime('%b %d, %Y %H:%M') }}{% if s.is_late %} · <span style="color: var(--color-red-600);">late</span>{% endif %}</p>
+        </div>
+        <div class="row">
+            {% if s.plagiarism_score %}
+            {% set label, color = severity_for_score(s.plagiarism_score) %}
+            <a href="{{ url_for('assignments.plagiarism_report', submission_id=s.id) }}" style="font-size: 0.78rem; color: {{ color }}; font-weight: 600;">{{ s.plagiarism_score }}% similar</a>
+            {% endif %}
+            {% if s.is_graded %}<span class="alert alert-success" style="margin: 0; padding: 4px 12px;">{{ s.grade }}/{{ assignment.total_points }}</span>{% endif %}
+            <a href="{{ url_for('assignments.grade_submission', submission_id=s.id) }}" class="btn btn-outline">
+                {{ 'Edit grade' if s.is_graded else 'Grade' }}
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No submissions yet.</p>
+{% endif %}
+{% endblock %}

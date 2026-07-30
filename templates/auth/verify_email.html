@@ -1,0 +1,47 @@
+{% extends "shared/base.html" %}
+{% block title %}Verify Your Email{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="navbar-brand" style="justify-content: center; margin-bottom: 18px;">
+                <img class="mark" src="{{ url_for('static', filename='icons/logo-mark.png') }}" alt="{{ app_name }} logo">
+                <span>{{ app_name }}</span>
+            </div>
+            <h1 style="font-size: 1.5rem;">Check your email</h1>
+            <p>We sent a 6-digit code to <strong>{{ user.email }}</strong></p>
+        </div>
+
+        <div class="card card-pad">
+            {% if user.matric_number %}
+            <div style="text-align: center; margin-bottom: 24px;">
+                <span class="id-badge-label" style="color: var(--text-muted);">Your matric number</span>
+                <div class="id-badge">{{ user.matric_number }}</div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('auth.verify_email') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="code">6-digit verification code</label>
+                    <input type="text" id="code" name="code" class="mono-input" inputmode="numeric"
+                           maxlength="6" pattern="\d{6}" required autofocus
+                           style="text-align: center; font-size: 1.4rem; letter-spacing: 0.3em;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Activate my account</button>
+            </form>
+
+            <form method="POST" action="{{ url_for('auth.resend_verification_code') }}" style="text-align: center; margin-top: 16px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <p style="font-size: 0.85rem; margin-bottom: 8px;">Didn't get a code?</p>
+                <button type="submit" class="btn btn-outline">Resend code</button>
+            </form>
+        </div>
+
+        <p style="text-align: center; margin-top: 16px; font-size: 0.8rem;">
+            <a href="{{ url_for('auth.login') }}">Back to login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

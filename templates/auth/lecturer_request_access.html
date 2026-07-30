@@ -1,0 +1,55 @@
+{% extends "shared/base.html" %}
+{% block title %}Request Lecturer Access{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="navbar-brand" style="justify-content: center; margin-bottom: 18px;">
+                <img class="mark" src="{{ url_for('static', filename='icons/logo-mark.png') }}" alt="{{ app_name }} logo">
+                <span>{{ app_name }}</span>
+            </div>
+            <h1 style="font-size: 1.5rem;">Request lecturer access</h1>
+            <p>An administrator reviews every request before an invite code is issued — no account is created until then.</p>
+        </div>
+
+        <div class="card card-pad">
+            <form method="POST" action="{{ url_for('auth.lecturer_request_access') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="field">
+                    <label for="full_name">Full name</label>
+                    <input type="text" id="full_name" name="full_name" required autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="email">Institutional email</label>
+                    <input type="email" id="email" name="email" required placeholder="you@mouau.edu.ng">
+                </div>
+
+                <div class="field">
+                    <label for="department_id">Department</label>
+                    <select id="department_id" name="department_id" required>
+                        <option value="">— Select department —</option>
+                        {% for dept in departments %}
+                        <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.college.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="reason">Brief note for the reviewing admin</label>
+                    <textarea id="reason" name="reason" rows="3" placeholder="e.g. your role, course(s) you teach"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Submit request</button>
+            </form>
+        </div>
+
+        <p style="text-align: center; margin-top: 16px; font-size: 0.85rem;">
+            Already have an invite code? <a href="{{ url_for('auth.lecturer_onboard') }}">Redeem it here</a><br>
+            <a href="{{ url_for('auth.login') }}">Back to login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

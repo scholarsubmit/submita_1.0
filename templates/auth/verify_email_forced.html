@@ -1,0 +1,52 @@
+{% extends "shared/base.html" %}
+{% block title %}Verify Your Email{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="navbar-brand" style="justify-content: center; margin-bottom: 18px;">
+                <img class="mark" src="{{ url_for('static', filename='icons/logo-mark.png') }}" alt="{{ app_name }} logo">
+                <span>{{ app_name }}</span>
+            </div>
+            <h1 style="font-size: 1.5rem;">Verify your email to continue</h1>
+        </div>
+
+        <div class="card card-pad">
+            {% if hours_remaining <= 0 %}
+            <div class="alert alert-danger">
+                Your verification window has expired. Verify immediately — your account may be deactivated at any time.
+            </div>
+            {% elif hours_remaining <= 24 %}
+            <div class="alert alert-danger">
+                Your account will be <strong>permanently deactivated in {{ hours_remaining }} hour{{ 's' if hours_remaining != 1 }}</strong> if you don't verify.
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                {{ hours_remaining }} hours left to verify. Accounts not verified within {{ grace_hours }} hours are automatically deactivated.
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('auth.verify_email_forced') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="field">
+                    <label for="code">6-digit verification code</label>
+                    <input type="text" id="code" name="code" class="mono-input" inputmode="numeric"
+                           maxlength="6" pattern="\d{6}" required autofocus
+                           style="text-align: center; font-size: 1.4rem; letter-spacing: 0.3em;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Verify now</button>
+            </form>
+
+            <form method="POST" action="{{ url_for('auth.resend_verification_code_forced') }}" style="text-align: center; margin-top: 16px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline">Resend code</button>
+            </form>
+        </div>
+
+        <p style="text-align: center; margin-top: 16px; font-size: 0.8rem;">
+            <a href="{{ url_for('auth.logout') }}">Log out</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

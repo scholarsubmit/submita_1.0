@@ -1,0 +1,85 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block sidebar_links %}
+<div class="dash-nav-section-label">Main</div>
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link active">
+    <span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span>
+</a>
+<a href="#" class="dash-nav-link">
+    <span class="dash-nav-icon">📄</span><span class="dash-nav-label">Assignments</span>
+</a>
+<a href="#" class="dash-nav-link">
+    <span class="dash-nav-icon">🎯</span><span class="dash-nav-label">Grades</span>
+</a>
+<div class="dash-nav-section-label">Account</div>
+<a href="#" class="dash-nav-link">
+    <span class="dash-nav-icon">👤</span><span class="dash-nav-label">Profile</span>
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="id-badge-row" style="margin-bottom: 24px;">
+    <div class="id-badge">
+        <span class="id-badge-visible">{{ current_user.matric_number }}</span>
+        <span class="id-badge-masked">•••• •••• ••••</span>
+    </div>
+    <button type="button" class="id-badge-toggle" data-id-toggle aria-label="Hide ID">👁</button>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-card-value">{{ upcoming|length }}</div>
+        <div class="stat-card-label">Upcoming deadlines</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-value">{{ total_submissions }}</div>
+        <div class="stat-card-label">Total submissions</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-value">{{ avg_grade if avg_grade is not none else '—' }}</div>
+        <div class="stat-card-label">Average grade</div>
+    </div>
+</div>
+
+<h3>Upcoming deadlines</h3>
+{% if upcoming %}
+<div style="margin-bottom: 32px;">
+    {% for a in upcoming %}
+    <div class="deadline-item">
+        <div class="deadline-urgency {{ a.urgency }}"></div>
+        <div>
+            <strong>{{ a.title }}</strong>
+            <p class="field-hint" style="margin: 0;">{{ a.course_code }} · {{ a.department.name }}</p>
+        </div>
+        <a href="{{ url_for('assignments.view_assignment', assignment_id=a.id) }}" class="btn btn-outline" style="margin-left: auto;">View</a>
+        <span class="deadline-time">{{ a.time_remaining_label() }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="margin-bottom: 32px;">No upcoming deadlines — you're all caught up.</p>
+{% endif %}
+
+<h3>Recent submissions</h3>
+{% if my_submissions %}
+<div class="card">
+    {% for s in my_submissions %}
+    <div class="row-between" style="padding: 14px 20px; border-bottom: 1px solid var(--border);">
+        <div>
+            <strong>{{ s.assignment.title }}</strong>
+            <p class="field-hint" style="margin: 0;">Submitted {{ s.submitted_at.strftime('%b %d, %Y') }}</p>
+        </div>
+        {% if s.is_graded %}
+        <span class="alert alert-success" style="margin: 0; padding: 4px 12px;">{{ s.grade }}/{{ s.assignment.total_points }}</span>
+        {% else %}
+        <span class="alert alert-warning" style="margin: 0; padding: 4px 12px;">Pending</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No submissions yet.</p>
+{% endif %}
+{% endblock %}

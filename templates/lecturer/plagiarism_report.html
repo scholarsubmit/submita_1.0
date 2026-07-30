@@ -1,0 +1,45 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}Plagiarism Report{% endblock %}
+{% block page_title %}Plagiarism Report{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card card-pad" style="max-width: 680px;">
+    <p><strong>{{ submission.student.name }}</strong> ({{ submission.student.matric_number }}) — {{ assignment.title }}</p>
+
+    <div style="text-align: center; margin: 24px 0;">
+        <div style="font-family: var(--font-display); font-size: 3rem; font-weight: 700; color: {{ severity_color }};">
+            {{ submission.plagiarism_score or 0 }}%
+        </div>
+        <p class="field-hint">Highest similarity to another submission for this assignment</p>
+        <span class="alert" style="display: inline-flex; margin: 0; background: {{ severity_color }}22; color: {{ severity_color }}; border-color: {{ severity_color }};">
+            {{ severity_label }} SIMILARITY
+        </span>
+    </div>
+
+    <h3>Matches</h3>
+    {% if matches %}
+    {% for m in matches %}
+    <div class="card" style="padding: 14px 18px; margin-bottom: 10px;">
+        <div class="row-between">
+            <div>
+                <strong>{{ m.student_name }}</strong>
+                <p class="field-hint" style="margin: 0;">{{ m.student_matric }}</p>
+            </div>
+            <div style="font-size: 1.3rem; font-weight: 700;">{{ m.similarity }}%</div>
+        </div>
+        <p class="field-hint" style="margin-top: 6px;">
+            Sequence match: {{ m.sequence_similarity }}% · Phrase match: {{ m.phrase_similarity }}%
+        </p>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>No significant similarity to any other submission for this assignment.</p>
+    {% endif %}
+
+    <a href="{{ url_for('assignments.manage_assignment', assignment_id=assignment.id) }}" class="btn btn-outline" style="margin-top: 12px;">← Back to submissions</a>
+</div>
+{% endblock %}

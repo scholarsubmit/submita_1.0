@@ -1,0 +1,90 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}New Assignment{% endblock %}
+{% block page_title %}New Assignment{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+<a href="{{ url_for('assignments.create_assignment') }}" class="dash-nav-link active"><span class="dash-nav-icon">➕</span><span class="dash-nav-label">New Assignment</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card card-pad" style="max-width: 640px;">
+    <form method="POST" action="{{ url_for('assignments.create_assignment') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="field">
+            <label for="title">Assignment title</label>
+            <input type="text" id="title" name="title" required autofocus>
+        </div>
+
+        <div class="row" style="gap: 16px;">
+            <div class="field" style="flex: 1;">
+                <label for="course_code">Course code</label>
+                <input type="text" id="course_code" name="course_code" class="mono-input" required placeholder="CSC301">
+            </div>
+            <div class="field" style="flex: 2;">
+                <label for="course_title">Course title</label>
+                <input type="text" id="course_title" name="course_title" required>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="questions_text">Questions — type them here</label>
+            <textarea id="questions_text" name="questions_text" rows="6" placeholder="What students will actually answer…"></textarea>
+        </div>
+        <div class="field">
+            <label for="questions_file">…or upload a question file instead</label>
+            <input type="file" id="questions_file" name="questions_file">
+            <p class="field-hint">Any file format, up to 5MB. Use this and/or the text box above — at least one is required.</p>
+        </div>
+
+        <div class="field">
+            <label for="instructions">Additional instructions (optional)</label>
+            <textarea id="instructions" name="instructions" rows="3" placeholder="Formatting notes, submission guidelines, etc. — separate from the questions themselves."></textarea>
+        </div>
+
+        <div class="row" style="gap: 16px;">
+            <div class="field" style="flex: 1;">
+                <label for="target_level">Target level</label>
+                <select id="target_level" name="target_level" required>
+                    <option value="">— Select —</option>
+                    <option value="100">100 Level</option>
+                    <option value="200">200 Level</option>
+                    <option value="300">300 Level</option>
+                    <option value="400">400 Level</option>
+                </select>
+            </div>
+            <div class="field" style="flex: 1;">
+                <label for="semester">Semester</label>
+                <select id="semester" name="semester" required>
+                    <option value="First">First</option>
+                    <option value="Second">Second</option>
+                </select>
+            </div>
+            <div class="field" style="flex: 1;">
+                <label for="academic_year">Academic year</label>
+                <select id="academic_year" name="academic_year" required>
+                    <option value="2024/2025">2024/2025</option>
+                    <option value="2025/2026" selected>2025/2026</option>
+                    <option value="2026/2027">2026/2027</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="total_points">Total points</label>
+            <input type="number" id="total_points" name="total_points" value="100" min="1" max="1000">
+        </div>
+
+        <div class="field">
+            <label for="deadline">Deadline</label>
+            <input type="datetime-local" id="deadline" name="deadline" required>
+        </div>
+
+        <div class="row" style="gap: 12px; margin-top: 8px;">
+            <button type="submit" name="action" value="publish" class="btn btn-primary">Publish now</button>
+            <button type="submit" name="action" value="draft" class="btn btn-outline">Save as draft</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

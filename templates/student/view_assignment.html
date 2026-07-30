@@ -1,0 +1,47 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}{{ assignment.title }}{% endblock %}
+{% block page_title %}{{ assignment.title }}{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card card-pad" style="max-width: 640px;">
+    <p class="field-hint">{{ assignment.course_code }} — {{ assignment.course_title }}</p>
+    <p><strong>Due:</strong> {{ assignment.deadline.strftime('%B %d, %Y at %H:%M') }} ({{ assignment.time_remaining_label() }})</p>
+    <p><strong>Points:</strong> {{ assignment.total_points }}</p>
+
+    {% if assignment.questions_text %}
+    <div class="field">
+        <label>Questions</label>
+        <div class="card" style="padding: 16px; white-space: pre-wrap; font-size: 0.9rem;">{{ assignment.questions_text }}</div>
+    </div>
+    {% endif %}
+    {% if assignment.questions_file_path %}
+    <div class="field">
+        <a href="{{ url_for('assignments.download_question_file', assignment_id=assignment.id) }}" class="btn btn-outline">
+            📎 Download question file — {{ assignment.questions_file_original_name }}
+        </a>
+    </div>
+    {% endif %}
+
+    {% if assignment.instructions %}
+    <div class="field">
+        <label>Additional instructions</label>
+        <p>{{ assignment.instructions }}</p>
+    </div>
+    {% endif %}
+
+    {% if submission %}
+        {% if submission.is_graded %}
+        <div class="alert alert-success">Graded: {{ submission.grade }}/{{ assignment.total_points }}</div>
+        {% if submission.feedback %}<p><strong>Feedback:</strong> {{ submission.feedback }}</p>{% endif %}
+        {% else %}
+        <div class="alert alert-info">Submitted — awaiting grading.</div>
+        {% endif %}
+    {% else %}
+        <a href="{{ url_for('assignments.submit_assignment', assignment_id=assignment.id) }}" class="btn btn-primary">Submit assignment</a>
+    {% endif %}
+</div>
+{% endblock %}

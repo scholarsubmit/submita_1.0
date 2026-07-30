@@ -1,0 +1,69 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block page_title %}All Users{% endblock %}
+
+{% block sidebar_links %}
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link"><span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span></a>
+<a href="{{ url_for('admin.lecturer_requests') }}" class="dash-nav-link"><span class="dash-nav-icon">👨‍🏫</span><span class="dash-nav-label">Lecturer Requests</span></a>
+<a href="{{ url_for('admin.manage_users') }}" class="dash-nav-link active"><span class="dash-nav-icon">👥</span><span class="dash-nav-label">All Users</span></a>
+{% endblock %}
+
+{% block dashboard_content %}
+<form method="GET" action="{{ url_for('admin.manage_users') }}" class="row" style="gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+    <input type="text" name="q" value="{{ search }}" placeholder="Search name, email, matric, or staff ID…" style="flex: 1; min-width: 220px;">
+    <select name="role" style="max-width: 160px;">
+        <option value="">All roles</option>
+        <option value="student" {% if role_filter == 'student' %}selected{% endif %}>Students</option>
+        <option value="lecturer" {% if role_filter == 'lecturer' %}selected{% endif %}>Lecturers</option>
+        <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admins</option>
+    </select>
+    <button type="submit" class="btn btn-outline">Filter</button>
+</form>
+
+<div class="card">
+    {% for u in users %}
+    <div class="row-between" style="padding: 14px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;">
+        <div>
+            <strong>{{ u.name }}</strong> — {{ u.email }}
+            <p class="field-hint mono" style="margin: 0;">{{ u.matric_number or u.staff_id or '—' }}</p>
+            <p class="field-hint" style="margin: 0;">
+                {{ u.role.value|capitalize }} · Joined {{ u.created_at.strftime('%b %d, %Y') }}
+                {% if not u.is_active_account %}· <span style="color: var(--color-red-600); font-weight: 600;">Deactivated</span>{% endif %}
+                {% if not u.is_email_verified %}· <span style="color: var(--color-amber-600);">Unverified</span>{% endif %}
+            </p>
+        </div>
+        <div class="row" style="gap: 8px;">
+            {% if u.id != current_user.id %}
+            <form method="POST" action="{{ url_for('admin.toggle_user_active', user_id=u.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline">{{ 'Reactivate' if not u.is_active_account else 'Deactivate' }}</button>
+            </form>
+            <button type="button" class="btn btn-outline" style="color: var(--color-red-600); border-color: var(--color-red-600);"
+                    onclick="document.getElementById('deleteModal-{{ u.id }}').hidden = false">Delete</button>
+
+            <div id="deleteModal-{{ u.id }}" hidden style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center;">
+                <div class="card card-pad" style="max-width: 420px; background: var(--bg-card);">
+                    <h3>Delete {{ u.name }}?</h3>
+                    <p class="field-hint">This permanently deletes the account. Type their email to confirm: <strong>{{ u.email }}</strong></p>
+                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=u.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="field">
+                            <input type="email" name="confirm_email" placeholder="{{ u.email }}" required>
+                        </div>
+                        <div class="row" style="gap: 8px;">
+                            <button type="submit" class="btn btn-primary" style="background: var(--color-red-600);">Yes, delete permanently</button>
+                            <button type="button" class="btn btn-outline" onclick="document.getElementById('deleteModal-{{ u.id }}').hidden = true">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <span class="field-hint">(you)</span>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <p style="padding: 20px;">No users match that search.</p>
+    {% endfor %}
+</div>
+{% endblock %}

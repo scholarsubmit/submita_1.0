@@ -1,0 +1,57 @@
+{% extends "shared/base.html" %}
+
+{% block content %}
+<div class="dash-shell" id="dashShell">
+    <aside class="dash-sidebar" id="dashSidebar">
+        <div class="dash-sidebar-header">
+            <div class="navbar-brand">
+                <img class="mark" src="{{ url_for('static', filename='icons/logo-mark.png') }}" alt="{{ app_name }} logo">
+                <span class="dash-brand-text">{{ app_name }}</span>
+            </div>
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse sidebar">‹</button>
+        </div>
+
+        <nav class="dash-nav">
+            {% block sidebar_links %}{% endblock %}
+        </nav>
+
+        <div class="dash-sidebar-footer">
+            <div class="id-badge-row" style="width: 100%; margin-bottom: 10px;">
+                <div class="id-badge dash-user-badge" style="margin-bottom: 0; flex: 1;">
+                    <span class="id-badge-visible">{{ current_user.matric_number or current_user.staff_id }}</span>
+                    <span class="id-badge-masked">•••• •••• ••••</span>
+                </div>
+                <button type="button" class="id-badge-toggle" data-id-toggle aria-label="Hide ID">👁</button>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="dash-nav-link">
+                <span class="dash-nav-icon">⏻</span><span class="dash-nav-label">Log out</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="dash-main">
+        <header class="dash-topbar">
+            <button class="sidebar-toggle-mobile" id="sidebarToggleMobile" aria-label="Open menu">☰</button>
+            <h2 class="dash-page-title">{% block page_title %}Dashboard{% endblock %}</h2>
+            <div class="dash-topbar-actions">
+                <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>🌙</span></button>
+                <button class="btn btn-outline" data-install-app hidden>Install app</button>
+                <div class="dash-notif-wrap">
+                    <button class="theme-toggle" id="notifBell" aria-label="Notifications">🔔<span class="dash-notif-dot" id="notifDot" hidden></span></button>
+                    <div class="dash-notif-panel" id="notifPanel" hidden>
+                        <div class="dash-notif-panel-header">Activity</div>
+                        <div id="notifList" class="dash-notif-list"><p class="field-hint" style="padding: 16px;">Loading…</p></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="dash-content">
+            {% block dashboard_content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% block dashboard_js %}{% endblock %}
+{% endblock %}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family: 'Segoe UI', Arial, sans-serif; background: #F3FAF6; margin: 0; padding: 32px 16px;">
+    <div style="max-width: 480px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(16,24,40,0.08);">
+        <div style="background: linear-gradient(135deg, #0F6B4C, #0A4A34); padding: 28px; text-align: center; color: #fff;">
+            <img src="{{ config.BASE_URL }}/static/icons/logo-mark-white.png" width="32" height="37" alt="Submita" style="display: block; margin: 0 auto 10px;">
+            <h1 style="margin: 0; font-size: 20px;">Submita</h1>
+        </div>
+        <div style="padding: 32px;">
+            <p>Hello <strong>{{ user.name }}</strong>,</p>
+            <p>Use this code to verify your email address:</p>
+            <div style="text-align: center; margin: 24px 0;">
+                <span style="display: inline-block; font-family: 'Courier New', monospace; font-size: 32px; font-weight: bold;
+                             letter-spacing: 8px; color: #0A4A34; background: #E8F5EE; padding: 16px 24px; border-radius: 12px;">
+                    {{ code }}
+                </span>
+            </div>
+            {% if user.matric_number %}
+            <p>Your matric number: <strong style="font-family: monospace;">{{ user.matric_number }}</strong></p>
+            {% endif %}
+            <p style="font-size: 13px; color: #667085;">This code expires in 15 minutes. If you didn't request this, you can ignore this email.</p>
+        </div>
+    </div>
+</body>
+</html>

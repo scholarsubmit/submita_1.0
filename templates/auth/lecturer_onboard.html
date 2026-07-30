@@ -1,0 +1,62 @@
+{% extends "shared/base.html" %}
+{% block title %}Complete Lecturer Registration{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="navbar-brand" style="justify-content: center; margin-bottom: 18px;">
+                <img class="mark" src="{{ url_for('static', filename='icons/logo-mark.png') }}" alt="{{ app_name }} logo">
+                <span>{{ app_name }}</span>
+            </div>
+            <h1 style="font-size: 1.5rem;">Complete your registration</h1>
+            <p>Enter the invite code emailed to you by an administrator, along with the exact email address it was sent to.</p>
+        </div>
+
+        <div class="card card-pad">
+            <form method="POST" action="{{ url_for('auth.lecturer_onboard') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="field">
+                    <label for="email">Email the invite was sent to</label>
+                    <input type="email" id="email" name="email" required autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="code">Invite code</label>
+                    <input type="text" id="code" name="code" class="mono-input" required>
+                </div>
+
+                <div class="field">
+                    <label for="name">Full name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" name="password" required minlength="10">
+                        <button type="button" class="password-toggle-btn" data-password-toggle="password" aria-label="Show password">👁</button>
+                    </div>
+                    <p class="field-hint">At least 10 characters, with uppercase, lowercase, a number, and a symbol.</p>
+                </div>
+
+                <div class="field">
+                    <label for="confirm_password">Confirm password</label>
+                    <div class="password-field">
+                        <input type="password" id="confirm_password" name="confirm_password" required minlength="10">
+                        <button type="button" class="password-toggle-btn" data-password-toggle="confirm_password" aria-label="Show password">👁</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Create account</button>
+            </form>
+        </div>
+
+        <p style="text-align: center; margin-top: 16px; font-size: 0.85rem;">
+            Don't have a code yet? <a href="{{ url_for('auth.lecturer_request_access') }}">Request access</a><br>
+            <a href="{{ url_for('auth.login') }}">Back to login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

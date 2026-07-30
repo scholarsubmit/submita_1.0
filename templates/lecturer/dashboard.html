@@ -1,0 +1,83 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}Lecturer Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block sidebar_links %}
+<div class="dash-nav-section-label">Main</div>
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link active">
+    <span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span>
+</a>
+<a href="{{ url_for('assignments.create_assignment') }}" class="dash-nav-link">
+    <span class="dash-nav-icon">➕</span><span class="dash-nav-label">New Assignment</span>
+</a>
+<a href="{{ url_for('assignments.my_courses') }}" class="dash-nav-link">
+    <span class="dash-nav-icon">📊</span><span class="dash-nav-label">Compiled Results</span>
+</a>
+<a href="#" class="dash-nav-link">
+    <span class="dash-nav-icon">📄</span><span class="dash-nav-label">My Assignments</span>
+</a>
+{% if pending_grading %}
+<a href="#" class="dash-nav-link">
+    <span class="dash-nav-icon">🎯</span><span class="dash-nav-label">Grading</span>
+    <span class="dash-nav-badge">{{ pending_grading }}</span>
+</a>
+{% endif %}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="id-badge-row" style="margin-bottom: 24px;">
+    <div class="id-badge">
+        <span class="id-badge-visible">{{ current_user.staff_id }}</span>
+        <span class="id-badge-masked">•••• •••• ••••</span>
+    </div>
+    <button type="button" class="id-badge-toggle" data-id-toggle aria-label="Hide ID">👁</button>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="stat-card-value">{{ total_assignments }}</div><div class="stat-card-label">Assignments created</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ total_submissions }}</div><div class="stat-card-label">Total submissions</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ pending_grading }}</div><div class="stat-card-label">Pending grading</div></div>
+</div>
+
+<div class="row-between">
+    <h3>My assignments</h3>
+    <a href="{{ url_for('assignments.create_assignment') }}" class="btn btn-primary">+ New assignment</a>
+</div>
+{% if assignments %}
+<div class="card" style="margin-bottom: 32px;">
+    {% for a in assignments %}
+    <div class="row-between" style="padding: 14px 20px; border-bottom: 1px solid var(--border);">
+        <div>
+            <strong>{{ a.title }}</strong>
+            <p class="field-hint" style="margin: 0;">{{ a.course_code }} · {{ a.target_level }} Level · Due {{ a.deadline.strftime('%b %d, %Y') }}</p>
+        </div>
+        <div class="row">
+            <span class="field-hint">{{ a.submission_count }} submitted · {{ a.pending_count }} pending</span>
+            <a href="{{ url_for('assignments.manage_assignment', assignment_id=a.id) }}" class="btn btn-outline">Manage</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p style="margin-bottom: 32px;">You haven't created any assignments yet.</p>
+{% endif %}
+
+<h3>Recent submissions</h3>
+{% if recent_submissions %}
+<div class="card">
+    {% for s in recent_submissions %}
+    <div class="row-between" style="padding: 14px 20px; border-bottom: 1px solid var(--border);">
+        <div>
+            <strong>{{ s.student.name }}</strong> — {{ s.assignment.title }}
+            <p class="field-hint" style="margin: 0;">{{ s.submitted_at.strftime('%b %d, %Y %H:%M') }}{% if s.is_late %} · late{% endif %}</p>
+        </div>
+        <a href="{{ url_for('assignments.grade_submission', submission_id=s.id) }}" class="btn btn-outline">
+            {{ 'View grade' if s.is_graded else 'Grade' }}
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No submissions yet.</p>
+{% endif %}
+{% endblock %}

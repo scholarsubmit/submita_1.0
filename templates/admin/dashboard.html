@@ -1,0 +1,42 @@
+{% extends "shared/dashboard_base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Admin Overview{% endblock %}
+
+{% block sidebar_links %}
+<div class="dash-nav-section-label">Main</div>
+<a href="{{ url_for('dashboard.home') }}" class="dash-nav-link active">
+    <span class="dash-nav-icon">🏠</span><span class="dash-nav-label">Dashboard</span>
+</a>
+<a href="{{ url_for('admin.lecturer_requests') }}" class="dash-nav-link">
+    <span class="dash-nav-icon">👨‍🏫</span><span class="dash-nav-label">Lecturer Requests</span>
+    {% if stats.pending_lecturer_requests %}<span class="dash-nav-badge">{{ stats.pending_lecturer_requests }}</span>{% endif %}
+</a>
+<a href="{{ url_for('admin.manage_users') }}" class="dash-nav-link">
+    <span class="dash-nav-icon">👥</span><span class="dash-nav-label">All Users</span>
+</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="stat-grid">
+    <div class="stat-card"><div class="stat-card-value">{{ stats.total_students }}</div><div class="stat-card-label">Students</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ stats.total_lecturers }}</div><div class="stat-card-label">Lecturers</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ stats.total_assignments }}</div><div class="stat-card-label">Assignments</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ stats.total_submissions }}</div><div class="stat-card-label">Submissions</div></div>
+    <div class="stat-card"><div class="stat-card-value">{{ stats.pending_lecturer_requests }}</div><div class="stat-card-label">Pending requests</div></div>
+</div>
+
+<h3>Recently registered users</h3>
+<div class="card">
+    {% for u in recent_users %}
+    <div class="row-between" style="padding: 14px 20px; border-bottom: 1px solid var(--border);">
+        <div>
+            <strong>{{ u.name }}</strong> — {{ u.email }}
+            <p class="field-hint" style="margin: 0;">{{ u.role.value|capitalize }} · Joined {{ u.created_at.strftime('%b %d, %Y') }}</p>
+        </div>
+        <span class="alert {{ 'alert-success' if u.is_email_verified else 'alert-warning' }}" style="margin: 0; padding: 4px 12px;">
+            {{ 'Verified' if u.is_email_verified else 'Unverified' }}
+        </span>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

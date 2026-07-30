@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family: 'Segoe UI', Arial, sans-serif; background: #F3FAF6; margin: 0; padding: 32px 16px;">
+    <div style="max-width: 480px; margin: 0 auto; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 14px rgba(16,24,40,0.08);">
+        <div style="background: linear-gradient(135deg, #B42318, #7A1610); padding: 28px; text-align: center; color: #fff;">
+            <img src="{{ config.BASE_URL }}/static/icons/logo-mark-white.png" width="32" height="37" alt="Submita" style="display: block; margin: 0 auto 10px;">
+            <h1 style="margin: 0; font-size: 20px;">Security Alert</h1>
+        </div>
+        <div style="padding: 32px;">
+            <p>Hello <strong>{{ user.name }}</strong>,</p>
+            <p>
+                We noticed repeated failed login attempts on your Submita account and have temporarily
+                locked it for 15 minutes as a precaution.
+            </p>
+            <p style="font-size: 13px; color: #667085;">
+                If this wasn't you, someone may be trying to guess your password. Consider changing it
+                once you're back in, and contact an administrator if you're concerned.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
