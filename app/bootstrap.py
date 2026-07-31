@@ -51,28 +51,72 @@ def bootstrap_database(app, db):
 
 
 def _auto_migrate(app, db):
-    """Adds columns that exist in models.py but are missing from an
-    already-created database — safe to run every startup, only acts on
-    what's actually missing."""
+    """Adds any column that exists on a model in models.py but is missing
+    from the actual database table — generic and automatic, not a
+    hardcoded list, so it keeps working as models.py evolves. Existing
+    tables can predate a model change (e.g. a table created by an earlier
+    deploy before a field was added), so this diffs every mapped table
+    against its real columns and patches the gap.
+
+    Added columns are always created NULLable regardless of what the
+    model declares, even if the model says nullable=False — an ALTER
+    TABLE ... NOT NULL would fail outright on a table that already has
+    rows, since there's no way to backfill a real value (e.g. a real
+    password hash) automatically. This unblocks the app immediately;
+    going forward, backfill any such column for existing rows by hand.
+    """
     try:
         inspector = sa_inspect(db.engine)
+        existing_tables = set(inspector.get_table_names())
     except Exception as exc:
         print(f'⚠️  Auto-migrate skipped, could not inspect DB: {exc}')
         return
 
-    def add_if_missing(table, column, col_def):
+    for table_name, table in db.metadata.tables.items():
+        if table_name not in existing_tables:
+            continue  # brand-new table — db.create_all() already handled it
         try:
-            existing = {c['name'] for c in inspector.get_columns(table)}
-            if column not in existing:
-                with db.engine.connect() as conn:
-                    conn.execute(text(f'ALTER TABLE {table} ADD COLUMN {col_def}'))
-                    conn.commit()
-                print(f'✅ Migrated: {table}.{column}')
+            existing_columns = {c['name'] for c in inspector.get_columns(table_name)}
         except Exception as exc:
-            print(f'⚠️  Could not add {table}.{column}: {exc}')
+            print(f'⚠️  Could not inspect columns for {table_name}: {exc}')
+            continue
 
-    add_if_missing('assignments', 'semester', "semester VARCHAR(10) NOT NULL DEFAULT 'First'")
-    add_if_missing('assignments', 'academic_year', "academic_year VARCHAR(20) NOT NULL DEFAULT '2025/2026'")
+        for column in table.columns:
+            if column.name in existing_columns:
+                continue
+            try:
+                col_type = column.type.compile(dialect=db.engine.dialect)
+                default_clause = _default_clause_for(column)
+                ddl = f'ALTER TABLE {table_name} ADD COLUMN {column.name} {col_type}{default_clause}'
+                with db.engine.connect() as conn:
+                    conn.execute(text(ddl))
+                    conn.commit()
+                print(f'✅ Migrated: {table_name}.{column.name} ({col_type})')
+            except Exception as exc:
+                print(f'⚠️  Could not add {table_name}.{column.name}: {exc}')
+
+
+def _default_clause_for(column):
+    """Best-effort ' DEFAULT ...' SQL fragment so existing rows get a
+    sensible backfilled value instead of NULL, when the model clearly
+    specifies one (server_default, or a scalar Python-side default like
+    `default='First'`). Returns '' when there's nothing safe to use —
+    the column is simply added as NULLable with no default in that case."""
+    if column.server_default is not None:
+        return f' DEFAULT {column.server_default.arg}'
+
+    if column.default is not None and not column.default.is_callable and not column.default.is_sequence:
+        value = column.default.arg
+        if isinstance(value, str):
+            escaped = value.replace("'", "''")
+            return f" DEFAULT '{escaped}'"
+        if isinstance(value, bool):
+            return f' DEFAULT {"TRUE" if value else "FALSE"}'
+        if isinstance(value, (int, float)):
+            return f' DEFAULT {value}'
+        # Enums, datetimes, callables, etc: not safe to inline as a
+        # literal — leave the column NULLable with no default instead.
+    return ''
 
 
 def _seed_academic_structure(app, db):
