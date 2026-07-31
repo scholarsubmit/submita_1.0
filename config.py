@@ -11,8 +11,8 @@ load_dotenv()
 
 
 def _database_uri():
-    url = os.environ.get('DATABASE_URL', '')
-    if url.startswith('postgres://'):
+    url = os.environ.get('DATABASE_URL', 'postgresql://neondb_owner:npg_DJxaLA4b6Zen@ep-billowing-sound-axd7ht1d.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require')
+    if url.startswith('postgres://postgresql://neondb_owner:npg_DJxaLA4b6Zen@ep-billowing-sound-axd7ht1d.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require'):
         url = url.replace('postgres://', 'postgresql://', 1)
     # Force the psycopg3 dialect. Without "+psycopg", SQLAlchemy defaults to
     # the psycopg2 driver, which we no longer install (see requirements.txt).
